@@ -16,6 +16,10 @@ import AddButtonReport from '../../screens/ReportsOfWeek/AddButtonReport';
 import AddPaymentReport from '../../screens/ReportsOfWeek/AddPaymentReport';
 import VerifyReport from '../../screens/ReportsOfWeek/VerifyReport';
 import WeeklyReport from '../../screens/ReportsOfWeek/WeeklyReport';
+import PaymentReport from '../../screens/PaymentMethods/PaymentReport';
+import OldPaymentReport from '../../screens/PaymentMethods/OldPaymentReport';
+import BusinessReport from '../../screens/PaymentMethods/BusinessReport';
+import PaymentLedger from '../../screens/PaymentMethods/PaymentLedger';
 
 
 
@@ -39,7 +43,11 @@ const StackNavigator = () => (
         <Stack.Screen name="AddPaymentReport" component={AddPaymentReport} />
         <Stack.Screen name="VerifyReport" component={VerifyReport} />
         <Stack.Screen name="WeeklyReport" component={WeeklyReport} />
+        <Stack.Screen name="PaymantReport" component={PaymentReport} />
 
+        <Stack.Screen name="OldPaymentReport" component={OldPaymentReport} />
+        <Stack.Screen name="BusinessReport" component={BusinessReport} />
+        <Stack.Screen name="PaymentLedger" component={PaymentLedger} />
 
     </Stack.Navigator>
 );

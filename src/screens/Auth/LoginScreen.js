@@ -1,20 +1,19 @@
 import React, { useState } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity, StyleSheet, Alert,
-    Image,
-    Dimensions
+    Image, Dimensions
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { globalColors } from '../../Theme/globalColors';
 import { DubaiGames } from '../../Theme/globalImage';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 const LoginScreen = ({ navigation }) => {
     const [username, setUsername] = useState('test');
     const [password, setPassword] = useState('12345');
     const [code, setCode] = useState('');
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-    const { width } = Dimensions.get("window");
 
     const handleLogin = async () => {
         if (username === 'test' && password === '12345') {
@@ -28,38 +27,40 @@ const LoginScreen = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <Image style={{
-                width: width * 0.9,
-                height: width * 0.5,
+                width: wp('90%'), 
+                height: hp('30%'), 
                 resizeMode: "contain",
-            }} source={DubaiGames}></Image>
-            {/* <Text style={styles.title}>Welcome To Dubai Games</Text> */}
+            }} source={DubaiGames} />
+
             <Text style={styles.subtitle}>Sign in to continue</Text>
 
             {/* Username Input */}
             <View style={styles.inputContainer}>
-                <Icon name="account-outline" size={24} color="#888" style={styles.icon} />
+                <Icon name="account-outline" size={hp('3%')} color="#888" style={styles.icon} />
                 <TextInput
                     style={styles.input}
                     placeholder="Username"
-                    placeholderTextColor={globalColors.inputLabel} value={username}
+                    placeholderTextColor={globalColors.inputLabel}
+                    value={username}
                     onChangeText={setUsername}
                 />
             </View>
 
             {/* Password Input */}
             <View style={styles.inputContainer}>
-                <Icon name="lock-outline" size={24} color="#888" style={styles.icon} />
+                <Icon name="lock-outline" size={hp('3%')} color="#888" style={styles.icon} />
                 <TextInput
                     style={styles.input}
                     placeholder="Password"
-                    placeholderTextColor={globalColors.inputLabel} value={password}
+                    placeholderTextColor={globalColors.inputLabel}
+                    value={password}
                     onChangeText={setPassword}
                     secureTextEntry={!isPasswordVisible}
                 />
                 <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
                     <Icon
                         name={isPasswordVisible ? "eye-outline" : "eye-off-outline"}
-                        size={24}
+                        size={hp('3%')}
                         color="#888"
                     />
                 </TouchableOpacity>
@@ -67,7 +68,7 @@ const LoginScreen = ({ navigation }) => {
 
             {/* Code Input */}
             <View style={styles.inputContainer}>
-                <Icon name="key-outline" size={24} color="#888" style={styles.icon} />
+                <Icon name="key-outline" size={hp('3%')} color="#888" style={styles.icon} />
                 <TextInput
                     style={styles.input}
                     placeholder="Enter Code"
@@ -82,11 +83,6 @@ const LoginScreen = ({ navigation }) => {
             <TouchableOpacity style={styles.button} onPress={handleLogin}>
                 <Text style={styles.buttonText}>Login</Text>
             </TouchableOpacity>
-
-            {/* Forgot Password */}
-            {/* <TouchableOpacity onPress={() => Alert.alert('Reset Password', 'Reset link sent to your email.')}>
-                <Text style={styles.forgotText}>Forgot Password?</Text>
-            </TouchableOpacity> */}
         </View>
     );
 };
@@ -95,180 +91,43 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: globalColors.LightWhite,
-        padding: 24,
+        padding: wp('6%'),  // Responsive padding
         justifyContent: 'center',
     },
-    title: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: globalColors.inputLabel,
-        textAlign: 'center',
-    },
     subtitle: {
-        fontSize: 20,
+        fontSize: hp('3.5%'), // Responsive font size
         color: '#666',
         textAlign: 'center',
-        marginBottom: 24,
+        marginBottom: hp('3%'), // Responsive margin
     },
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        // backgroundColor: '#FFF',
         borderRadius: 10,
-        paddingHorizontal: 16,
-        marginBottom: 16,
+        paddingHorizontal: wp('2%'), // Responsive padding
+        marginBottom: hp('2%'), // Responsive margin
         elevation: 2,
     },
     icon: {
-        marginRight: 10,
+        marginRight: wp('3%'), // Responsive margin
     },
     input: {
         flex: 1,
-        height: 50,
+        height: hp('6%'), // Responsive input height
         color: '#333',
-
     },
     button: {
         backgroundColor: globalColors.blue,
-        padding: 14,
+        paddingVertical: hp('2%'), // Responsive vertical padding
         borderRadius: 12,
         alignItems: 'center',
-        marginTop: 10,
-        // shadowColor: '#007BFF',
-        shadowOpacity: 0.3,
-        shadowRadius: 10,
+        marginTop: hp('3%'), // Responsive margin
     },
     buttonText: {
         color: globalColors.white,
-        fontSize: 18,
+        fontSize: wp('2%'), // Responsive font size
         fontWeight: 'bold',
     },
-
 });
 
 export default LoginScreen;
-
-
-
-
-
-// import React, { useState } from 'react';
-// import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
-// import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-
-// const LoginScreen = ({ navigation }) => {
-//     const [username, setUsername] = useState('test');
-//     const [password, setPassword] = useState('12345');
-//     const [code, setCode] = useState('');
-//     const [isPasswordVisible, setIsPasswordVisible] = useState(false); // ✅ State for password visibility
-
-//     const handleLogin = async () => {
-//         if (username === 'test' && password === '12345') {
-//             await AsyncStorage.setItem('userToken', 'dummy-token');
-//             navigation.navigate("MainApp");
-//         } else {
-//             Alert.alert('Invalid Credentials', 'Please enter the correct username, password, and code.');
-//         }
-//     };
-
-//     return (
-//         <View style={styles.container}>
-//             <View style={styles.header}>
-//                 <Text style={styles.welcomeText}>Login</Text>
-//             </View>
-
-//             <View style={styles.inputContainer}>
-//                 <Icon name="account-outline" size={24} color="#888888" style={styles.icon} />
-//                 <TextInput
-//                     style={styles.input}
-//                     placeholder="Username"
-//                     placeholderTextColor="#888888"
-//                     value={username}
-//                     onChangeText={setUsername}
-//                 />
-//             </View>
-
-//             <View style={styles.inputContainer}>
-//                 <Icon name="lock-outline" size={24} color="#888888" style={styles.icon} />
-//                 <TextInput
-//                     style={styles.input}
-//                     placeholder="Password"
-//                     placeholderTextColor="#888888"
-//                     value={password}
-//                     onChangeText={setPassword}
-//                     secureTextEntry={!isPasswordVisible} // ✅ Toggle password visibility
-//                 />
-//                 <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
-//                     <Icon
-//                         name={isPasswordVisible ? "eye-outline" : "eye-off-outline"}
-//                         size={24}
-//                         color="#888888"
-//                     />
-//                 </TouchableOpacity>
-//             </View>
-
-//             <View style={styles.inputContainer}>
-//                 <Icon name="key-outline" size={24} color="#888888" style={styles.icon} />
-//                 <TextInput
-//                     style={styles.input}
-//                     placeholder="Enter Code"
-//                     placeholderTextColor="#888888"
-//                     value={code}
-//                     onChangeText={setCode}
-//                     keyboardType="numeric"
-//                 />
-//             </View>
-
-//             <TouchableOpacity style={styles.button} onPress={handleLogin}>
-//                 <Text style={styles.buttonText}>Login</Text>
-//             </TouchableOpacity>
-//         </View>
-//     );
-// };
-
-// const styles = StyleSheet.create({
-//     container: {
-//         flex: 1,
-//         backgroundColor: '#1A1A1A',
-//         padding: 20,
-//         justifyContent: 'center',
-//     },
-//     header: {
-//         alignItems: 'center',
-//         marginBottom: 24,
-//     },
-//     welcomeText: {
-//         fontSize: 24,
-//         fontWeight: 'bold',
-//         color: '#FFFFFF',
-//     },
-//     inputContainer: {
-//         flexDirection: 'row',
-//         alignItems: 'center',
-//         backgroundColor: '#2A2A2A',
-//         borderRadius: 12,
-//         paddingHorizontal: 16,
-//         marginBottom: 16,
-//     },
-//     icon: {
-//         marginRight: 10,
-//     },
-//     input: {
-//         flex: 1,
-//         height: 50,
-//         color: '#FFFFFF',
-//     },
-//     button: {
-//         backgroundColor: '#4CAF50',
-//         padding: 14,
-//         borderRadius: 12,
-//         alignItems: 'center',
-//         marginTop: 10,
-//     },
-//     buttonText: {
-//         color: '#FFFFFF',
-//         fontSize: 18,
-//         fontWeight: 'bold',
-//     },
-// });

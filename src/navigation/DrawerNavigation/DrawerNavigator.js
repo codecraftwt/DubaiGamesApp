@@ -14,6 +14,10 @@ import Advance from "../../screens/Advance/Advance";
 import EntryDelete from "../../screens/EntryDelete/EntryDelete";
 import AddPayment from "../../screens/AddPayment/AddPayment";
 import { DubaiGames, DubaiGameslogo } from "../../Theme/globalImage";
+import PaymentReport from "../../screens/PaymentMethods/PaymentReport";
+import OldPaymentReport from "../../screens/PaymentMethods/OldPaymentReport";
+import BusinessReport from "../../screens/PaymentMethods/BusinessReport";
+import { globalColors } from "../../Theme/globalColors";
 
 const Drawer = createDrawerNavigator();
 
@@ -42,21 +46,24 @@ const CustomHeaderTitle = () => {
 const CustomDrawerContent = (props) => {
     const [isAttendanceOpen, setAttendanceOpen] = useState(false);
     const [isReportsOpen, setReportsOpen] = useState(false);
+    const [PaymentMethods, setPaymentMethods] = useState(false);
 
     return (
         <DrawerContentScrollView {...props}>
             <DrawerItemList {...props} />
 
             <TouchableOpacity style={styles.dropdownHeader} onPress={() => setAttendanceOpen(!isAttendanceOpen)}>
-                <Feather name="folder" size={24} color="black" />
+                <Feather name="folder" size={24} color={globalColors.inputLabel} />
                 <Text style={styles.dropdownText}>Attendance</Text>
                 <Feather name={isAttendanceOpen ? "chevron-up" : "chevron-down"} size={24} color="black" />
             </TouchableOpacity>
+
             {isAttendanceOpen && (
                 <View style={styles.nestedItem}>
                     <DrawerItem
                         label="Staff Attendance"
-                        icon={({ color }) => <Feather name="file-text" size={22} color={color} />}
+                        icon={({ color }) => <Feather name="file-text" size={22} color={color}
+                        />}
                         onPress={() => props.navigation.navigate("StaffAttendance")}
                     />
                 </View>
@@ -65,10 +72,11 @@ const CustomDrawerContent = (props) => {
 
 
             <TouchableOpacity style={styles.dropdownHeader} onPress={() => setReportsOpen(!isReportsOpen)}>
-                <Feather name="folder" size={24} color="black" />
+                <Feather name="folder" size={24} color={globalColors.inputLabel} />
                 <Text style={styles.dropdownText}>Reports of Week</Text>
                 <Feather name={isReportsOpen ? "chevron-up" : "chevron-down"} size={24} color="black" />
             </TouchableOpacity>
+
             {isReportsOpen && (
                 <View style={styles.nestedItem}>
                     <DrawerItem label="Weekly Report" onPress={() => props.navigation.navigate("WeeklyReport")} />
@@ -78,6 +86,45 @@ const CustomDrawerContent = (props) => {
                 </View>
             )}
 
+
+            <TouchableOpacity style={styles.dropdownHeader} onPress={() => setPaymentMethods(!PaymentMethods)}>
+                <Feather name="folder" size={24} color={globalColors.inputLabel} />
+                <Text style={styles.dropdownText}>Payment Methods</Text>
+                <Feather name={PaymentMethods ? "chevron-up" : "chevron-down"} size={24} color="black" />
+            </TouchableOpacity>
+
+            {
+                PaymentMethods &&
+                <View style={styles.nestedItem}>
+                    <DrawerItem
+                        label="Payment Report"
+                        icon={({ color }) => <Feather name="database" size={22} color={color}
+                        />}
+                        onPress={() => props.navigation.navigate("PaymentReport")}
+                    />
+                    <DrawerItem
+                        label="Old Payment Report"
+                        icon={({ color }) => <Feather name="film" size={22} color={color}
+                        />}
+                        onPress={() => props.navigation.navigate("OldPaymentReport")}
+                    />
+                    <DrawerItem
+                        label="Business Report"
+                        icon={({ color }) => <Feather name="file-text" size={22} color={color}
+                        />}
+                        onPress={() => props.navigation.navigate("BusinessReport")}
+                    />
+
+                    <DrawerItem
+                        label="Payment Ledger"
+                        icon={({ color }) => <Feather name="file-text" size={22} color={color}
+                        />}
+                        onPress={() => props.navigation.navigate("PaymentLedger")}
+                    />
+
+
+                </View>
+            }
         </DrawerContentScrollView>
     );
 };
@@ -195,11 +242,12 @@ const styles = StyleSheet.create({
     },
     dropdownText: {
         flex: 1,
-        fontSize: 16,
-        marginLeft: 10, 
+        fontSize: 15,
+        marginLeft: 10,
+        color: globalColors.inputLabel
     },
     nestedItem: {
-        paddingLeft: 30, // Indent for nested menu
+        paddingLeft: 30,
     },
 
 });

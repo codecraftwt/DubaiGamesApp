@@ -13,12 +13,15 @@ import {
 import Icon from "react-native-vector-icons/FontAwesome";
 import Header from "../../components/Header/Header";
 import { globalColors } from "../../Theme/globalColors";
+import { format } from "date-fns";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 const DashboardScreen = ({ navigation }) => {
     const [agentId, setAgentId] = useState("");
     const [agentName, setAgentName] = useState("");
     const [market, setMarket] = useState("");
-    const [date, setDate] = useState("");
+    const [date, setDate] = useState(new Date());
     const [openMsg, setOpenMsg] = useState("");
     const [closeMsg, setCloseMsg] = useState("");
     const [number, setNumber] = useState("");
@@ -30,6 +33,10 @@ const DashboardScreen = ({ navigation }) => {
     const [saralPanData, setSaralPanData] = useState([]);
     const [saralPanGunule, setsaralPanGunule] = useState([]);
     const [saralPanGunuleAmount, setsaralPanGunuleAmount] = useState([]);
+    const [showPicker, setShowPicker] = useState(false);
+
+
+    const [submittedData, setSubmittedData] = useState([]);
 
     const categories = [
         "OPEN",
@@ -48,7 +55,8 @@ const DashboardScreen = ({ navigation }) => {
     ];
 
     const handleSubmit = () => {
-        navigation.navigate("AgentList");
+        // navigation.navigate("AgentList");
+
         console.log({
             agentId,
             agentName,
@@ -57,9 +65,22 @@ const DashboardScreen = ({ navigation }) => {
             openMsg,
             closeMsg,
             selectedCategory,
-            number,
             amount,
+            anotherNumber,
+            number,
+
         });
+        const newEntry = {
+            id: agentId,
+            category: selectedCategory,
+            number: number,
+            amount: amount
+        };
+
+        setSubmittedData([...submittedData, newEntry]);
+        setAgentId(agentId + 1); // Increment ID for uniqueness
+        setNumber(""); // Clear inputs
+        setAmount("");
     };
 
     const handleAddSaralPan = () => {
@@ -115,12 +136,22 @@ const DashboardScreen = ({ navigation }) => {
                     </View>
                     <View style={styles.halfWidthInput}>
                         <Text style={styles.label}>DATE</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="DD-MM-YYYY"
-                            value={date}
-                            onChangeText={setDate}
-                        />
+                        <TouchableOpacity onPress={() => setShowPicker(true)} style={styles.datePicker}>
+                            <Text>{format(date, 'dd-MM-yyyy')}</Text>
+                        </TouchableOpacity>
+                        {showPicker && (
+                            <DateTimePicker
+                                value={date}
+                                mode="date"
+                                display="default"
+                                onChange={(event, selectedDate) => {
+                                    setShowPicker(false);
+                                    if (selectedDate) {
+                                        setDate(selectedDate);
+                                    }
+                                }}
+                            />
+                        )}
                     </View>
                 </View>
 
@@ -144,13 +175,11 @@ const DashboardScreen = ({ navigation }) => {
                         />
                     </View>
                 </View>
-
-
-                {/* Category Selection */}
                 <Text style={styles.sectionTitle}>Select Category</Text>
                 <FlatList
                     data={categories}
                     numColumns={3}
+                    showsVerticalScrollIndicator={false}
                     keyExtractor={(item) => item}
                     renderItem={({ item }) => (
                         <TouchableOpacity
@@ -397,6 +426,24 @@ const DashboardScreen = ({ navigation }) => {
 
 
             </View>
+
+            <FlatList
+                data={submittedData}
+                keyExtractor={(item, index) => index.toString()}
+                showsVerticalScrollIndicator={false}
+                numColumns={2}
+                columnWrapperStyle={styles.flatListContainer} 
+                renderItem={({ item }) => (
+                    <View style={styles.card}>
+                        <Text style={styles.cardTitle}>Submitted Data</Text>
+                        <Text style={styles.cardText}><Text style={styles.bold}>ID:</Text> {item.id}</Text>
+                        <Text style={styles.cardText}><Text style={styles.bold}>Category:</Text> {item.category}</Text>
+                        <Text style={styles.cardText}><Text style={styles.bold}>Enter Number:</Text> {item.number}</Text>
+                        <Text style={styles.cardText}><Text style={styles.bold}>Enter Amount:</Text> {item.amount}</Text>
+                    </View>
+                )}
+            />
+
         </ScrollView >
     );
 };
@@ -407,6 +454,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: globalColors.LightWhite,
+        height: '50%'
     },
     header: {
         backgroundColor: globalColors.bluegrey,
@@ -427,6 +475,14 @@ const styles = StyleSheet.create({
     },
     menuButton: {
         padding: 8,
+    },
+    datePicker: {
+        borderWidth: 1,
+        borderColor: globalColors.borderColor,
+        backgroundColor: globalColors.inputbgColor,
+        padding: 12,
+        borderRadius: 8,
+        marginBottom: 12,
     },
     formContainer: {
         backgroundColor: globalColors.white,
@@ -528,9 +584,69 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     halfWidthInput: {
-
         width: "48%"
     },
+    resultContainer: {
+        backgroundColor: "#fff",
+        padding: 15,
+        borderRadius: 10,
+        marginTop: 20,
+        shadowColor: "#000",
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 2 },
+        elevation: 3,
+    },
+    resultTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        marginBottom: 10,
+        textAlign: "center",
+    },
+    resultText: {
+        fontSize: 16,
+        color: "#444",
+        marginBottom: 5,
+    },
+    listContainer: {
+        // paddingBottom: 20,
+        // flexDirection: 'row',
+        // flexWrap: 'wrap'
+
+        flexDirection: "row",
+        // justifyContent: "space-between",
+        // alignItems: 'center',
+        marginBottom: 10,
+    },
+    card: {
+        backgroundColor: "#fff",
+        // width: '48%',
+        padding: 15,
+        borderRadius: 10,
+        marginBottom: 10,
+        shadowColor: "#000",
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 2 },
+        elevation: 3,
+
+    },
+    cardTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        marginBottom: 10,
+        textAlign: "center",
+    },
+    cardText: {
+        fontSize: 16,
+        color: "#444",
+        marginBottom: 5,
+    },
+    bold: {
+        fontWeight: "bold",
+    },
+    flatListContainer: {
+     
+        justifyContent: 'space-evenly',
+    }
 });
 
 export default DashboardScreen;

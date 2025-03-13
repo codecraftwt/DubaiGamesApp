@@ -9,18 +9,24 @@ const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => (
     <Tab.Navigator
+
         screenOptions={({ route }) => ({
             headerShown: false,
+            animation: 'none',
             tabBarIcon: ({ color, size }) => {
                 let iconName;
-                if (route.name === 'Dashboard') iconName = 'home';
+                if (route.name === 'Home') iconName = 'home';
                 else if (route.name === 'Setting') iconName = 'settings'; // Settings icon
 
                 return <Feather name={iconName} size={size} color={color} />;
             },
         })}
     >
-        <Tab.Screen name="Dashboard" component={DrawerNavigator} />
+        <Tab.Screen
+            screenOptions={{
+                animation: 'none',
+            }}
+            name="Home" component={DrawerNavigator} />
         <Tab.Screen name="Setting" component={SettingsScreen} />
     </Tab.Navigator>
 );
