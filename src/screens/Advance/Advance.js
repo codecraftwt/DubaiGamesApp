@@ -67,47 +67,60 @@ const Advance = () => {
 
     return (
         <ScrollView style={styles.container}>
-
+            <Text style={styles.title}>Advance</Text>
             <View style={styles.inputContainer}>
-                <Text style={styles.label}>Agent Code</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Agent Code"
-                    value={agentCode}
-                    onChangeText={setAgentCode}
-                />
+                <View style={styles.row}>
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Agent Code</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Agent Code"
+                            value={agentCode}
+                            onChangeText={setAgentCode}
+                        />
+                    </View>
 
-                <Text style={styles.label}>Agent Name</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Agent Name"
-                    value={agentName}
-                    onChangeText={setAgentName}
-                />
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Agent Name</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Agent Name"
+                            value={agentName}
+                            onChangeText={setAgentName}
+                        />
 
-
-                <Text style={styles.label}>Payment Medium</Text>
-                <Dropdown
-                    data={paymentOptions}
-                    value={paymentMedium}
-                    onChange={item => setPaymentMedium(item.value)}
-                    style={styles.dropdown}
-                    placeholder="Payment Medium"
-                    labelField="label"
-                    valueField="value"
-                />
+                    </View>
+                </View>
 
 
-                <Text style={styles.label}>Advance</Text>
-                <Dropdown
-                    data={advanceOptions}
-                    value={advance}
-                    onChange={item => setAdvance(item.value)}
-                    style={styles.dropdown}
-                    placeholder="Advance"
-                    labelField="label"
-                    valueField="value"
-                />
+                <View style={styles.row}>
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Payment Medium</Text>
+                        <Dropdown
+                            data={paymentOptions}
+                            value={paymentMedium}
+                            onChange={item => setPaymentMedium(item.value)}
+                            style={styles.dropdown}
+                            placeholder="Payment Medium"
+                            labelField="label"
+                            valueField="value"
+                        />
+                    </View>
+
+
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Advance</Text>
+                        <Dropdown
+                            data={advanceOptions}
+                            value={advance}
+                            onChange={item => setAdvance(item.value)}
+                            style={styles.dropdown}
+                            placeholder="Advance"
+                            labelField="label"
+                            valueField="value"
+                        />
+                    </View>
+                </View>
 
                 <Text style={styles.label}>Amount</Text>
                 <TextInput
@@ -117,6 +130,7 @@ const Advance = () => {
                     value={amount}
                     onChangeText={setAmount}
                 />
+
             </View>
 
             <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
@@ -153,10 +167,10 @@ const styles = StyleSheet.create({
         padding: 10,
     },
     title: {
-        fontSize: 24,
+        fontSize: 22,
         fontWeight: 'bold',
         color: globalColors.black,
-        marginBottom: 24,
+        marginBottom: 10,
     },
     card: {
         backgroundColor: globalColors.white,
@@ -272,11 +286,21 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     submitButton: {
-        backgroundColor: '#007bff',
+        backgroundColor: globalColors.blue,
         paddingVertical: 10,
         borderRadius: 5,
         alignItems: 'center',
         marginBottom: 20,
+    },
+    row: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    inputGroup: {
+        marginBottom: 10,
+        width: '48%'
     },
 });
 

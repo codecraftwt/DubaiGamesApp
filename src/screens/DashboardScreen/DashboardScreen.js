@@ -79,38 +79,72 @@ const DashboardScreen = ({ navigation }) => {
 
     return (
         <ScrollView style={styles.container}>
-            {/* Header */}
-            {/* <View style={styles.header}>
-                <View style={styles.logoContainer}>
-                    <Icon name="gamepad" size={24} color="white" />
-                    <Text style={styles.logoText}>GAMES</Text>
-                </View>
-            </View> */}
-            {/* <Header /> */}
-
-            {/* Form Container */}
             <View style={styles.formContainer}>
                 <Text style={styles.sectionTitle}>Agent Details</Text>
 
-                {/* Input Fields */}
-                {[
-                    { label: "AGENT ID", value: agentId, setter: setAgentId, placeholder: "Enter Agent ID" },
-                    { label: "AGENT NAME", value: agentName, setter: setAgentName, placeholder: "Enter Agent Name" },
-                    { label: "MARKET", value: market, setter: setMarket, placeholder: "Enter Market Name" },
-                    { label: "DATE", value: date, setter: setDate, placeholder: "DD-MM-YYYY" },
-                    { label: "OPEN MSG", value: openMsg, setter: setOpenMsg, placeholder: "Enter Open Message" },
-                    { label: "CLOSE MSG", value: closeMsg, setter: setCloseMsg, placeholder: "Enter Close Message" },
-                ].map(({ label, value, setter, placeholder }, index) => (
-                    <View key={index} style={styles.inputGroup}>
-                        <Text style={styles.label}>{label}</Text>
+                <View style={styles.row}>
+                    <View style={styles.halfWidthInput}>
+                        <Text style={styles.label}>AGENT ID</Text>
                         <TextInput
                             style={styles.input}
-                            placeholder={placeholder}
-                            value={value}
-                            onChangeText={setter}
+                            placeholder="Enter Agent ID"
+                            value={agentId}
+                            onChangeText={setAgentId}
                         />
                     </View>
-                ))}
+                    <View style={styles.halfWidthInput}>
+                        <Text style={styles.label}>AGENT NAME</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Enter Agent Name"
+                            value={agentName}
+                            onChangeText={setAgentName}
+                        />
+                    </View>
+                </View>
+
+                <View style={styles.row}>
+                    <View style={styles.halfWidthInput}>
+                        <Text style={styles.label}>MARKET</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Enter Market Name"
+                            value={market}
+                            onChangeText={setMarket}
+                        />
+                    </View>
+                    <View style={styles.halfWidthInput}>
+                        <Text style={styles.label}>DATE</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="DD-MM-YYYY"
+                            value={date}
+                            onChangeText={setDate}
+                        />
+                    </View>
+                </View>
+
+                <View style={styles.row}>
+                    <View style={styles.halfWidthInput}>
+                        <Text style={styles.label}>OPEN MSG</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Enter Open Message"
+                            value={openMsg}
+                            onChangeText={setOpenMsg}
+                        />
+                    </View>
+                    <View style={styles.halfWidthInput}>
+                        <Text style={styles.label}>CLOSE MSG</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Enter Close Message"
+                            value={closeMsg}
+                            onChangeText={setCloseMsg}
+                        />
+                    </View>
+                </View>
+
 
                 {/* Category Selection */}
                 <Text style={styles.sectionTitle}>Select Category</Text>
@@ -150,16 +184,17 @@ const DashboardScreen = ({ navigation }) => {
                 </View>
                 {(selectedCategory === "CYCLE" || selectedCategory === "RUNNING PAN") && (
                     <>
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>ENTER NUMBER</Text>
-                            <TextInput style={styles.input} placeholder="Enter Number" value={number} onChangeText={setNumber} />
-                        </View>
+                        <View style={styles.row}>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>ENTER NUMBER</Text>
+                                <TextInput style={styles.input} placeholder="Enter Number" value={number} onChangeText={setNumber} />
+                            </View>
 
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>ENTER ANOTHER NUMBER</Text>
-                            <TextInput style={styles.input} placeholder="Enter Another Number" value={anotherNumber} onChangeText={setAnotherNumber} />
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>ANOTHER NUMBER</Text>
+                                <TextInput style={styles.input} placeholder="Enter Another Number" value={anotherNumber} onChangeText={setAnotherNumber} />
+                            </View>
                         </View>
-
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>ENTER AMOUNT</Text>
                             <TextInput style={styles.input} placeholder="Enter Amount" value={amount} onChangeText={setAmount} />
@@ -169,16 +204,18 @@ const DashboardScreen = ({ navigation }) => {
 
                 {selectedCategory === "CUT" && (
                     <>
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>ENTER NUMBER</Text>
-                            <TextInput style={styles.input} placeholder="Enter Number" value={number} onChangeText={setNumber} />
-                        </View>
+                        <View style={styles.row}>
 
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>ENTER AMOUNT</Text>
-                            <TextInput style={styles.input} placeholder="Enter Amount" value={amount} onChangeText={setAmount} />
-                        </View>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>ENTER NUMBER</Text>
+                                <TextInput style={styles.input} placeholder="Enter Number" value={number} onChangeText={setNumber} />
+                            </View>
 
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>ENTER AMOUNT</Text>
+                                <TextInput style={styles.input} placeholder="Enter Amount" value={amount} onChangeText={setAmount} />
+                            </View>
+                        </View>
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>ENTER ANOTHER NUMBER</Text>
                             <TextInput style={styles.input} placeholder="Enter Another Number" value={anotherNumber} onChangeText={setAnotherNumber} />
@@ -188,59 +225,69 @@ const DashboardScreen = ({ navigation }) => {
 
                 {selectedCategory !== "CYCLE" && selectedCategory !== "RUNNING PAN" && selectedCategory !== "CUT" && selectedCategory !== "SARALPAN" && selectedCategory !== "ULTA PAN" && (
                     <>
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>ENTER NUMBER</Text>
-                            <TextInput style={styles.input} placeholder="Enter Number" value={number} onChangeText={setNumber} />
+                        <View style={styles.row}>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>ENTER NUMBER</Text>
+                                <TextInput style={styles.input} placeholder="Enter Number" value={number} onChangeText={setNumber} />
+                            </View>
+
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>ENTER AMOUNT</Text>
+                                <TextInput style={styles.input} placeholder="Enter Amount" value={amount} onChangeText={setAmount} />
+                            </View>
                         </View>
 
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>ENTER AMOUNT</Text>
-                            <TextInput style={styles.input} placeholder="Enter Amount" value={amount} onChangeText={setAmount} />
-                        </View>
                     </>
                 )}
 
                 {selectedCategory === "SARALPAN" && (
                     <View>
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>SARALPAN NUMBER</Text>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Enter Saral-Pan Number"
-                                value={saralPanNumber}
-                                onChangeText={setSaralPanNumber}
-                                keyboardType="numeric"
-                            />
+                        <View style={styles.row}>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>SARALPAN NUMBER</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Enter Saral-Pan Number"
+                                    value={saralPanNumber}
+                                    onChangeText={setSaralPanNumber}
+                                    keyboardType="numeric"
+                                />
+                            </View>
+
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>AMOUNT</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Enter Amount"
+                                    value={saralPanAmount}
+                                    onChangeText={setSaralPanAmount}
+                                    keyboardType="numeric"
+                                />
+                            </View>
+                        </View>
+                        <View style={styles.row}>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>GUNULE</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Enter Gunule"
+                                    value={saralPanGunule}
+                                    onChangeText={setsaralPanGunule}
+                                    keyboardType="numeric"
+                                />
+                            </View>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>AMOUNT</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Enter Amount"
+                                    value={saralPanGunuleAmount}
+                                    onChangeText={setsaralPanGunuleAmount}
+                                    keyboardType="numeric"
+                                />
+                            </View>
                         </View>
 
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>AMOUNT</Text>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Enter Amount"
-                                value={saralPanAmount}
-                                onChangeText={setSaralPanAmount}
-                                keyboardType="numeric"
-                            />
-                        </View> <View style={styles.inputGroup}>
-                            <Text style={styles.label}>GUNULE</Text>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Enter Gunule"
-                                value={saralPanGunule}
-                                onChangeText={setsaralPanGunule}
-                                keyboardType="numeric"
-                            />
-                        </View> <View style={styles.inputGroup}>
-                            <Text style={styles.label}>AMOUNT</Text>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Enter Amount"
-                                value={saralPanGunuleAmount}
-                                onChangeText={setsaralPanGunuleAmount}
-                                keyboardType="numeric"
-                            />
-                        </View>
 
                         <TouchableOpacity style={styles.addButton} onPress={handleAddSaralPan}>
                             <Text style={styles.addButtonText}>Add Saral-Pan</Text>
@@ -272,49 +319,55 @@ const DashboardScreen = ({ navigation }) => {
                 {selectedCategory === "ULTA PAN" && (
                     <View>
 
+                        <View style={styles.row}>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>GUNULE</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Enter Gunule"
+                                    value={saralPanGunule}
+                                    onChangeText={setsaralPanGunule}
+                                    keyboardType="numeric"
+                                />
+                            </View>
 
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>GUNULE</Text>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Enter Gunule"
-                                value={saralPanGunule}
-                                onChangeText={setsaralPanGunule}
-                                keyboardType="numeric"
-                            />
-                        </View> <View style={styles.inputGroup}>
-                            <Text style={styles.label}>AMOUNT</Text>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Enter Amount"
-                                value={saralPanGunuleAmount}
-                                onChangeText={setsaralPanGunuleAmount}
-                                keyboardType="numeric"
-                            />
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>AMOUNT</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Enter Amount"
+                                    value={saralPanGunuleAmount}
+                                    onChangeText={setsaralPanGunuleAmount}
+                                    keyboardType="numeric"
+                                />
+                            </View>
                         </View>
 
 
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>ULTA PAN NUMBER</Text>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Enter Saral-Pan Number"
-                                value={saralPanNumber}
-                                onChangeText={setSaralPanNumber}
-                                keyboardType="numeric"
-                            />
+                        <View style={styles.row}>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>ULTA PAN NUMBER</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Enter Saral-Pan Number"
+                                    value={saralPanNumber}
+                                    onChangeText={setSaralPanNumber}
+                                    keyboardType="numeric"
+                                />
+                            </View>
+
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>AMOUNT</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Enter Amount"
+                                    value={saralPanAmount}
+                                    onChangeText={setSaralPanAmount}
+                                    keyboardType="numeric"
+                                />
+                            </View>
                         </View>
 
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>AMOUNT</Text>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Enter Amount"
-                                value={saralPanAmount}
-                                onChangeText={setSaralPanAmount}
-                                keyboardType="numeric"
-                            />
-                        </View>
 
                         {/* <TouchableOpacity style={styles.addButton} onPress={handleAddSaralPan}>
                             <Text style={styles.addButtonText}>Add Saral-Pan</Text>
@@ -353,7 +406,7 @@ const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: globalColors.white,
+        backgroundColor: globalColors.LightWhite,
     },
     header: {
         backgroundColor: globalColors.bluegrey,
@@ -394,6 +447,7 @@ const styles = StyleSheet.create({
     },
     inputGroup: {
         marginBottom: 16,
+        width: '48%'
     },
     label: {
         fontSize: 14,
@@ -403,12 +457,13 @@ const styles = StyleSheet.create({
         textTransform: 'uppercase'
     },
     input: {
+        height: 40,
         borderWidth: 1,
         borderColor: globalColors.borderColor,
-        borderRadius: 8,
-        padding: 10,
-        fontSize: 16,
-        backgroundColor: globalColors.inputbgColor,
+        borderRadius: 5,
+        paddingHorizontal: 10,
+        backgroundColor: globalColors.inputbgColor
+
     },
     radioButton: {
         flex: 1,
@@ -465,6 +520,16 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "bold",
         marginLeft: 6,
+    },
+    row: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    halfWidthInput: {
+
+        width: "48%"
     },
 });
 

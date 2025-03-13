@@ -21,52 +21,69 @@ const DailyResult = () => {
     return (
         <View style={styles.container}>
             <Text style={styles.header}>DAILY RESULT</Text>
+            <View style={styles.row}>
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>AGENT CODE</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Agent Code"
+                        value={agentCode}
+                        onChangeText={setAgentCode}
+                    />
+                </View>
 
-            <Text style={styles.label}>AGENT CODE</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Agent Code"
-                value={agentCode}
-                onChangeText={setAgentCode}
-            />
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>AGENT NAME</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Agent Name"
+                        value={agentName}
+                        onChangeText={setAgentName}
+                    />
+                </View>
+            </View>
 
-            <Text style={styles.label}>AGENT NAME</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Agent Name"
-                value={agentName}
-                onChangeText={setAgentName}
-            />
 
-            <Text style={styles.label}>MARKET</Text>
-            <Dropdown
-                data={markets}
-                labelField="label"
-                valueField="value"
-                placeholder="Select Market"
-                value={market}
-                onChange={item => setMarket(item.value)}
-                style={styles.dropdown}
-            />
 
-            <Text style={styles.label}>DATE</Text>
-            <TouchableOpacity onPress={() => setShowPicker(true)} style={styles.datePicker}>
-                <Text>{format(date, 'dd-MM-yyyy')}</Text>
-            </TouchableOpacity>
+            <View style={styles.row}>
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>MARKET</Text>
+                    <Dropdown
+                        data={markets}
+                        labelField="label"
+                        valueField="value"
+                        placeholder="Select Market"
+                        value={market}
+                        onChange={item => setMarket(item.value)}
+                        style={styles.dropdown}
+                    />
+                </View>
 
-            {showPicker && (
-                <DateTimePicker
-                    value={date}
-                    mode="date"
-                    display="default"
-                    onChange={(event, selectedDate) => {
-                        setShowPicker(false);
-                        if (selectedDate) {
-                            setDate(selectedDate);
-                        }
-                    }}
-                />
-            )}
+
+                <View style={styles.inputGroup}>
+
+                    <Text style={styles.label}>DATE</Text>
+                    <TouchableOpacity onPress={() => setShowPicker(true)} style={styles.datePicker}>
+                        <Text>{format(date, 'dd-MM-yyyy')}</Text>
+                    </TouchableOpacity>
+
+                    {showPicker && (
+                        <DateTimePicker
+                            value={date}
+                            mode="date"
+                            display="default"
+                            onChange={(event, selectedDate) => {
+                                setShowPicker(false);
+                                if (selectedDate) {
+                                    setDate(selectedDate);
+                                }
+                            }}
+                        />
+                    )}
+                </View>
+
+            </View>
+
 
             <TouchableOpacity style={styles.button}>
                 <Text style={styles.buttonText}>Show</Text>
@@ -80,7 +97,6 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 16,
         borderColor: globalColors.white,
-        justifyContent: 'center',
     },
     header: {
         fontSize: 20,
@@ -95,29 +111,10 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     input: {
-        borderWidth: 1,
-        borderColor: globalColors.borderColor,
-        padding: 12,
         backgroundColor: globalColors.inputbgColor,
         borderRadius: 8,
-        marginBottom: 12,
-        fontSize: 16,
-    },
-    dropdown: {
         borderWidth: 1,
         borderColor: globalColors.borderColor,
-        padding: 12,
-        backgroundColor: globalColors.inputbgColor,
-        borderRadius: 8,
-        marginBottom: 12,
-    },
-    datePicker: {
-        borderWidth: 1,
-        borderColor: globalColors.borderColor,
-        padding: 12,
-        backgroundColor: globalColors.inputbgColor,
-        borderRadius: 8,
-        marginBottom: 12,
     },
     button: {
         backgroundColor: globalColors.blue,
@@ -130,6 +127,32 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         color: globalColors.white,
+    },
+    row: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    inputGroup: {
+        marginBottom: 10,
+        width: '48%'
+    },
+    dropdown: {
+        borderWidth: 1,
+        borderColor: globalColors.borderColor,
+        backgroundColor: globalColors.inputbgColor,
+        padding: 12,
+        borderRadius: 8,
+        marginBottom: 12,
+    },
+    datePicker: {
+        borderWidth: 1,
+        borderColor: globalColors.borderColor,
+        backgroundColor: globalColors.inputbgColor,
+        padding: 12,
+        borderRadius: 8,
+        marginBottom: 12,
     },
 });
 

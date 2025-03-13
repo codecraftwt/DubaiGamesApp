@@ -11,6 +11,11 @@ import AdvancePaymentScreen from '../../screens/Advance/Advance';
 import Advance from '../../screens/Advance/Advance';
 import EntryDelete from '../../screens/EntryDelete/EntryDelete';
 import AddPayment from '../../screens/AddPayment/AddPayment';
+import StaffAttendance from '../../screens/Attendance/StaffAttendance';
+import AddButtonReport from '../../screens/ReportsOfWeek/AddButtonReport';
+import AddPaymentReport from '../../screens/ReportsOfWeek/AddPaymentReport';
+import VerifyReport from '../../screens/ReportsOfWeek/VerifyReport';
+import WeeklyReport from '../../screens/ReportsOfWeek/WeeklyReport';
 
 
 
@@ -27,7 +32,15 @@ const StackNavigator = () => (
         <Stack.Screen name="Advance" component={Advance} />
         <Stack.Screen name="EntryDelete" component={EntryDelete} />
         <Stack.Screen name="AddPayment" component={AddPayment} />
+        <Stack.Screen name="StaffAttendance" component={StaffAttendance} />
         <Stack.Screen name="MainApp" component={TabNavigator} />
+
+        <Stack.Screen name="AddButtonReport" component={AddButtonReport} />
+        <Stack.Screen name="AddPaymentReport" component={AddPaymentReport} />
+        <Stack.Screen name="VerifyReport" component={VerifyReport} />
+        <Stack.Screen name="WeeklyReport" component={WeeklyReport} />
+
+
     </Stack.Navigator>
 );
 

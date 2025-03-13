@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import {
-    View, Text, TextInput, TouchableOpacity, StyleSheet, Alert
+    View, Text, TextInput, TouchableOpacity, StyleSheet, Alert,
+    Image,
+    Dimensions
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { globalColors } from '../../Theme/globalColors';
+import { DubaiGames } from '../../Theme/globalImage';
 
 const LoginScreen = ({ navigation }) => {
     const [username, setUsername] = useState('test');
     const [password, setPassword] = useState('12345');
     const [code, setCode] = useState('');
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+    const { width } = Dimensions.get("window");
 
     const handleLogin = async () => {
         if (username === 'test' && password === '12345') {
@@ -23,7 +27,12 @@ const LoginScreen = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Welcome To Dubai Games</Text>
+            <Image style={{
+                width: width * 0.9,
+                height: width * 0.5,
+                resizeMode: "contain",
+            }} source={DubaiGames}></Image>
+            {/* <Text style={styles.title}>Welcome To Dubai Games</Text> */}
             <Text style={styles.subtitle}>Sign in to continue</Text>
 
             {/* Username Input */}
@@ -96,7 +105,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     subtitle: {
-        fontSize: 16,
+        fontSize: 20,
         color: '#666',
         textAlign: 'center',
         marginBottom: 24,

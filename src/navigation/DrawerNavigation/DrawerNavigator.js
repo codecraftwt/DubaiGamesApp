@@ -1,23 +1,23 @@
-import React from 'react';
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import Feather from 'react-native-vector-icons/Feather';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import DashboardScreen from '../../screens/DashboardScreen/DashboardScreen';
-import SettingsScreen from '../../screens/Setting/Settings';
-import { useNavigation } from '@react-navigation/native';
-import { globalColors } from '../../Theme/globalColors';
-import AgentList from '../../screens/Agent/AgentList';
-import StaffListScreen from '../../screens/StaffList/StaffListScreen';
-import DailyResult from '../../screens/Result/DailyResult';
-import ResultPage from '../../screens/Result/ResultPage';
-import Advance from '../../screens/Advance/Advance';
-import EntryDelete from '../../screens/EntryDelete/EntryDelete';
-import AddPayment from '../../screens/AddPayment/AddPayment';
+import React, { useState } from "react";
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItem, DrawerItemList } from "@react-navigation/drawer";
+import { View, TouchableOpacity, Text, StyleSheet, Image } from "react-native";
+import Feather from "react-native-vector-icons/Feather";
+import Icon from "react-native-vector-icons/FontAwesome";
+import { useNavigation } from "@react-navigation/native";
+import DashboardScreen from "../../screens/DashboardScreen/DashboardScreen";
+import SettingsScreen from "../../screens/Setting/Settings";
+import AgentList from "../../screens/Agent/AgentList";
+import StaffListScreen from "../../screens/StaffList/StaffListScreen";
+import ResultPage from "../../screens/Result/ResultPage";
+import DailyResult from "../../screens/Result/DailyResult";
+import Advance from "../../screens/Advance/Advance";
+import EntryDelete from "../../screens/EntryDelete/EntryDelete";
+import AddPayment from "../../screens/AddPayment/AddPayment";
+import { DubaiGames, DubaiGameslogo } from "../../Theme/globalImage";
 
 const Drawer = createDrawerNavigator();
 
-// Custom Left Menu Button
+// Custom Header Left Button
 const CustomHeaderLeft = () => {
     const navigation = useNavigation();
 
@@ -31,20 +31,66 @@ const CustomHeaderLeft = () => {
 const CustomHeaderTitle = () => {
     return (
         <View style={styles.logoContainer}>
-            <Icon name="gamepad" size={24} color="white" />
+            {/* <Icon name="gamepad" size={24} color="white" /> */}
+            <Image source={DubaiGameslogo} style={{ height: 28, width: 40 }}></Image>
             <Text style={styles.logoText}>Dubai Game</Text>
         </View>
     );
 };
 
+// Custom Drawer Content for Nested Menus
+const CustomDrawerContent = (props) => {
+    const [isAttendanceOpen, setAttendanceOpen] = useState(false);
+    const [isReportsOpen, setReportsOpen] = useState(false);
+
+    return (
+        <DrawerContentScrollView {...props}>
+            <DrawerItemList {...props} />
+
+            <TouchableOpacity style={styles.dropdownHeader} onPress={() => setAttendanceOpen(!isAttendanceOpen)}>
+                <Feather name="folder" size={24} color="black" />
+                <Text style={styles.dropdownText}>Attendance</Text>
+                <Feather name={isAttendanceOpen ? "chevron-up" : "chevron-down"} size={24} color="black" />
+            </TouchableOpacity>
+            {isAttendanceOpen && (
+                <View style={styles.nestedItem}>
+                    <DrawerItem
+                        label="Staff Attendance"
+                        icon={({ color }) => <Feather name="file-text" size={22} color={color} />}
+                        onPress={() => props.navigation.navigate("StaffAttendance")}
+                    />
+                </View>
+            )}
+
+
+
+            <TouchableOpacity style={styles.dropdownHeader} onPress={() => setReportsOpen(!isReportsOpen)}>
+                <Feather name="folder" size={24} color="black" />
+                <Text style={styles.dropdownText}>Reports of Week</Text>
+                <Feather name={isReportsOpen ? "chevron-up" : "chevron-down"} size={24} color="black" />
+            </TouchableOpacity>
+            {isReportsOpen && (
+                <View style={styles.nestedItem}>
+                    <DrawerItem label="Weekly Report" onPress={() => props.navigation.navigate("WeeklyReport")} />
+                    <DrawerItem label="Verify Report" onPress={() => props.navigation.navigate("VerifyReport")} />
+                    <DrawerItem label="Add Payment Report" onPress={() => props.navigation.navigate("AddPaymentReport")} />
+                    <DrawerItem label="Add Button Report" onPress={() => props.navigation.navigate("AddButtonReport")} />
+                </View>
+            )}
+
+        </DrawerContentScrollView>
+    );
+};
+
 const DrawerNavigator = () => (
     <Drawer.Navigator
+        drawerContent={(props) => <CustomDrawerContent {...props} />}
         screenOptions={{
             headerShown: true,
             headerStyle: styles.header,
             headerLeft: () => <CustomHeaderLeft />,
             headerTitle: () => <CustomHeaderTitle />,
-            headerTitleAlign: 'center',
+            headerTitleAlign: "center",
         }}
     >
         <Drawer.Screen
@@ -53,21 +99,6 @@ const DrawerNavigator = () => (
             options={{
                 drawerIcon: ({ color }) => <Feather name="home" size={24} color={color} />,
             }}
-        />
-        <Drawer.Screen
-            name="AgentList"
-            component={AgentList}
-            options={{
-                drawerIcon: ({ color }) => <Feather name="users" size={24} color={color} />,
-            }}
-        />
-        <Drawer.Screen
-            name="StaffList"
-            component={StaffListScreen}
-            options={{
-                drawerIcon: ({ color }) => <Feather name="users" size={24} color={color} />,
-            }}
-
         />
         <Drawer.Screen
             name="ResultPage"
@@ -81,6 +112,20 @@ const DrawerNavigator = () => (
             component={DailyResult}
             options={{
                 drawerIcon: ({ color }) => <Feather name="list" size={24} color={color} />,
+            }}
+        />
+        <Drawer.Screen
+            name="StaffList"
+            component={StaffListScreen}
+            options={{
+                drawerIcon: ({ color }) => <Feather name="users" size={24} color={color} />,
+            }}
+        />
+        <Drawer.Screen
+            name="AgentList"
+            component={AgentList}
+            options={{
+                drawerIcon: ({ color }) => <Feather name="users" size={24} color={color} />,
             }}
         />
         <Drawer.Screen
@@ -104,17 +149,13 @@ const DrawerNavigator = () => (
                 drawerIcon: ({ color }) => <Feather name="credit-card" size={24} color={color} />,
             }}
         />
-
         <Drawer.Screen
-            name="Settings"
+            name="Logout"
             component={SettingsScreen}
             options={{
                 drawerIcon: ({ color }) => <Feather name="settings" size={24} color={color} />,
             }}
         />
-
-
-
     </Drawer.Navigator>
 );
 
@@ -133,9 +174,32 @@ const styles = StyleSheet.create({
         alignItems: "flex-end",
     },
     logoText: {
-        color: globalColors.white,
+        color: "white",
         fontSize: 18,
         fontWeight: "bold",
         marginLeft: 8,
     },
+    section: {
+        marginTop: 20,
+        paddingLeft: 15,
+    },
+    nestedItem: {
+        paddingLeft: 35, // Indent for nested menu
+    },
+    dropdownHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 5,
+    },
+    dropdownText: {
+        flex: 1,
+        fontSize: 16,
+        marginLeft: 10, 
+    },
+    nestedItem: {
+        paddingLeft: 30, // Indent for nested menu
+    },
+
 });

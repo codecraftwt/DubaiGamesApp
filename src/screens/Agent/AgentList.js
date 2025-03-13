@@ -146,7 +146,7 @@ const AgentList = () => {
 const styles = {
     container: {
         backgroundColor: globalColors.white,
-        padding: 16,
+        padding: 10,
     },
     title: {
         fontSize: 24,
@@ -157,7 +157,7 @@ const styles = {
     card: {
         backgroundColor: globalColors.white,
         borderRadius: 12,
-        padding: 24,
+        padding: 10,
         shadowColor: globalColors.black,
         shadowOpacity: 0.1,
         shadowRadius: 6,

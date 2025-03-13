@@ -54,46 +54,60 @@ export default function ResultPage() {
                     <Text style={styles.title}>RESULT PAGE</Text>
 
                     <View style={styles.formSection}>
-                        <Text style={styles.label}>PAN NUMBER</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="PAN NUMBER (3 digits)"
-                            keyboardType="numeric"
-                            maxLength={3}
-                            value={panNumber}
-                            onChangeText={setPanNumber}
-                        />
+                        <View style={styles.row}>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>PAN NUMBER</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="PAN NUMBER (3 digits)"
+                                    keyboardType="numeric"
+                                    maxLength={3}
+                                    value={panNumber}
+                                    onChangeText={setPanNumber}
+                                />
+                            </View>
 
-                        <Text style={styles.label}>NUMBER</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="NUMBER"
-                            keyboardType="numeric"
-                            value={number}
-                            onChangeText={setNumber}
-                        />
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>NUMBER</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="NUMBER"
+                                    keyboardType="numeric"
+                                    value={number}
+                                    onChangeText={setNumber}
+                                />
+                            </View>
 
-                        <Text style={styles.label}>TYPE</Text>
-                        <Dropdown
-                            data={Type}
-                            labelField="label"
-                            valueField="value"
-                            placeholder="Select Market"
-                            value={type}
-                            onChange={item => setType(item.value)}
-                            style={styles.dropdown}
-                        />
+                        </View>
 
-                        <Text style={styles.label}>MARKET</Text>
-                        <Dropdown
-                            data={markets}
-                            labelField="label"
-                            valueField="value"
-                            placeholder="Select Market"
-                            value={market}
-                            onChange={item => setMarket(item.value)}
-                            style={styles.dropdown}
-                        />
+                        <View style={styles.row}>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>TYPE</Text>
+                                <Dropdown
+                                    data={Type}
+                                    labelField="label"
+                                    valueField="value"
+                                    placeholder="Select Market"
+                                    value={type}
+                                    onChange={item => setType(item.value)}
+                                    style={styles.dropdown}
+                                />
+                            </View>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>MARKET</Text>
+                                <Dropdown
+                                    data={markets}
+                                    labelField="label"
+                                    valueField="value"
+                                    placeholder="Select Market"
+                                    value={market}
+                                    onChange={item => setMarket(item.value)}
+                                    style={styles.dropdown}
+                                />
+                            </View>
+
+                        </View>
+
 
                         <Text style={styles.label}>DATE</Text>
                         <TouchableOpacity onPress={() => setShowPicker(true)} style={styles.datePicker}>
@@ -124,21 +138,29 @@ export default function ResultPage() {
                 </View >
                 <View style={styles.container}>
                     <View style={styles.formSection}>
-                        <Text style={styles.label}>Agent Code</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Agent Code"
-                            value={agentCode}
-                            onChangeText={setAgentCode}
-                        />
 
-                        <Text style={styles.label}>Agent Name</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Agent Name"
-                            value={agentName}
-                            onChangeText={setAgentName}
-                        />
+                        <View style={styles.row}>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>Agent Code</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Agent Code"
+                                    value={agentCode}
+                                    onChangeText={setAgentCode}
+                                />
+                            </View>
+
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>Agent Name</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Agent Name"
+                                    value={agentName}
+                                    onChangeText={setAgentName}
+                                />
+                            </View>
+
+                        </View>
 
                         <Text style={styles.label}>MARKET</Text>
                         <Dropdown
@@ -153,7 +175,8 @@ export default function ResultPage() {
 
                         <Button
                             mode="contained"
-                            onPress={addEntry}>Submit
+                            onPress={addEntry}>
+                            Submit
                         </Button>
                         <View style={styles.buttonContainer}>
 
@@ -174,7 +197,7 @@ export default function ResultPage() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
+        padding: 10,
         backgroundColor: globalColors.LightWhite
     },
     title:
@@ -190,8 +213,6 @@ const styles = StyleSheet.create({
     },
     input: {
         backgroundColor: globalColors.inputbgColor,
-        padding: 10,
-        marginBottom: 10,
         borderRadius: 8,
         borderWidth: 1,
         borderColor: globalColors.borderColor,
@@ -228,5 +249,15 @@ const styles = StyleSheet.create({
         padding: 12,
         borderRadius: 8,
         marginBottom: 12,
+    },
+    row: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    inputGroup: {
+        marginBottom: 10,
+        width: '48%'
     },
 });

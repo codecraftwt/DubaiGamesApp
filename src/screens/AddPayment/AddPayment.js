@@ -28,115 +28,122 @@ const AddPayment = () => {
             <Text style={styles.title}>ADD PAYMENT</Text>
 
             <View style={styles.row}>
-                <Text style={styles.label}>MARKET</Text>
-                <Dropdown
-                    data={[
-                        { label: 'Kalyan', value: 'Kalyan' },
-                        { label: 'Market 2', value: 'Market 2' }
-                    ]}
-                    value={market}
-                    style={styles.input}
-                    onChange={item => setMarket(item.value)}
-                />
-            </View>
-
-            <View style={styles.row}>
-                <Text style={styles.label}>DATE</Text>
-                <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.input}>
-                    <Text>{date.toLocaleDateString()}</Text>
-                </TouchableOpacity>
-                {showDatePicker && (
-                    <DateTimePicker
-                        value={date}
-                        mode="date"
-                        display="default"
-                        onChange={onChangeDate}
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>MARKET</Text>
+                    <Dropdown
+                        data={[
+                            { label: 'Kalyan', value: 'Kalyan' },
+                            { label: 'Market 2', value: 'Market 2' }
+                        ]}
+                        value={market}
+                        style={styles.input}
+                        onChange={item => setMarket(item.value)}
                     />
-                )}
+                </View>
+
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>DATE</Text>
+                    <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.input}>
+                        <Text>{date.toLocaleDateString()}</Text>
+                    </TouchableOpacity>
+                    {showDatePicker && (
+                        <DateTimePicker
+                            value={date}
+                            mode="date"
+                            display="default"
+                            onChange={onChangeDate}
+                        />
+                    )}
+                </View>
             </View>
 
             <View style={styles.row}>
-                <Text style={styles.label}>AGENT ID</Text>
-                <TextInput
-                    style={styles.input}
-                    value={agentId}
-                    onChangeText={setAgentId}
-                />
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>AGENT ID</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={agentId}
+                        onChangeText={setAgentId}
+                    />
+                </View>
+
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>AGENT NAME</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={agentName}
+                        onChangeText={setAgentName}
+                    />
+                </View>
             </View>
 
             <View style={styles.row}>
-                <Text style={styles.label}>AGENT NAME</Text>
-                <TextInput
-                    style={styles.input}
-                    value={agentName}
-                    onChangeText={setAgentName}
-                />
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>PAYMENT MEDIUM</Text>
+                    <Dropdown
+                        data={[
+                            { label: 'Cash', value: 'Cash' },
+                            { label: 'Credit', value: 'Credit' }
+                        ]}
+                        value={paymentMedium}
+                        style={styles.input}
+                        onChange={item => setPaymentMedium(item.value)}
+                        labelField="label"
+                        valueField="value"
+                    />
+                </View>
+
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>TRANSACTION HEAD</Text>
+                    <Dropdown
+                        data={[
+                            { label: ' Transaction Head', value: '' },
+                            { label: 'Head 1', value: 'Head 1' }
+                        ]}
+                        labelField="label"
+                        valueField="value"
+                        value={transactionHead}
+                        style={styles.input}
+                        onChange={item => setTransactionHead(item.value)}
+                    />
+                </View>
             </View>
 
             <View style={styles.row}>
-                <Text style={styles.label}>PAYMENT MEDIUM</Text>
-                <Dropdown
-                    data={[
-                        { label: 'Cash', value: 'Cash' },
-                        { label: 'Credit', value: 'Credit' }
-                    ]}
-                    value={paymentMedium}
-                    style={styles.input}
-                    onChange={item => setPaymentMedium(item.value)}
-                    labelField="label"
-                    valueField="value"
-                />
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>TRANSACTION TYPE</Text>
+                    <Dropdown
+                        data={[
+                            { label: 'Transaction Type', value: '' },
+                            { label: 'Type 1', value: 'Type 1' }
+                        ]}
+                        labelField="label"
+                        valueField="value"
+                        value={transactionType}
+                        style={styles.input}
+                        onChange={item => setTransactionType(item.value)}
+                    />
+                </View>
+
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>AMOUNT</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={amount}
+                        onChangeText={setAmount}
+                        keyboardType="numeric"
+                    />
+                </View>
             </View>
 
-            <View style={styles.row}>
-                <Text style={styles.label}>TRANSACTION HEAD</Text>
-                <Dropdown
-                    data={[
-                        { label: 'Select Transaction Head', value: '' },
-                        { label: 'Head 1', value: 'Head 1' }
-                    ]}
-                    labelField="label"
-                    valueField="value"
-                    value={transactionHead}
-                    style={styles.input}
-                    onChange={item => setTransactionHead(item.value)}
-                />
-            </View>
 
-            <View style={styles.row}>
-                <Text style={styles.label}>TRANSACTION TYPE</Text>
-                <Dropdown
-                    data={[
-                        { label: 'Select Transaction Type', value: '' },
-                        { label: 'Type 1', value: 'Type 1' }
-                    ]}
-                    labelField="label"
-                    valueField="value"
-                    value={transactionType}
-                    style={styles.input}
-                    onChange={item => setTransactionType(item.value)}
-                />
-            </View>
-
-            <View style={styles.row}>
-                <Text style={styles.label}>AMOUNT</Text>
-                <TextInput
-                    style={styles.input}
-                    value={amount}
-                    onChangeText={setAmount}
-                    keyboardType="numeric"
-                />
-            </View>
-
-            <View style={styles.row}>
-                <Text style={styles.label}>ADD NOTE</Text>
-                <TextInput
-                    style={styles.textArea}
-                    value={addNote}
-                    onChangeText={setAddNote}
-                    multiline
-                />
-            </View>
+            <Text style={styles.label}>ADD NOTE</Text>
+            <TextInput
+                style={styles.textArea}
+                value={addNote}
+                onChangeText={setAddNote}
+                multiline
+            />
 
             <TouchableOpacity style={styles.submitButton}>
                 <Text style={styles.submitText}>Submit</Text>
@@ -156,12 +163,21 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     row: {
-        marginBottom: 15,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    inputGroup: {
+        marginBottom: 10,
+        width: '48%'
     },
     label: {
-        fontSize: 16,
-        marginBottom: 5,
-        color: globalColors.inputLabel
+        fontSize: 14,
+        fontWeight: '600',
+        color: globalColors.inputLabel,
+        marginBottom: 6,
+        textTransform: 'uppercase'
     },
     input: {
         height: 40,
@@ -169,25 +185,26 @@ const styles = StyleSheet.create({
         backgroundColor: globalColors.inputbgColor,
         borderWidth: 1,
         paddingLeft: 10,
-        fontSize: 16,
+        // fontSize: 16,
     },
     textArea: {
         height: 100,
-        borderColor: '#ccc',
+        borderColor: globalColors.borderColor,
+        backgroundColor: globalColors.inputbgColor,
         borderWidth: 1,
         paddingLeft: 10,
         fontSize: 16,
         textAlignVertical: 'top',
     },
     submitButton: {
-        backgroundColor: '#007BFF',
+        backgroundColor: globalColors.blue,
         paddingVertical: 15,
         marginTop: 20,
         alignItems: 'center',
         borderRadius: 5,
     },
     submitText: {
-        color: 'white',
+        color: globalColors.white,
         fontSize: 18,
     },
 });
