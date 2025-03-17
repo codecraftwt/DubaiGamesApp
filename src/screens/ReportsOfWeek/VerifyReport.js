@@ -30,7 +30,7 @@ const VerifyReport = () => {
     return (
         <View style={styles.container}>
 
-            <Text style={styles.title}>VERIFY PAGE 🔵</Text>
+            <Text style={styles.title}>Verify Page 🔵</Text>
             <View style={styles.formSection}>
                 <View style={styles.row}>
                     <View style={styles.inputGroup}>
@@ -93,7 +93,7 @@ const VerifyReport = () => {
 
             {/* Table Header */}
             <ScrollView horizontal>
-                <View style={{ flexDirection: "row", borderBottomWidth: 2, paddingVertical: 5, backgroundColor: "#f5f5f5" }}>
+                <View style={{ flexDirection: "row", borderBottomWidth: 2, paddingVertical: 5, backgroundColor: "#f5f5f5", }}>
                     {["SR.NO", "AGENT CODE", "AGENT NAME", "MARKET", "USER IDS", "VERIFIED BY", "VERIFICATION COUNT", "NOT VERIFIED COUNT", "OPEN_MSG", "CLOSE_MSG"].map((header, index) => (
                         <Text key={index} style={{ width: 100, fontWeight: "bold", padding: 5, textAlign: "center", borderRightWidth: 1 }}>
                             {header}
@@ -129,11 +129,6 @@ const VerifyReport = () => {
 
 
 const styles = StyleSheet.create({
-
-
-
-
-
     container: {
         flex: 1,
         padding: 10,
@@ -142,7 +137,7 @@ const styles = StyleSheet.create({
     title:
     {
         fontSize: 22,
-        fontWeight: "bold",
+        fontFamily: 'Poppins-Bold',
         marginBottom: 10
     },
     input: {
@@ -150,6 +145,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         borderWidth: 1,
         borderColor: globalColors.borderColor,
+        fontFamily: 'Poppins-Medium',
     },
     dropdown: {
         borderWidth: 1,

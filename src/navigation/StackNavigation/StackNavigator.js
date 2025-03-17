@@ -43,7 +43,7 @@ const StackNavigator = () => (
         <Stack.Screen name="AddPaymentReport" component={AddPaymentReport} />
         <Stack.Screen name="VerifyReport" component={VerifyReport} />
         <Stack.Screen name="WeeklyReport" component={WeeklyReport} />
-        <Stack.Screen name="PaymantReport" component={PaymentReport} />
+        <Stack.Screen name="PaymentReport" component={PaymentReport} />
 
         <Stack.Screen name="OldPaymentReport" component={OldPaymentReport} />
         <Stack.Screen name="BusinessReport" component={BusinessReport} />

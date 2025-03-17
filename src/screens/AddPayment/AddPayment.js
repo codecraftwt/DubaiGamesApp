@@ -25,7 +25,7 @@ const AddPayment = () => {
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.title}>ADD PAYMENT</Text>
+            <Text style={styles.title}>Add Payment</Text>
 
             <View style={styles.row}>
                 <View style={styles.inputGroup}>
@@ -159,8 +159,9 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 24,
-        fontWeight: 'bold',
+        fontFamily: 'Poppins-Bold',
         marginBottom: 20,
+        lineHeight: 26,
     },
     row: {
         flexDirection: "row",
@@ -174,16 +175,17 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 14,
-        fontWeight: '600',
         color: globalColors.inputLabel,
-        marginBottom: 6,
-        textTransform: 'uppercase'
+        fontFamily: 'Poppins-Bold',
     },
     input: {
         height: 40,
+        borderRadius: 5,
         borderColor: globalColors.borderColor,
         backgroundColor: globalColors.inputbgColor,
         borderWidth: 1,
+        fontFamily: 'Poppins-Medium',
+
         paddingLeft: 10,
         // fontSize: 16,
     },
@@ -198,14 +200,16 @@ const styles = StyleSheet.create({
     },
     submitButton: {
         backgroundColor: globalColors.blue,
-        paddingVertical: 15,
+        paddingVertical: 12,
         marginTop: 20,
         alignItems: 'center',
         borderRadius: 5,
     },
     submitText: {
         color: globalColors.white,
-        fontSize: 18,
+        fontSize: 16,
+        fontFamily: 'Poppins-Bold',
+
     },
 });
 

@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 22,
-        fontWeight: 'bold',
+        fontFamily: 'Poppins-Bold',
         color: globalColors.black,
         marginBottom: 10,
     },
@@ -196,7 +196,8 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: globalColors.white,
-        fontWeight: 'bold',
+        fontFamily: 'Poppins-Bold',
+        lineHeight: 18
     },
     tableContainer: {
         minWidth: '100%',
@@ -212,7 +213,8 @@ const styles = StyleSheet.create({
         color: globalColors.black,
         paddingHorizontal: 16,
         textAlign: 'left',
-        fontWeight: 'bold',
+        fontFamily: 'Poppins-Bold',
+
     },
     itemContainer: {
         flexDirection: 'row',
@@ -224,6 +226,7 @@ const styles = StyleSheet.create({
         color: '#333',
         paddingHorizontal: 16,
         textAlign: 'left',
+        fontFamily: 'Poppins-Medium',
     },
     srNo: {
         width: 60,
@@ -263,10 +266,12 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     input: {
-        height: 40,
         borderColor: globalColors.borderColor,
         backgroundColor: globalColors.inputbgColor,
         borderWidth: 1,
+        borderRadius: 5,
+        fontFamily: 'Poppins-Medium',
+        fontSize: 14,
         marginBottom: 10,
         paddingLeft: 10,
     },
@@ -275,13 +280,14 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: globalColors.inputLabel,
         marginBottom: 6,
+        fontFamily: 'Poppins-Medium',
         textTransform: 'uppercase',
     },
     dropdown: {
         borderWidth: 1,
         borderColor: globalColors.borderColor,
         backgroundColor: globalColors.inputbgColor,
-        padding: 12,
+        padding: 11,
         borderRadius: 8,
         marginBottom: 12,
     },

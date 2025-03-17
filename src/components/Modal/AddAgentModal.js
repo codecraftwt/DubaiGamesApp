@@ -134,13 +134,14 @@ const styles = StyleSheet.create({
     },
     modalTitle: {
         fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 10
+        fontFamily: 'Poppins-Bold',
+        marginBottom: 8
     },
     input: {
         borderWidth: 1,
         borderColor: globalColors.borderColor,
-        padding: 10,
+        padding: 8,
+        fontFamily: 'Poppins-Medium',
         marginBottom: 10,
         borderRadius: 5
     },
@@ -174,7 +175,8 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: globalColors.white,
-        textAlign: 'center'
+        textAlign: 'center',
+        fontFamily: 'Poppins-Bold'
     }
 });
 

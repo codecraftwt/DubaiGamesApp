@@ -24,11 +24,11 @@ const EntryDelete = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>ENTRY DELETE</Text>
+            <Text style={styles.title}>Entry Delete</Text>
 
             <View style={styles.dateInputs}>
                 <View style={styles.dateInput}>
-                    <Text>START DATE</Text>
+                    <Text style={styles.label}>START DATE</Text>
                     <TouchableOpacity onPress={() => setShowStartDatePicker(true)} style={styles.input}>
                         <Text>{startDate.toLocaleDateString()}</Text>
                     </TouchableOpacity>
@@ -43,7 +43,7 @@ const EntryDelete = () => {
                 </View>
 
                 <View style={styles.dateInput}>
-                    <Text>END DATE</Text>
+                    <Text style={styles.label}>END DATE</Text>
                     <TouchableOpacity onPress={() => setShowEndDatePicker(true)} style={styles.input}>
                         <Text>{endDate.toLocaleDateString()}</Text>
                     </TouchableOpacity>
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 21,
-        fontWeight: 'bold',
+        fontFamily: 'Poppins-Bold',
         marginBottom: 20,
     },
     dateInputs: {
@@ -118,17 +118,27 @@ const styles = StyleSheet.create({
         borderColor: globalColors.borderColor,
         backgroundColor: globalColors.inputbgColor,
         marginBottom: 10,
+        borderRadius: 5,
         justifyContent: 'center',
         alignItems: 'center',
     },
+    label: {
+        fontSize: 14,
+        fontWeight: '600',
+        fontFamily: 'Poppins-Bold',
+        color: globalColors.inputLabel,
+        textTransform: 'uppercase'
+    },
     deleteButton: {
         backgroundColor: globalColors.vividred,
-        padding: 15,
+        padding: 10,
         alignItems: 'center',
+        borderRadius: 5,
         marginBottom: 20,
     },
     deleteButtonText: {
         color: 'white',
+        fontFamily: 'Poppins-Bold',
         fontSize: 18,
     },
     recordInfo: {
@@ -138,20 +148,22 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
     recordInfoText: {
-        fontWeight: 'bold',
+        fontFamily: 'Poppins-Bold',
         fontSize: 16,
         marginBottom: 10,
         alignSelf: 'center'
     },
     recordText: {
-        fontSize: 16,
-        fontWeight: 'bold',
+        fontSize: 14,
+        fontFamily: 'Poppins-Bold',
         color: globalColors.black,
         marginBottom: 5,
     },
     lastUpdatedText: {
-        fontSize: 12,
+        fontSize: 11,
         color: globalColors.black,
+        fontFamily: 'Poppins-Light',
+
         alignSelf: "center",
         margin: 10
     },

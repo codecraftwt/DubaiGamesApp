@@ -29,7 +29,12 @@ const WeeklyReport = () => {
 
     return (
         <View style={{ padding: 20, backgroundColor: "#fff", flex: 1 }}>
-            <Text style={{ fontSize: 22, fontWeight: "bold", marginBottom: 10 }}>REPORT</Text>
+            <Text style={{
+                fontSize: 22,
+                fontFamily: 'Poppins-Bold',
+                marginBottom: 10
+            }}>
+                Report</Text>
 
             {/* Input Fields */}
             <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" }}>
@@ -64,6 +69,7 @@ const WeeklyReport = () => {
                             borderWidth: 1,
                             borderColor: "#ccc",
                             padding: 10,
+                            fontFamily: 'Poppins-Bold',
                             borderRadius: 5,
                             marginBottom: 10,
                         }}
@@ -123,14 +129,19 @@ const WeeklyReport = () => {
                     style={{ backgroundColor: "#007bff", padding: 10, borderRadius: 5 }}
                     onPress={() => console.log("PDF Exported")}
                 >
-                    <Text style={{ color: "#fff", textAlign: "center" }}>PDF</Text>
+                    <Text style={{
+                        color: "#fff", textAlign: "center", fontFamily: 'Poppins-Medium',
+                    }}>PDF</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     style={{ backgroundColor: "#007bff", padding: 10, borderRadius: 5 }}
                     onPress={() => console.log("Excel Exported")}
                 >
-                    <Text style={{ color: "#fff", textAlign: "center" }}>Export to Excel</Text>
+                    <Text style={{
+                        color: "#fff", textAlign: "center", fontFamily: 'Poppins-Medium',
+
+                    }}>Export to Excel</Text>
                 </TouchableOpacity>
 
 
@@ -140,16 +151,20 @@ const WeeklyReport = () => {
             <ScrollView horizontal={true} style={{ marginTop: 10 }}>
                 <DataTable>
                     <DataTable.Header>
-                        <DataTable.Title style={{ width: 50 }}>SR</DataTable.Title>
-                        <DataTable.Title style={{ width: 120 }}>Agent Name</DataTable.Title>
-                        <DataTable.Title style={{ width: 100 }}>Market</DataTable.Title>
-                        <DataTable.Title style={{ width: 80 }}>KAM</DataTable.Title>
-                        <DataTable.Title style={{ width: 80 }}>Win</DataTable.Title>
-                        <DataTable.Title style={{ width: 120 }}>Date</DataTable.Title>
+                        <DataTable.Title style={styles.dataTableTitle}>SR</DataTable.Title>
+                        <DataTable.Title
+                            style={styles.dataTableTitle}>Agent Name</DataTable.Title>
+                        <DataTable.Title style={styles.dataTableTitle}>Market</DataTable.Title>
+                        <DataTable.Title style={styles.dataTableTitle}>KAM</DataTable.Title>
+                        <DataTable.Title style={styles.dataTableTitle}>Win</DataTable.Title>
+                        <DataTable.Title style={styles.dataTableTitle}>Date</DataTable.Title>
                     </DataTable.Header>
 
                     {tableData.length === 0 ? (
-                        <Text style={{ textAlign: "center", marginTop: 10 }}>No Data Available</Text>
+                        <Text style={{
+                            textAlign: "center", fontFamily: 'Poppins-Medium',
+                            marginTop: 10
+                        }}>No Data Available</Text>
                     ) : (
                         <FlatList
                             data={tableData}
@@ -168,7 +183,7 @@ const WeeklyReport = () => {
                     )}
                 </DataTable>
             </ScrollView>
-        </View>
+        </View >
     );
 };
 
@@ -190,9 +205,8 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 14,
-        fontWeight: '600',
+        fontFamily: 'Poppins-Bold',
         color: globalColors.inputLabel,
-        marginBottom: 6,
         textTransform: 'uppercase'
     },
     row: {
@@ -205,6 +219,11 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         width: '48%'
     },
+    dataTableTitle: {
+        fontFamily: 'Poppins-Medium',
+        width: 80,
+        fontSize: 14
+    }
 })
 
 

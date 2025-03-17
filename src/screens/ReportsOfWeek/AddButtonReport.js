@@ -20,7 +20,7 @@ const AddButtonReport = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>AGENT ADD BUTTON</Text>
+            <Text style={styles.title}>Agent Add Button</Text>
             <Text style={styles.label}>AGENT CODE</Text>
             <Dropdown
                 data={agents}
@@ -83,14 +83,13 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 22,
-        fontWeight: "bold",
-        marginBottom: 10
+        fontFamily: 'Poppins-Bold',
+        marginBottom: 20
     },
     label: {
         fontSize: 14,
-        fontWeight: '600',
+        fontFamily: 'Poppins-Bold',
         color: globalColors.inputLabel,
-        marginBottom: 6,
         textTransform: 'uppercase'
     },
     dropdown: {
@@ -123,14 +122,15 @@ const styles = StyleSheet.create({
         paddingVertical: 10
     },
     headerCell: {
-        flex: 1, padding: 10,
-        fontWeight: 'bold',
+        flex: 1, padding: 8,
+        fontFamily: 'Poppins-Bold',
         textAlign: 'center'
     },
     cell: {
         flex: 1,
         padding: 10,
-        textAlign: 'center'
+        textAlign: 'center',
+        fontFamily: 'Poppins-Medium',
     },
     datePicker: {
         borderWidth: 1,

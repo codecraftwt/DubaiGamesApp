@@ -25,7 +25,7 @@ const BusinessReport = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>BUSINESS REPORT</Text>
+            <Text style={styles.title}>Business Report</Text>
 
             {/* Controls (Export & Refresh) */}
             <View style={styles.buttonContainer}>
@@ -35,8 +35,7 @@ const BusinessReport = () => {
                 <Button mode="contained" style={styles.button} onPress={() => console.log("Export PDF")}>
                     PDF
                 </Button>
-                <Button mode="contained" buttonColor="red" onPress={handleRefresh}>
-                    Refresh
+                <Button mode="contained" style={styles.button} buttonColor="red" onPress={handleRefresh}>Refresh
                 </Button>
             </View>
 
@@ -94,9 +93,8 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: width > 600 ? 26 : 22, // Adjust font size based on screen width
-        fontWeight: 'bold',
+        fontFamily: 'Poppins-Bold',
         marginBottom: 15,
-        textAlign: 'center',
     },
     buttonContainer: {
         flexDirection: "row",
@@ -118,8 +116,9 @@ const styles = StyleSheet.create({
     headerCell: {
         paddingVertical: 12,
         paddingHorizontal: 8,
+        // fontFamily: 'Poppins-Bold',
         fontWeight: 'bold',
-        width: width > 600 ? 120 : 90, // Adjust header width for tablet
+        width: width > 600 ? 120 : 110, // Adjust header width for tablet
         textAlign: 'center',
         fontSize: width > 600 ? 16 : 14, // Responsive font size
     },
@@ -131,7 +130,7 @@ const styles = StyleSheet.create({
     rowCell: {
         paddingVertical: 10,
         paddingHorizontal: 8,
-        width: width > 600 ? 120 : 90, // Adjust row cell width for tablet
+        width: width > 600 ? 120 : 110, // Adjust row cell width for tablet
         textAlign: 'center',
         fontSize: width > 600 ? 16 : 14, // Responsive font size
     },

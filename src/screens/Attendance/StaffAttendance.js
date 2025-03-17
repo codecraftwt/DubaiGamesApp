@@ -11,6 +11,8 @@ import { Dropdown } from "react-native-element-dropdown";
 import StaffAttendanceView from "../../components/Modal/StaffAttendanceView";
 import StaffAttendanceInsertModal from "../../components/Modal/StaffAttendanceInsertModal";
 import { globalColors } from "../../Theme/globalColors";
+import Icon from "react-native-vector-icons/FontAwesome";
+import { useNavigation } from "@react-navigation/native";
 
 const weeks = [
     { label: "Week 11 (10 Mar - 16 Mar)", value: "week_11" },
@@ -53,6 +55,7 @@ const attendanceData = [
 const weekDays = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
 const StaffAttendance = () => {
+    const navigation = useNavigation();
     const [selectedWeek, setSelectedWeek] = useState(weeks[0].value);
     const [modalVisible, setModalVisible] = useState(false);
     const [modalVisibleInsert, setModalVisibleInsert] = useState(false);
@@ -66,7 +69,12 @@ const StaffAttendance = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>STAFF ATTENDANCE</Text>
+            <TouchableOpacity
+                onPress={() => navigation.goBack()}
+
+                style={styles.menuButton}>
+                <Icon name="bars" size={24} color="white" />
+            </TouchableOpacity><Text style={styles.title}>Staff Attendance</Text>
 
             {/* Dropdown */}
             <Dropdown
@@ -145,9 +153,9 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 22,
-        fontWeight: "bold",
-        textAlign: "center",
-        marginBottom: 10,
+        fontFamily: 'Poppins-Bold',
+        // textAlign: "center",
+        marginBottom: 20,
     },
     dropdown: {
         borderWidth: 1,
@@ -167,8 +175,8 @@ const styles = StyleSheet.create({
     },
     headerCell: {
         fontSize: 14,
-        fontWeight: "bold",
-        paddingHorizontal: 10,
+        fontFamily: 'Poppins-Bold',
+        paddingHorizontal: 8,
         textAlign: "center",
         width: 80,
     },

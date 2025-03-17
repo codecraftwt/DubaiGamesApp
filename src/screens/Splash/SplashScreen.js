@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
-import { AppLogo, DubaiGames } from '../../Theme/globalImage';
+import { AppLogo, DubaiGames, DubaiGameslogo } from '../../Theme/globalImage';
 import { globalColors } from '../../Theme/globalColors';
 
 
@@ -13,7 +13,7 @@ const SplashScreen = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <Image source={DubaiGames} style={styles.logo} />
+            <Image source={DubaiGameslogo} style={styles.logo} />
             <Text style={styles.text}>Dubai Games</Text>
         </View>
     );

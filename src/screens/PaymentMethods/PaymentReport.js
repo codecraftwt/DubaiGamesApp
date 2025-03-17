@@ -38,7 +38,7 @@ const PaymentReport = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>PAYMENT REPORT</Text>
+            <Text style={styles.title}>Payment Report</Text>
 
             {/* Agent Code Selection */}
             <Text style={styles.label}>AGENT CODE</Text>
@@ -56,13 +56,15 @@ const PaymentReport = () => {
 
             {/* Export Buttons */}
             <View style={styles.exportContainer}>
-                <Button mode="contained" style={styles.button} onPress={() => console.log("Export Excel")}>
+                <Button mode="contained" labelStyle={styles.labelStyle}
+                    style={styles.button} onPress={() => console.log("Export Excel")}>
                     Excel
                 </Button>
-                <Button mode="contained" style={styles.button} onPress={() => console.log("Export PDF")}>
+                <Button mode="contained" labelStyle={styles.labelStyle}
+                    style={styles.button} onPress={() => console.log("Export PDF")}>
                     PDF
                 </Button>
-                <Button mode="contained" buttonColor="red" onPress={() => console.log("Refresh")}>
+                <Button mode="contained" buttonColor="red" labelStyle={styles.labelStyle} onPress={() => console.log("Refresh")}>
                     Refresh
                 </Button>
             </View>
@@ -104,18 +106,20 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 22,
-        fontWeight: "bold",
+        fontFamily: 'Poppins-Bold',
         marginBottom: 10,
     },
     label: {
         fontSize: 14,
-        fontWeight: "bold",
-        marginBottom: 5,
+        fontWeight: '600',
+        fontFamily: 'Poppins-Bold',
+        color: globalColors.inputLabel,
+        textTransform: 'uppercase'
     },
     input: {
         height: 40,
         borderWidth: 1,
-        borderColor: "#ccc",
+        fontFamily: 'Poppins-Medium',
         borderRadius: 5,
         paddingHorizontal: 10,
         marginBottom: 10,
@@ -126,9 +130,10 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         alignSelf: "flex-start",
     },
-    refreshText: {
-        color: "#fff",
-        fontWeight: "bold",
+
+    labelStyle: {
+        fontFamily: 'Poppins-Medium',
+        fontSize: 16
     },
     exportContainer: {
         flexDirection: "row",
@@ -157,7 +162,7 @@ const styles = StyleSheet.create({
     },
     headerCell: {
         width: 120,
-        fontWeight: "bold",
+        fontFamily: 'Poppins-Bold',
         textAlign: "center",
         color: globalColors.black
     },

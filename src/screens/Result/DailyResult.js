@@ -20,7 +20,7 @@ const DailyResult = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>DAILY RESULT</Text>
+            <Text style={styles.header}>Daily Result</Text>
             <View style={styles.row}>
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>AGENT CODE</Text>
@@ -100,32 +100,34 @@ const styles = StyleSheet.create({
     },
     header: {
         fontSize: 20,
-        fontWeight: 'bold',
+        fontFamily: 'Poppins-Bold',
         color: '#1F2937',
         marginBottom: 16,
     },
     label: {
         fontSize: 14,
         fontWeight: '600',
+        fontFamily: 'Poppins-Bold',
         color: globalColors.labelField,
-        marginBottom: 4,
+        color: globalColors.inputLabel,
     },
     input: {
         backgroundColor: globalColors.inputbgColor,
         borderRadius: 8,
+        fontFamily: 'Poppins-Medium',
         borderWidth: 1,
         borderColor: globalColors.borderColor,
     },
     button: {
         backgroundColor: globalColors.blue,
-        padding: 16,
+        padding: 12,
         borderRadius: 8,
         marginTop: 16,
         alignItems: 'center',
     },
     buttonText: {
-        fontSize: 18,
-        fontWeight: 'bold',
+        fontSize: 16,
+        fontFamily: 'Poppins-Bold',
         color: globalColors.white,
     },
     row: {

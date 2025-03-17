@@ -3,16 +3,21 @@ import { View, Text, Image, TouchableOpacity, StyleSheet, Alert } from 'react-na
 import { globalColors } from '../../Theme/globalColors';
 import Header from '../../components/Header/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { logout } from '../../Redux/Slices/authSlice';
+import { useDispatch } from 'react-redux';
 
 const SettingsScreen = ({ navigation }) => {
+    const dispatch = useDispatch();
+
     const handleLogout = () => {
         Alert.alert("Logout", "Are you sure you want to logout?", [
             { text: "Cancel", style: "cancel" },
             {
                 text: "Logout",
                 onPress: async () => {
-                    await AsyncStorage.clear(); // Clears all data from AsyncStorage
-                    navigation.replace("Login"); // Navigate to Login screen after clearing
+                    dispatch(logout())
+                    navigation.replace("Login");
+
                 }
             },
         ]);
@@ -52,7 +57,7 @@ const styles = StyleSheet.create({
     },
     userName: {
         fontSize: 20,
-        fontWeight: 'bold',
+        fontFamily: 'Poppins-Bold',
         marginBottom: 30,
     },
     logoutButton: {
@@ -64,7 +69,7 @@ const styles = StyleSheet.create({
     logoutText: {
         color: globalColors.white,
         fontSize: 18,
-        fontWeight: 'bold',
+        fontFamily: 'Poppins-Bold',
     },
 });
 

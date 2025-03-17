@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
     View,
     Text,
@@ -16,6 +16,10 @@ import { globalColors } from "../../Theme/globalColors";
 import { format } from "date-fns";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { debounce } from "lodash";
+import axios from "axios";
+import DynamicDropdown from "../DynamicDropdown";
+
 
 const DashboardScreen = ({ navigation }) => {
     const [agentId, setAgentId] = useState("");
@@ -35,7 +39,10 @@ const DashboardScreen = ({ navigation }) => {
     const [saralPanGunuleAmount, setsaralPanGunuleAmount] = useState([]);
     const [showPicker, setShowPicker] = useState(false);
 
+    const [agentList, setAgentList] = useState([]);
+    const [loading, setLoading] = useState(false); // State to manage loading state
 
+    const [openDropdown, setOpenDropdown] = useState(false); // To toggle dropdown visibility
     const [submittedData, setSubmittedData] = useState([]);
 
     const categories = [
@@ -53,6 +60,30 @@ const DashboardScreen = ({ navigation }) => {
         "CLOSE PAN",
         "CLOSE",
     ];
+
+    const [query, setQuery] = useState('');
+    const [results, setResults] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [error, setError] = useState(null);
+
+    const handleSelect = async (value) => {
+        setLoading(true); // Set loading to true when API request starts
+        try {
+            const response = await axios.get(`https://staging.rdnidhi.com/agent/getByCode/${value}`);
+            const { name, agentcode } = response.data;
+
+            setAgentName(name); // Set name field
+            setAgentId(agentcode); // Set agentID field
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        } finally {
+            setLoading(false); // Set loading to false when API request finishes
+        }
+    };
+
+
+
 
     const handleSubmit = () => {
         // navigation.navigate("AgentList");
@@ -100,17 +131,16 @@ const DashboardScreen = ({ navigation }) => {
 
     return (
         <ScrollView style={styles.container}>
+            <Text style={styles.sectionTitle}>Agent Details</Text>
             <View style={styles.formContainer}>
-                <Text style={styles.sectionTitle}>Agent Details</Text>
+
 
                 <View style={styles.row}>
                     <View style={styles.halfWidthInput}>
                         <Text style={styles.label}>AGENT ID</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Enter Agent ID"
-                            value={agentId}
-                            onChangeText={setAgentId}
+                        <DynamicDropdown
+                            onSelect={handleSelect}
+                            placeholder="Search for items..."
                         />
                     </View>
                     <View style={styles.halfWidthInput}>
@@ -221,7 +251,7 @@ const DashboardScreen = ({ navigation }) => {
 
                             <View style={styles.inputGroup}>
                                 <Text style={styles.label}>ANOTHER NUMBER</Text>
-                                <TextInput style={styles.input} placeholder="Enter Another Number" value={anotherNumber} onChangeText={setAnotherNumber} />
+                                <TextInput style={styles.input} placeholder="Enter Another No" value={anotherNumber} onChangeText={setAnotherNumber} />
                             </View>
                         </View>
                         <View style={styles.inputGroup}>
@@ -247,7 +277,7 @@ const DashboardScreen = ({ navigation }) => {
                         </View>
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>ENTER ANOTHER NUMBER</Text>
-                            <TextInput style={styles.input} placeholder="Enter Another Number" value={anotherNumber} onChangeText={setAnotherNumber} />
+                            <TextInput style={styles.input} placeholder="Enter Another No" value={anotherNumber} onChangeText={setAnotherNumber} />
                         </View>
                     </>
                 )}
@@ -276,7 +306,7 @@ const DashboardScreen = ({ navigation }) => {
                                 <Text style={styles.label}>SARALPAN NUMBER</Text>
                                 <TextInput
                                     style={styles.input}
-                                    placeholder="Enter Saral-Pan Number"
+                                    placeholder="Enter Saral-Pan No"
                                     value={saralPanNumber}
                                     onChangeText={setSaralPanNumber}
                                     keyboardType="numeric"
@@ -378,7 +408,7 @@ const DashboardScreen = ({ navigation }) => {
                                 <Text style={styles.label}>ULTA PAN NUMBER</Text>
                                 <TextInput
                                     style={styles.input}
-                                    placeholder="Enter Saral-Pan Number"
+                                    placeholder="Enter Saral-Pan No"
                                     value={saralPanNumber}
                                     onChangeText={setSaralPanNumber}
                                     keyboardType="numeric"
@@ -432,7 +462,7 @@ const DashboardScreen = ({ navigation }) => {
                 keyExtractor={(item, index) => index.toString()}
                 showsVerticalScrollIndicator={false}
                 numColumns={2}
-                columnWrapperStyle={styles.flatListContainer} 
+                columnWrapperStyle={styles.flatListContainer}
                 renderItem={({ item }) => (
                     <View style={styles.card}>
                         <Text style={styles.cardTitle}>Submitted Data</Text>
@@ -454,7 +484,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: globalColors.LightWhite,
-        height: '50%'
+        height: '50%',
+        padding: 10,
     },
     header: {
         backgroundColor: globalColors.bluegrey,
@@ -485,20 +516,20 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     formContainer: {
-        backgroundColor: globalColors.white,
-        margin: 10,
+        // backgroundColor: globalColors.white,
+        // margin: 10,
         padding: 10,
-        borderRadius: 12,
-        shadowColor: globalColors.black,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 6,
-        elevation: 3,
+        // borderRadius: 12,
+        // shadowColor: globalColors.black,
+        // shadowOffset: { width: 0, height: 4 },
+        // shadowOpacity: 0.1,
+        // shadowRadius: 6,
+        // elevation: 3,
     },
     sectionTitle: {
         fontSize: 21,
-        fontWeight: "bold",
-        marginBottom: 12,
+        fontFamily: 'Poppins-Bold',
+        marginBottom: 10,
         color: globalColors.darkBlue,
     },
     inputGroup: {
@@ -508,13 +539,14 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 14,
         fontWeight: "600",
+        fontFamily: 'Poppins-Bold',
         color: globalColors.inputLabel,
-        marginBottom: 6,
         textTransform: 'uppercase'
     },
     input: {
-        height: 40,
+        fontSize: 14,
         borderWidth: 1,
+        fontFamily: 'Poppins-Medium',
         borderColor: globalColors.borderColor,
         borderRadius: 5,
         paddingHorizontal: 10,
@@ -539,10 +571,12 @@ const styles = StyleSheet.create({
     radioText: {
         fontSize: 14,
         fontWeight: "500",
+        fontFamily: 'Poppins-Medium',
         color: globalColors.darkBlue,
     },
     selectedRadioText: {
         color: globalColors.white,
+        fontFamily: 'Poppins-Medium',
     },
     buttonGroup: {
         flexDirection: "row",
@@ -560,7 +594,8 @@ const styles = StyleSheet.create({
     submitButtonText: {
         color: globalColors.white,
         fontSize: 16,
-        fontWeight: "bold",
+        lineHeight: 19,
+        fontFamily: 'Poppins-Bold',
     },
     deleteAllButton: {
         backgroundColor: globalColors.vividred,
@@ -574,7 +609,8 @@ const styles = StyleSheet.create({
     deleteAllButtonText: {
         color: globalColors.white,
         fontSize: 16,
-        fontWeight: "bold",
+        lineHeight: 19,
+        fontFamily: 'Poppins-Bold',
         marginLeft: 6,
     },
     row: {
@@ -631,20 +667,23 @@ const styles = StyleSheet.create({
     },
     cardTitle: {
         fontSize: 18,
-        fontWeight: "bold",
+        lineHeight: 19,
+        fontFamily: 'Poppins-Medium',
         marginBottom: 10,
         textAlign: "center",
     },
     cardText: {
         fontSize: 16,
         color: "#444",
+        lineHeight: 19,
+        fontFamily: 'Poppins-Medium',
         marginBottom: 5,
     },
     bold: {
         fontWeight: "bold",
     },
     flatListContainer: {
-     
+
         justifyContent: 'space-evenly',
     }
 });

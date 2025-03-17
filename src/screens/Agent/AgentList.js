@@ -100,7 +100,7 @@ const AgentList = () => {
 
     return (
         <ScrollView style={styles.container}>
-            <Text style={styles.title}>AGENT LIST</Text>
+            <Text style={styles.title}>Agent List</Text>
             <View style={styles.card}>
                 <View style={styles.header}>
                     <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
@@ -150,7 +150,7 @@ const styles = {
     },
     title: {
         fontSize: 24,
-        fontWeight: 'bold',
+        fontFamily: 'Poppins-Bold',
         color: globalColors.black,
         marginBottom: 24,
     },
@@ -178,7 +178,7 @@ const styles = {
     },
     buttonText: {
         color: globalColors.white,
-        fontWeight: 'bold',
+        fontFamily: 'Poppins-Bold',
     },
     tableContainer: {
         minWidth: '100%',
@@ -192,9 +192,9 @@ const styles = {
     },
     tableHeaderText: {
         color: globalColors.black,
+        fontFamily: 'Poppins-Bold',
         paddingHorizontal: 16,
         textAlign: 'left',
-        fontWeight: 'bold',
     },
     itemContainer: {
         flexDirection: 'row',
@@ -205,6 +205,7 @@ const styles = {
     itemText: {
         color: '#333',
         paddingHorizontal: 16,
+        fontFamily: 'Poppins-Medium',
         textAlign: 'left',
     },
     srNo: {

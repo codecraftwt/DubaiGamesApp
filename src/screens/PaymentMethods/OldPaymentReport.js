@@ -148,7 +148,7 @@ const OldPaymentReport = () => {
     return (
         <PaperProvider>
             <View style={styles.container}>
-                <Text style={styles.title}>PAYMENT REPORT</Text>
+                <Text style={styles.title}>Payment Report</Text>
 
                 {/* Agent Code Selection */}
                 <View style={styles.inputContainer}>
@@ -202,13 +202,13 @@ const OldPaymentReport = () => {
 
                 {/* Buttons */}
                 <View style={styles.buttonContainer}>
-                    <Button mode="contained" style={styles.button} onPress={() => console.log("Export Excel")}>
+                    <Button mode="contained" labelStyle={styles.labelStyle} style={styles.button} onPress={() => console.log("Export Excel")}>
                         Excel
                     </Button>
-                    <Button mode="contained" style={styles.button} onPress={() => console.log("Export PDF")}>
+                    <Button mode="contained" labelStyle={styles.labelStyle} style={styles.button} onPress={() => console.log("Export PDF")}>
                         PDF
                     </Button>
-                    <Button mode="contained" buttonColor="red" onPress={() => console.log("Refresh")}>
+                    <Button mode="contained" buttonColor="red" labelStyle={styles.labelStyle} onPress={() => console.log("Refresh")}>
                         Refresh
                     </Button>
                 </View>
@@ -226,20 +226,22 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 22,
         fontWeight: "bold",
-        marginBottom: 10,
+        marginBottom: 20,
     },
     inputContainer: {
         marginBottom: 20,
     },
     label: {
         fontSize: 14,
-        fontWeight: "bold",
-        marginBottom: 5,
+        fontFamily: 'Poppins-Bold',
+        color: globalColors.inputLabel,
+        textTransform: 'uppercase'
     },
     dropdown: {
         padding: 10,
         borderWidth: 1,
         borderRadius: 5,
+        fontFamily: 'Poppins-Bold',
         borderColor: "#ccc",
     },
     tableContainer: {
@@ -253,15 +255,16 @@ const styles = StyleSheet.create({
     header: {
         backgroundColor: "#ddd",
         fontWeight: "700",
-        paddingVertical: 10,
+        paddingVertical: 8,
     },
     headerText: {
-        fontWeight: "bold",
+        fontFamily: 'Poppins-Bold',
         textAlign: "center",
     },
     cell: {
         padding: 10,
         textAlign: "center",
+        fontFamily: 'Poppins-Medium',
         color: globalColors.black,
     },
     buttonContainer: {
@@ -273,6 +276,10 @@ const styles = StyleSheet.create({
         flex: 1,
         marginHorizontal: 5,
     },
+    labelStyle: {
+        fontFamily: 'Poppins-Medium',
+        fontSize: 16
+    }
 });
 
 export default OldPaymentReport;

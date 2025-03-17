@@ -243,6 +243,7 @@ const styles = StyleSheet.create({
     addButtonText: {
         color: globalColors.white,
         fontSize: 16,
+        fontFamily: 'Poppins-Medium',
     },
     modalOverlay: {
         flex: 1,

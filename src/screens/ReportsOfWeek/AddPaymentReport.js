@@ -18,7 +18,7 @@ const AddPaymentReport = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>AGENT ADD PAYMENT</Text>
+            <Text style={styles.title}>Agent Add Payment</Text>
             <Text style={styles.label}>AGENT CODE</Text>
             <Dropdown
                 data={agents}
@@ -53,14 +53,13 @@ const styles = StyleSheet.create({
         flex: 1
     },
     title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#007bff',
-        marginBottom: 10
+        fontSize: 22,
+        fontFamily: 'Poppins-Bold',
+        marginBottom: 20
     },
     label: {
-        fontSize: 16,
-        marginTop: 10
+        fontSize: 14,
+        fontFamily: 'Poppins-Bold',
     },
     dropdown: {
         borderWidth: 1,

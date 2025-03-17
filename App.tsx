@@ -18,6 +18,9 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 import AppNavigator from './src/navigation/AppNavigation/AppNavigator';
+import { Provider } from 'react-redux';
+import store, { persistor } from './src/Redux/store/store';
+import { PersistGate } from 'redux-persist/integration/react';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -68,7 +71,11 @@ function App(): React.JSX.Element {
   const safePadding = '5%';
 
   return (
-    <AppNavigator />
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <AppNavigator />
+      </PersistGate>
+    </Provider>
   );
 }
 

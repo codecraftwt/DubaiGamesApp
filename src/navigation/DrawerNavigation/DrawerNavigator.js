@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItem, DrawerItemList } from "@react-navigation/drawer";
 import { View, TouchableOpacity, Text, StyleSheet, Image } from "react-native";
 import Feather from "react-native-vector-icons/Feather";
@@ -32,6 +32,7 @@ const CustomHeaderLeft = () => {
     );
 };
 
+
 const CustomHeaderTitle = () => {
     return (
         <View style={styles.logoContainer}>
@@ -44,9 +45,22 @@ const CustomHeaderTitle = () => {
 
 // Custom Drawer Content for Nested Menus
 const CustomDrawerContent = (props) => {
+    const navigation = useNavigation();
+
     const [isAttendanceOpen, setAttendanceOpen] = useState(false);
     const [isReportsOpen, setReportsOpen] = useState(false);
     const [PaymentMethods, setPaymentMethods] = useState(false);
+
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('blur', () => {
+            setAttendanceOpen(false);
+            setReportsOpen(false);
+            setPaymentMethods(false);
+        });
+
+        return unsubscribe;
+    }, [navigation]);
 
     return (
         <DrawerContentScrollView {...props}>
@@ -64,7 +78,7 @@ const CustomDrawerContent = (props) => {
                         label="Staff Attendance"
                         icon={({ color }) => <Feather name="file-text" size={22} color={color}
                         />}
-                        onPress={() => props.navigation.navigate("StaffAttendance")}
+                        onPress={() => navigation.navigate("StaffAttendance")}
                     />
                 </View>
             )}
@@ -79,10 +93,10 @@ const CustomDrawerContent = (props) => {
 
             {isReportsOpen && (
                 <View style={styles.nestedItem}>
-                    <DrawerItem label="Weekly Report" onPress={() => props.navigation.navigate("WeeklyReport")} />
-                    <DrawerItem label="Verify Report" onPress={() => props.navigation.navigate("VerifyReport")} />
-                    <DrawerItem label="Add Payment Report" onPress={() => props.navigation.navigate("AddPaymentReport")} />
-                    <DrawerItem label="Add Button Report" onPress={() => props.navigation.navigate("AddButtonReport")} />
+                    <DrawerItem label="Weekly Report" onPress={() => navigation.navigate("WeeklyReport")} />
+                    <DrawerItem label="Verify Report" onPress={() => navigation.navigate("VerifyReport")} />
+                    <DrawerItem label="Add Payment Report" onPress={() => navigation.navigate("AddPaymentReport")} />
+                    <DrawerItem label="Add Button Report" onPress={() => navigation.navigate("AddButtonReport")} />
                 </View>
             )}
 
@@ -100,26 +114,26 @@ const CustomDrawerContent = (props) => {
                         label="Payment Report"
                         icon={({ color }) => <Feather name="database" size={22} color={color}
                         />}
-                        onPress={() => props.navigation.navigate("PaymentReport")}
+                        onPress={() => navigation.navigate("PaymentReport")}
                     />
                     <DrawerItem
                         label="Old Payment Report"
                         icon={({ color }) => <Feather name="film" size={22} color={color}
                         />}
-                        onPress={() => props.navigation.navigate("OldPaymentReport")}
+                        onPress={() => navigation.navigate("OldPaymentReport")}
                     />
                     <DrawerItem
                         label="Business Report"
                         icon={({ color }) => <Feather name="file-text" size={22} color={color}
                         />}
-                        onPress={() => props.navigation.navigate("BusinessReport")}
+                        onPress={() => navigation.navigate("BusinessReport")}
                     />
 
                     <DrawerItem
                         label="Payment Ledger"
                         icon={({ color }) => <Feather name="file-text" size={22} color={color}
                         />}
-                        onPress={() => props.navigation.navigate("PaymentLedger")}
+                        onPress={() => navigation.navigate("PaymentLedger")}
                     />
 
 
@@ -138,6 +152,10 @@ const DrawerNavigator = () => (
             headerLeft: () => <CustomHeaderLeft />,
             headerTitle: () => <CustomHeaderTitle />,
             headerTitleAlign: "center",
+            drawerLabelStyle: {
+                fontFamily: 'Poppins-Medium',
+                fontSize: 16
+            }
         }}
     >
         <Drawer.Screen
@@ -145,6 +163,7 @@ const DrawerNavigator = () => (
             component={DashboardScreen}
             options={{
                 drawerIcon: ({ color }) => <Feather name="home" size={24} color={color} />,
+
             }}
         />
         <Drawer.Screen
@@ -244,6 +263,7 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: 15,
         marginLeft: 10,
+        fontFamily: 'Poppins-Medium',
         color: globalColors.inputLabel
     },
     nestedItem: {

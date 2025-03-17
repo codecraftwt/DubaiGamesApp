@@ -13,6 +13,7 @@ import {
 import { Dropdown } from 'react-native-element-dropdown';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { globalColors } from '../../Theme/globalColors';
 
 const PaymentLedger = () => {
     // Form state
@@ -114,7 +115,7 @@ const PaymentLedger = () => {
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView>
-                <Text style={styles.header}>PAYMENT LEDGER</Text>
+                <Text style={styles.header}>Payment Ledger</Text>
 
                 {/* Form Section */}
                 <View style={styles.formSection}>
@@ -444,7 +445,7 @@ const styles = StyleSheet.create({
     },
     header: {
         fontSize: 22,
-        fontWeight: 'bold',
+        fontFamily: 'Poppins-Bold',
         padding: 16,
         borderBottomWidth: 1,
         borderBottomColor: '#e0e0e0',
@@ -470,14 +471,18 @@ const styles = StyleSheet.create({
         minWidth: 150,
     },
     label: {
-        fontSize: 12,
-        fontWeight: 'bold',
-        marginBottom: 6,
+        fontSize: 14,
+        fontWeight: '600',
+        fontFamily: 'Poppins-Bold',
+        color: globalColors.inputLabel,
+        marginBottom: 4,
+        textTransform: 'uppercase'
     },
     input: {
         height: 40,
         borderWidth: 1,
-        borderColor: '#ccc',
+        borderColor: globalColors.borderColor,
+        fontFamily: 'Poppins-Medium',
         borderRadius: 4,
         paddingHorizontal: 10,
     },
@@ -494,6 +499,7 @@ const styles = StyleSheet.create({
     },
     selectedTextStyle: {
         fontSize: 14,
+
     },
     datePickerButton: {
         flexDirection: 'row',
@@ -510,7 +516,7 @@ const styles = StyleSheet.create({
     },
     submitButton: {
         backgroundColor: '#007bff',
-        paddingVertical: 10,
+        paddingVertical: 8,
         paddingHorizontal: 20,
         borderRadius: 4,
         alignSelf: 'flex-start',
@@ -518,7 +524,7 @@ const styles = StyleSheet.create({
     },
     submitButtonText: {
         color: '#fff',
-        fontWeight: 'bold',
+        fontFamily: 'Poppins-Bold',
     },
     tableControls: {
         flexDirection: 'row',
@@ -574,7 +580,7 @@ const styles = StyleSheet.create({
     },
     tableHeaderCell: {
         padding: 12,
-        fontWeight: 'bold',
+        fontFamily: 'Poppins-Bold',
         fontSize: 12,
     },
     tableRow: {

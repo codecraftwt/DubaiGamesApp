@@ -51,7 +51,7 @@ export default function ResultPage() {
         >
             <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
                 <View style={styles.container}>
-                    <Text style={styles.title}>RESULT PAGE</Text>
+                    <Text style={styles.title}>Result Page</Text>
 
                     <View style={styles.formSection}>
                         <View style={styles.row}>
@@ -130,6 +130,7 @@ export default function ResultPage() {
 
                         <Button
                             mode="contained"
+                            style={styles.label}
                             onPress={addEntry}>Submit
                         </Button>
 
@@ -175,13 +176,20 @@ export default function ResultPage() {
 
                         <Button
                             mode="contained"
+                            style={styles.label}
                             onPress={addEntry}>
                             Submit
                         </Button>
                         <View style={styles.buttonContainer}>
 
-                            <Button mode="outlined">Before Open</Button>
-                            <Button mode="outlined">After Open</Button>
+                            <Button mode="outlined"
+                                labelStyle={styles.labelStyle}
+                            >Before Open
+                            </Button>
+                            <Button mode="outlined"
+                                labelStyle={styles.labelStyle}
+                            >After Open
+                            </Button>
                             <TouchableOpacity style={styles.lockButton}>
                                 <Icon name="lock" size={24} color="white" />
                             </TouchableOpacity>
@@ -203,17 +211,18 @@ const styles = StyleSheet.create({
     title:
     {
         fontSize: 22,
-        fontWeight: "bold",
-        marginBottom: 10
+        fontFamily: 'Poppins-Bold',
+        marginBottom: 8
     },
     formSection: {
-        backgroundColor: globalColors.white,
-        padding: 15,
+        // backgroundColor: globalColors.white,
+        padding: 10,
         borderRadius: 10
     },
     input: {
         backgroundColor: globalColors.inputbgColor,
         borderRadius: 8,
+        fontFamily: 'Poppins-Medium',
         borderWidth: 1,
         borderColor: globalColors.borderColor,
     },
@@ -231,6 +240,7 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 14,
         fontWeight: '600',
+        fontFamily: 'Poppins-Bold',
         color: globalColors.inputLabel,
         marginBottom: 6,
         textTransform: 'uppercase'
@@ -240,14 +250,17 @@ const styles = StyleSheet.create({
         borderColor: globalColors.borderColor,
         backgroundColor: globalColors.inputbgColor,
         padding: 12,
+        color: globalColors.inputLabel,
+        fontFamily: 'Poppins-Medium',
         borderRadius: 8,
-        marginBottom: 12,
+        marginBottom: 10,
     },
     datePicker: {
         borderWidth: 1,
         borderColor: globalColors.borderColor,
         backgroundColor: globalColors.inputbgColor,
         padding: 12,
+        fontFamily: 'Poppins-Medium',
         borderRadius: 8,
         marginBottom: 12,
     },
@@ -261,4 +274,8 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         width: '48%'
     },
+    labelStyle: {
+        fontFamily: 'Poppins-Medium',
+        fontSize: 16
+    }
 });
