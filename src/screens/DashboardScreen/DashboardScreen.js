@@ -9,6 +9,7 @@ import {
     StyleSheet,
     FlatList,
     Dimensions,
+    SectionList,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import Header from "../../components/Header/Header";
@@ -16,18 +17,18 @@ import { globalColors } from "../../Theme/globalColors";
 import { format } from "date-fns";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import { debounce } from "lodash";
 import axios from "axios";
 import DynamicDropdown from "../DynamicDropdown";
+import { Dropdown } from "react-native-element-dropdown";
+import { fetchMarketData } from "../../Redux/Slices/marketSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 
 const DashboardScreen = ({ navigation }) => {
     const [agentId, setAgentId] = useState("");
     const [agentName, setAgentName] = useState("");
-    const [market, setMarket] = useState("");
+    const [market, setMarket] = useState("Kalyan");
     const [date, setDate] = useState(new Date());
-    const [openMsg, setOpenMsg] = useState("");
-    const [closeMsg, setCloseMsg] = useState("");
     const [number, setNumber] = useState("");
     const [amount, setAmount] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("JODI");
@@ -40,11 +41,26 @@ const DashboardScreen = ({ navigation }) => {
     const [showPicker, setShowPicker] = useState(false);
 
     const [agentList, setAgentList] = useState([]);
-    const [loading, setLoading] = useState(false); // State to manage loading state
+    const [loading, setLoading] = useState(false);
 
     const [openDropdown, setOpenDropdown] = useState(false); // To toggle dropdown visibility
-    const [submittedData, setSubmittedData] = useState([]);
+    const [submittedData, setSubmittedData] = useState(data);
+    const [response, setResponse] = useState([])
 
+    const dispatch = useDispatch();
+
+    const { data, status } = useSelector((state) => state.market);
+    console.log("market data 11------->", data)
+
+    // useEffect(() => {
+    //     dispatch(fetchMarketData({ agent_id: 1, market: 'Kalyan', date: '2025-03-14' }));
+    // }, [dispatch]);
+
+    // setResponse(data)
+
+    const formatDate = (date) => {
+        return date.toISOString().split("T")[0]; // Extracts YYYY-MM-DD
+    };
     const categories = [
         "OPEN",
         "JODI",
@@ -66,15 +82,17 @@ const DashboardScreen = ({ navigation }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
     const [error, setError] = useState(null);
+    const [id, setId] = useState('')
 
     const handleSelect = async (value) => {
-        setLoading(true); // Set loading to true when API request starts
+        setLoading(true);
         try {
             const response = await axios.get(`https://staging.rdnidhi.com/agent/getByCode/${value}`);
             const { name, agentcode } = response.data;
-
+            console.log("handleSelect   api Printinted", response.data)
             setAgentName(name); // Set name field
             setAgentId(agentcode); // Set agentID field
+            setId(id)
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
@@ -83,10 +101,34 @@ const DashboardScreen = ({ navigation }) => {
     };
 
 
+    // useEffect(() => {
+    //     const fetchData = async () => {
+    //         try {
+    //             console.log("date ==========", formatDate(date))
+    //             const dateFormated = formatDate(date)
 
+    //             const response = await dispatch(fetchMarketData({ agent_id: 1, market: 'Kalyan', date: dateFormated }));
+    //             setResponse(response.data);
+    //         } catch (error) {
+    //             console.error("Error fetching data:", error);
+    //         }
+    //     };
 
-    const handleSubmit = () => {
+    //     fetchData();
+    // }, []);
+
+    const handleSubmit = async () => {
         // navigation.navigate("AgentList");
+        try {
+            console.log("date ==========", formatDate(date))
+            const dateFormated = formatDate(date)
+            await dispatch(fetchMarketData({ agent_id: 1, market: 'Kalyan', date: dateFormated }));
+
+            console.log("market data 22------->", data)
+
+        } catch (error) {
+            console.error("Error fetching market data:", error);
+        }
 
         console.log({
             agentId,
@@ -99,7 +141,6 @@ const DashboardScreen = ({ navigation }) => {
             amount,
             anotherNumber,
             number,
-
         });
         const newEntry = {
             id: agentId,
@@ -109,9 +150,12 @@ const DashboardScreen = ({ navigation }) => {
         };
 
         setSubmittedData([...submittedData, newEntry]);
-        setAgentId(agentId + 1); // Increment ID for uniqueness
-        setNumber(""); // Clear inputs
-        setAmount("");
+        // setAgentId(agentId + 1); // Increment ID for uniqueness
+        // setNumber(""); // Clear inputs
+        // setAmount("");
+
+
+
     };
 
     const handleAddSaralPan = () => {
@@ -129,6 +173,25 @@ const DashboardScreen = ({ navigation }) => {
         navigation.navigate("StaffList")
     }
 
+    const groupedData = Object.values(data?.reversedGroupedEntries || {}).reduce((acc, group) => {
+        Object.values(group).forEach((item) => {
+            if (item.msg_no) {
+                if (!acc[item.msg_no]) {
+                    acc[item.msg_no] = [];
+                }
+                acc[item.msg_no].push(item);
+            }
+        });
+        return acc;
+    }, {});
+
+    // Convert grouped data into sections for SectionList
+    const sections = Object.keys(groupedData).map((msg_no) => ({
+        title: `OPEN MSG - ${msg_no}`,
+        data: groupedData[msg_no],
+    }));
+
+
     return (
         <ScrollView style={styles.container}>
             <Text style={styles.sectionTitle}>Agent Details</Text>
@@ -140,7 +203,7 @@ const DashboardScreen = ({ navigation }) => {
                         <Text style={styles.label}>AGENT ID</Text>
                         <DynamicDropdown
                             onSelect={handleSelect}
-                            placeholder="Search for items..."
+                            placeholder="Agent Code"
                         />
                     </View>
                     <View style={styles.halfWidthInput}>
@@ -157,11 +220,21 @@ const DashboardScreen = ({ navigation }) => {
                 <View style={styles.row}>
                     <View style={styles.halfWidthInput}>
                         <Text style={styles.label}>MARKET</Text>
-                        <TextInput
+                        {/* <TextInput
                             style={styles.input}
                             placeholder="Enter Market Name"
                             value={market}
                             onChangeText={setMarket}
+                        /> */}
+                        <Dropdown
+                            data={[
+                                { label: 'Kalyan', value: 'Kalyan' },
+                                { label: 'Mumbai', value: 'Mumbai' }
+                            ]}
+                            value={market} labelField="label"
+                            valueField="value"
+                            style={styles.dropdown}
+                            onChange={item => setMarket(item.value)}
                         />
                     </View>
                     <View style={styles.halfWidthInput}>
@@ -178,31 +251,12 @@ const DashboardScreen = ({ navigation }) => {
                                     setShowPicker(false);
                                     if (selectedDate) {
                                         setDate(selectedDate);
+                                        console.log("Selected Date:", formatDate(selectedDate));
+
                                     }
                                 }}
                             />
                         )}
-                    </View>
-                </View>
-
-                <View style={styles.row}>
-                    <View style={styles.halfWidthInput}>
-                        <Text style={styles.label}>OPEN MSG</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Enter Open Message"
-                            value={openMsg}
-                            onChangeText={setOpenMsg}
-                        />
-                    </View>
-                    <View style={styles.halfWidthInput}>
-                        <Text style={styles.label}>CLOSE MSG</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Enter Close Message"
-                            value={closeMsg}
-                            onChangeText={setCloseMsg}
-                        />
                     </View>
                 </View>
                 <Text style={styles.sectionTitle}>Select Category</Text>
@@ -246,17 +300,28 @@ const DashboardScreen = ({ navigation }) => {
                         <View style={styles.row}>
                             <View style={styles.inputGroup}>
                                 <Text style={styles.label}>ENTER NUMBER</Text>
-                                <TextInput style={styles.input} placeholder="Enter Number" value={number} onChangeText={setNumber} />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Enter Number"
+                                    value={number}
+                                    keyboardType="numeric"
+                                    onChangeText={setNumber} />
                             </View>
 
                             <View style={styles.inputGroup}>
                                 <Text style={styles.label}>ANOTHER NUMBER</Text>
-                                <TextInput style={styles.input} placeholder="Enter Another No" value={anotherNumber} onChangeText={setAnotherNumber} />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Enter Another No"
+                                    value={anotherNumber}
+                                    keyboardType="numeric"
+                                    onChangeText={setAnotherNumber} />
                             </View>
                         </View>
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>ENTER AMOUNT</Text>
-                            <TextInput style={styles.input} placeholder="Enter Amount" value={amount} onChangeText={setAmount} />
+                            <TextInput style={styles.input} placeholder="Enter Amount" keyboardType="numeric"
+                                value={amount} onChangeText={setAmount} />
                         </View>
                     </>
                 )}
@@ -267,17 +332,20 @@ const DashboardScreen = ({ navigation }) => {
 
                             <View style={styles.inputGroup}>
                                 <Text style={styles.label}>ENTER NUMBER</Text>
-                                <TextInput style={styles.input} placeholder="Enter Number" value={number} onChangeText={setNumber} />
+                                <TextInput style={styles.input} placeholder="Enter Number" keyboardType="numeric"
+                                    value={number} onChangeText={setNumber} />
                             </View>
 
                             <View style={styles.inputGroup}>
                                 <Text style={styles.label}>ENTER AMOUNT</Text>
-                                <TextInput style={styles.input} placeholder="Enter Amount" value={amount} onChangeText={setAmount} />
+                                <TextInput style={styles.input} placeholder="Enter Amount" keyboardType="numeric"
+                                    value={amount} onChangeText={setAmount} />
                             </View>
                         </View>
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>ENTER ANOTHER NUMBER</Text>
-                            <TextInput style={styles.input} placeholder="Enter Another No" value={anotherNumber} onChangeText={setAnotherNumber} />
+                            <TextInput style={styles.input} placeholder="Enter Another No" keyboardType="numeric"
+                                value={anotherNumber} onChangeText={setAnotherNumber} />
                         </View>
                     </>
                 )}
@@ -287,12 +355,14 @@ const DashboardScreen = ({ navigation }) => {
                         <View style={styles.row}>
                             <View style={styles.inputGroup}>
                                 <Text style={styles.label}>ENTER NUMBER</Text>
-                                <TextInput style={styles.input} placeholder="Enter Number" value={number} onChangeText={setNumber} />
+                                <TextInput style={styles.input} keyboardType="numeric"
+                                    placeholder="Enter Number" value={number} onChangeText={setNumber} />
                             </View>
 
                             <View style={styles.inputGroup}>
                                 <Text style={styles.label}>ENTER AMOUNT</Text>
-                                <TextInput style={styles.input} placeholder="Enter Amount" value={amount} onChangeText={setAmount} />
+                                <TextInput style={styles.input} keyboardType="numeric"
+                                    placeholder="Enter Amount" value={amount} onChangeText={setAmount} />
                             </View>
                         </View>
 
@@ -457,22 +527,36 @@ const DashboardScreen = ({ navigation }) => {
 
             </View>
 
-            <FlatList
-                data={submittedData}
-                keyExtractor={(item, index) => index.toString()}
-                showsVerticalScrollIndicator={false}
-                numColumns={2}
-                columnWrapperStyle={styles.flatListContainer}
-                renderItem={({ item }) => (
-                    <View style={styles.card}>
-                        <Text style={styles.cardTitle}>Submitted Data</Text>
-                        <Text style={styles.cardText}><Text style={styles.bold}>ID:</Text> {item.id}</Text>
-                        <Text style={styles.cardText}><Text style={styles.bold}>Category:</Text> {item.category}</Text>
-                        <Text style={styles.cardText}><Text style={styles.bold}>Enter Number:</Text> {item.number}</Text>
-                        <Text style={styles.cardText}><Text style={styles.bold}>Enter Amount:</Text> {item.amount}</Text>
-                    </View>
-                )}
-            />
+            {data?.reversedGroupedEntries ? (
+                <SectionList
+                    sections={sections}
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={({ item }) => (
+                        <View style={styles.card}>
+                            <Text style={styles.cardText}><Text style={styles.bold}>Type:</Text> {item.type}</Text>
+                            <Text style={styles.cardText}>
+                                <Text style={styles.bold}>Number:</Text>
+                                {Array.isArray(item?.number)
+                                    ? item.number.join(", ")
+                                    : (typeof item?.number === "string" && item.number.startsWith("[")
+                                        ? JSON.parse(item.number).join(", ")
+                                        : item?.number || "N/A"
+                                    )}
+                            </Text>
+
+                            <Text style={styles.cardText}><Text style={styles.bold}>Amount:</Text> {item.amount}</Text>
+                        </View>
+                    )}
+                    renderSectionHeader={({ section }) => (
+                        <View style={styles.sectionHeader}>
+                            <Text style={styles.sectionHeaderText}>{section.title}</Text>
+                            <Text style={styles.sectionHeaderTotal}>TOTAL = {section.data.reduce((sum, item) => sum + item.amount, 0)}</Text>
+                        </View>
+                    )}
+                />
+            ) : (
+                <Text>Loading...</Text>
+            )}
 
         </ScrollView >
     );
@@ -685,7 +769,49 @@ const styles = StyleSheet.create({
     flatListContainer: {
 
         justifyContent: 'space-evenly',
-    }
+    },
+    dropdown: {
+        borderWidth: 1,
+        borderColor: globalColors.borderColor,
+        backgroundColor: globalColors.inputbgColor,
+        padding: 11,
+        borderRadius: 8,
+        marginBottom: 12,
+    },
+    sectionHeader: {
+        backgroundColor: "#e0e0e0",
+        padding: 10,
+        marginBottom: 10,
+        borderRadius: 5,
+    },
+    sectionHeaderText: {
+        fontSize: 16,
+        fontWeight: "bold",
+        color: "#333",
+    },
+    sectionHeaderTotal: {
+        fontSize: 14,
+        color: "#666",
+        marginTop: 5,
+    },
+    card: {
+        backgroundColor: "#fff",
+        padding: 15,
+        borderRadius: 5,
+        marginBottom: 10,
+        shadowColor: "#000",
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 2 },
+        elevation: 3,
+    },
+    cardText: {
+        fontSize: 14,
+        color: "#444",
+        marginBottom: 5,
+    },
+    bold: {
+        fontWeight: "bold",
+    },
 });
 
 export default DashboardScreen;

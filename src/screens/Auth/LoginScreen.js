@@ -16,8 +16,8 @@ const LoginScreen = ({ navigation }) => {
     const dispatch = useDispatch();
     const authState = useSelector((state) => state.auth);
 
-    const [username, setUsername] = useState('test@example.com');
-    const [password, setPassword] = useState('123456');
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
     const [code, setCode] = useState('');
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
@@ -35,8 +35,10 @@ const LoginScreen = ({ navigation }) => {
     useEffect(() => {
         if (authState.isAuthenticated) {
             navigation.replace('MainApp'); // Navigate after login success
+        } else if (authState.error) {
+            Alert.alert('Login Failed', authState.error);
         }
-    }, [authState.isAuthenticated, navigation]);
+    }, [authState.isAuthenticated, authState.error, navigation]);
 
     return (
         <View style={styles.container}>

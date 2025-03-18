@@ -1,1 +1,2 @@
-export const baseURL = 'https://staging.rdnidhi.com';
+export const API_BASE_URL = 'https://staging.rdnidhi.com/api';
+

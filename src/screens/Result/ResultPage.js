@@ -174,12 +174,7 @@ export default function ResultPage() {
                             style={styles.dropdown}
                         />
 
-                        <Button
-                            mode="contained"
-                            style={styles.label}
-                            onPress={addEntry}>
-                            Submit
-                        </Button>
+                       
                         <View style={styles.buttonContainer}>
 
                             <Button mode="outlined"

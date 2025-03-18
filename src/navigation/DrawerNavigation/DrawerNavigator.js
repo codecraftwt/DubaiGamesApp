@@ -21,7 +21,7 @@ import { globalColors } from "../../Theme/globalColors";
 
 const Drawer = createDrawerNavigator();
 
-// Custom Header Left Button
+
 const CustomHeaderLeft = () => {
     const navigation = useNavigation();
 

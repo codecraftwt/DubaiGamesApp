@@ -3,24 +3,15 @@ import { View, Text, Image, TouchableOpacity, StyleSheet, Alert } from 'react-na
 import { globalColors } from '../../Theme/globalColors';
 import Header from '../../components/Header/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { logout } from '../../Redux/Slices/authSlice';
+import { logoutUser } from '../../Redux/Slices/authSlice';
 import { useDispatch } from 'react-redux';
 
 const SettingsScreen = ({ navigation }) => {
     const dispatch = useDispatch();
 
-    const handleLogout = () => {
-        Alert.alert("Logout", "Are you sure you want to logout?", [
-            { text: "Cancel", style: "cancel" },
-            {
-                text: "Logout",
-                onPress: async () => {
-                    dispatch(logout())
-                    navigation.replace("Login");
-
-                }
-            },
-        ]);
+    const handleLogout = async () => {
+        await dispatch(logoutUser());
+        navigation.replace('Login');
     };
 
     return (

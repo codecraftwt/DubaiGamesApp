@@ -7,6 +7,7 @@ export const fetchMarketData = createAsyncThunk(
         const response = await axios.get(
             `https://staging.rdnidhi.com/entery-fetch-newcards?agent_id=${agent_id}&market=${market}&date=${date}`
         );
+        console.log("Reponse comming from slice")
         return response.data; // Assuming response is JSON
     }
 );

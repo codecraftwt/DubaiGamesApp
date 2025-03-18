@@ -33,27 +33,6 @@ const AddAgentModal = ({ modalVisible, setModalVisible, onSave, editAgent }) => 
         }
     };
 
-    // useEffect(() => {
-    //     if (editAgent) {
-    //         setAgent(editAgent);
-    //     } else {
-    //         setAgent({
-    //             name: '',
-    //             agentCode: '',
-    //             staff: '',
-    //             rent: '',
-    //             fixedExpenses: '',
-    //             agentType: '',
-    //             commission: '',
-    //             fields: {
-    //                 open: '', close: '', jodi: '', openClosePan: '', sp: '',
-    //                 dp: '', tp: '', chokadaCycle: '', cut: '',
-    //                 runningPan: '', saralPan: '', ultaPan: '', farak: '', beerich: ''
-    //             }
-    //         });
-    //     }
-    // }, [editAgent]);
-
 
     useEffect(() => {
         if (editAgent) {

@@ -1,5 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { fakeLoginApi } from '../../api/authApi';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_BASE_URL } from '../../utils/Api';
 
 
 const initialState = {
@@ -41,11 +44,39 @@ export const { loginStart, loginSuccess, loginFailure, logout } = authSlice.acti
 export const loginUser = (username, password) => async (dispatch) => {
     dispatch(loginStart());
     try {
-        const response = await fakeLoginApi(username, password);
-        dispatch(loginSuccess(response));
+        const response = await axios.post(`${API_BASE_URL}/login`, {
+            email: username,
+            password,
+            code: "",
+        });
+
+        const { user, token } = response.data;
+
+        await AsyncStorage.setItem('authToken', token);
+
+        dispatch(loginSuccess({ user, token }));
     } catch (error) {
-        dispatch(loginFailure(error.message));
+        dispatch(loginFailure(error.response ? error.response.data.message : error.message));
     }
 };
+
+export const logoutUser = () => async (dispatch, getState) => {
+    try {
+        const token = getState().auth.token || (await AsyncStorage.getItem('authToken'));
+
+        if (!token) throw new Error('No authentication token found');
+
+        const response = await axios.post(`${API_BASE_URL}/logout`, {}, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        console.log("Logged out successfully")
+        await AsyncStorage.removeItem('authToken');
+
+        dispatch(logout());
+    } catch (error) {
+        console.log('Logout error:', error.message);
+    }
+};
+
 
 export default authSlice.reducer;
