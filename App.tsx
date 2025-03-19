@@ -21,6 +21,8 @@ import AppNavigator from './src/navigation/AppNavigation/AppNavigator';
 import { Provider } from 'react-redux';
 import store, { persistor } from './src/Redux/store/store';
 import { PersistGate } from 'redux-persist/integration/react';
+import Toast, { BaseToast } from 'react-native-toast-message';
+import { globalColors } from './src/Theme/globalColors';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -70,11 +72,28 @@ function App(): React.JSX.Element {
    */
   const safePadding = '5%';
 
+
+  const customToastConfig = {
+    success: (props: any) => (
+      <BaseToast
+        {...props}
+        style={{ borderLeftWidth: 2, borderRightWidth: 2, borderColor: globalColors.green, width: '90%' }}
+      />
+    ),
+    error: (props: any) => (
+      <BaseToast
+        {...props}
+        style={{ borderLeftWidth: 2, borderRightWidth: 2, borderColor: globalColors.red, width: '90%' }}
+      />
+    ),
+  };
+
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <AppNavigator />
       </PersistGate>
+      <Toast config={customToastConfig} />
     </Provider>
   );
 }

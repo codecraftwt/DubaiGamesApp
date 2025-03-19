@@ -101,28 +101,28 @@ const DashboardScreen = ({ navigation }) => {
     };
 
 
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         try {
-    //             console.log("date ==========", formatDate(date))
-    //             const dateFormated = formatDate(date)
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                console.log("date ==========", formatDate(date))
+                const dateFormated = formatDate(date)
 
-    //             const response = await dispatch(fetchMarketData({ agent_id: 1, market: 'Kalyan', date: dateFormated }));
-    //             setResponse(response.data);
-    //         } catch (error) {
-    //             console.error("Error fetching data:", error);
-    //         }
-    //     };
+                const response = await dispatch(fetchMarketData({ agent_id: 1, market: market, date: dateFormated }));
+                setResponse(response.data);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
 
-    //     fetchData();
-    // }, []);
+        fetchData();
+    }, [date, agentId, market]);
 
     const handleSubmit = async () => {
         // navigation.navigate("AgentList");
         try {
             console.log("date ==========", formatDate(date))
             const dateFormated = formatDate(date)
-            await dispatch(fetchMarketData({ agent_id: 1, market: 'Kalyan', date: dateFormated }));
+            await dispatch(fetchMarketData({ agent_id: 1, market: market, date: dateFormated }));
 
             console.log("market data 22------->", data)
 
@@ -555,7 +555,7 @@ const DashboardScreen = ({ navigation }) => {
                     )}
                 />
             ) : (
-                <Text>Loading...</Text>
+                <Text></Text>
             )}
 
         </ScrollView >

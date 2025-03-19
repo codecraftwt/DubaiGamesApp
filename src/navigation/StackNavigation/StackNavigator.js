@@ -20,6 +20,7 @@ import PaymentReport from '../../screens/PaymentMethods/PaymentReport';
 import OldPaymentReport from '../../screens/PaymentMethods/OldPaymentReport';
 import BusinessReport from '../../screens/PaymentMethods/BusinessReport';
 import PaymentLedger from '../../screens/PaymentMethods/PaymentLedger';
+import DashboardScreen from '../../screens/DashboardScreen/DashboardScreen';
 
 
 
@@ -31,13 +32,14 @@ const StackNavigator = () => (
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="AgentList" component={AgentList} />
         <Stack.Screen name="StaffList" component={StaffListScreen} />
-        <Stack.Screen name="DailyResult" component={DailyResult} />
+        {/* <Stack.Screen name="Daily Result" component={DailyResult} /> */}
         <Stack.Screen name="ResultPage" component={ResultPage} />
         <Stack.Screen name="Advance" component={Advance} />
         <Stack.Screen name="EntryDelete" component={EntryDelete} />
         <Stack.Screen name="AddPayment" component={AddPayment} />
         <Stack.Screen name="StaffAttendance" component={StaffAttendance} />
         <Stack.Screen name="MainApp" component={TabNavigator} />
+        <Stack.Screen name='Dashboard' component={DashboardScreen} />
 
         <Stack.Screen name="AddButtonReport" component={AddButtonReport} />
         <Stack.Screen name="AddPaymentReport" component={AddPaymentReport} />

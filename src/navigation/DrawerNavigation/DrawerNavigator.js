@@ -1,15 +1,225 @@
+// import React, { useEffect, useState } from "react";
+// import { createDrawerNavigator, DrawerContentScrollView, DrawerItem, DrawerItemList } from "@react-navigation/drawer";
+// import { View, TouchableOpacity, Text, StyleSheet, Image } from "react-native";
+// import Feather from "react-native-vector-icons/Feather";
+// import Icon from "react-native-vector-icons/FontAwesome";
+// import { NavigationContainer, useNavigation } from "@react-navigation/native";
+// import DashboardScreen from "../../screens/DashboardScreen/DashboardScreen";
+// import SettingsScreen from "../../screens/Setting/Settings";
+// import AgentList from "../../screens/Agent/AgentList";
+// import StaffListScreen from "../../screens/StaffList/StaffListScreen";
+// import ResultPage from "../../screens/Result/ResultPage";
+// import DailyResult from "../../screens/Result/DailyResult";
+// import Advance from "../../screens/Advance/Advance";
+// import EntryDelete from "../../screens/EntryDelete/EntryDelete";
+// import AddPayment from "../../screens/AddPayment/AddPayment";
+// import { DubaiGames, DubaiGameslogo } from "../../Theme/globalImage";
+// import PaymentReport from "../../screens/PaymentMethods/PaymentReport";
+// import OldPaymentReport from "../../screens/PaymentMethods/OldPaymentReport";
+// import BusinessReport from "../../screens/PaymentMethods/BusinessReport";
+// import { globalColors } from "../../Theme/globalColors";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
+
+// const Drawer = createDrawerNavigator();
+
+// const ALL_MENU_ITEMS = [
+//     { name: "Dashboard", component: DashboardScreen, icon: "home" },
+//     { name: "Daily Result", component: DailyResult, icon: "clipboard" },
+//     { name: "Agent List", component: AgentList, icon: "users" },
+//     { name: "Client List", component: StaffListScreen, icon: "user" },
+//     { name: "Reports", component: PaymentReport, icon: "file-text" },
+//     { name: "My Account", component: SettingsScreen, icon: "user" },
+// ];
+
+
+// const MENU_ITEMS = {
+//     admin: ["Dashboard", "Daily Result", "Agent List", "Client List", "Reports", "My Account"],
+//     staff: ["Dashboard", "My Account", "Client List", "Daily Result", "Reports"],
+//     editor: ["Dashboard", "My Account", "Daily Result"],
+// };
+
+// const CustomDrawerContent = (props) => {
+//     const [role, setRole] = useState(null);
+//     const navigation = useNavigation();
+
+//     useEffect(() => {
+//         const fetchUserRole = async () => {
+//             const userData = await AsyncStorage.getItem('userData');
+//             if (userData) {
+//                 const parsedData = JSON.parse(userData);
+//                 setRole(parsedData.role);
+//             }
+//         };
+//         fetchUserRole();
+//     }, []);
+
+//     return (
+//         <DrawerContentScrollView {...props}>
+//             <View style={styles.drawerHeader}>
+//                 <Image source={DubaiGameslogo} style={styles.drawerLogo} />
+//                 <Text style={styles.drawerTitle}>Dubai Game</Text>
+//             </View>
+//             {ALL_MENU_ITEMS.map((item, index) => {
+//                 if (role && MENU_ITEMS[role]?.includes(item.name)) {
+//                     return (
+//                         <DrawerItem
+//                             key={index}
+//                             label={item.name}
+//                             icon={({ color }) => <Feather name={item.icon} size={22} color={color} />}
+//                             onPress={() => props.navigation.navigate(item.name)}
+//                         />
+//                     );
+//                 }
+//                 return null;
+//             })}
+//         </DrawerContentScrollView>
+//     );
+// };
+
+
+// const DrawerNavigator = () => {
+
+//     const CustomHeaderLeft = () => {
+//         const navigation = useNavigation();
+
+//         return (
+//             <TouchableOpacity onPress={() => navigation.openDrawer()} style={styles.menuButton}>
+//                 <Icon name="bars" size={24} color="white" />
+//             </TouchableOpacity>
+//         );
+//     };
+
+//     const CustomHeaderTitle = () => {
+//         return (
+//             <View style={styles.logoContainer}>
+//                 {/* <Icon name="gamepad" size={24} color="white" /> */}
+//                 <Text style={styles.logoText}>Dubai Game</Text>
+
+//                 <Image source={DubaiGameslogo} style={{ height: 28, width: 40 }}></Image>
+//             </View>
+//         );
+//     };
+
+//     return (
+//         <>
+//             <Drawer.Navigator drawerContent={(props) => <CustomDrawerContent {...props} />}
+//                 screenOptions={{
+//                     headerShown: true,
+//                     headerStyle: styles.header,
+//                     headerLeft: () => <CustomHeaderLeft />,
+//                     headerTitle: () => <CustomHeaderTitle />,
+//                     headerTitleAlign: "center",
+//                     drawerInactiveTintColor: "black", // Ensures inactive labels are black
+//                     drawerActiveTintColor: "red",
+//                     drawerLabelStyle: ({ focused }) => ({
+//                         fontFamily: 'Poppins-Medium',
+//                         fontSize: 16,
+//                         color: focused ? "red" : "black",
+//                     }),
+//                 }}>
+//                 {
+//                     ALL_MENU_ITEMS.map((item, index) => (
+//                         <Drawer.Screen key={index} name={item.name} component={item.component} />
+//                     ))
+//                 }
+//             </Drawer.Navigator>
+//         </>
+//     );
+// };
+
+
+
+// export default DrawerNavigator;
+
+// // 🔹 Styles
+// const styles = StyleSheet.create({
+//     header: {
+//         backgroundColor: "#1e293b",
+//     },
+//     menuButton: {
+//         paddingLeft: 16,
+//     },
+//     logoContainer: {
+//         flexDirection: "row",
+//         alignItems: "flex-end",
+//     },
+//     logoText: {
+//         color: "white",
+//         fontSize: 18,
+//         fontWeight: "bold",
+//         marginLeft: 8,
+//     },
+//     section: {
+//         marginTop: 20,
+//         paddingLeft: 15,
+//     },
+//     nestedItem: {
+//         paddingLeft: 35, // Indent for nested menu
+//     },
+//     dropdownHeader: {
+//         flexDirection: "row",
+//         alignItems: "center",
+//         paddingVertical: 12,
+//         paddingHorizontal: 16,
+//         borderRadius: 5,
+//     },
+//     dropdownText: {
+//         flex: 1,
+//         fontSize: 15,
+//         marginLeft: 10,
+//         fontFamily: 'Poppins-Medium',
+//         color: globalColors.inputLabel
+//     },
+//     nestedItem: {
+//         paddingLeft: 30,
+//     },
+
+//     drawerHeader: {
+//         alignItems: "center",
+//         justifyContent: 'center',
+//         paddingVertical: 10,
+//         flexDirection: 'row',
+//         borderBottomWidth: 1,
+//         borderBottomColor: globalColors.borderColor,
+//         backgroundColor: globalColors.LightWhite,
+//         marginBottom: 10,
+//     },
+//     drawerLogo: {
+//         height: 50,
+//         width: 80,
+//         resizeMode: "contain",
+//     },
+//     drawerTitle: {
+//         fontSize: 18,
+//         fontWeight: "bold",
+//         marginTop: 5,
+//         color: "#333",
+//     },
+
+// });
+
+
+
+
+
 import React, { useEffect, useState } from "react";
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItem, DrawerItemList } from "@react-navigation/drawer";
 import { View, TouchableOpacity, Text, StyleSheet, Image } from "react-native";
 import Feather from "react-native-vector-icons/Feather";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { useNavigation } from "@react-navigation/native";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import DashboardScreen from "../../screens/DashboardScreen/DashboardScreen";
 import SettingsScreen from "../../screens/Setting/Settings";
 import AgentList from "../../screens/Agent/AgentList";
 import StaffListScreen from "../../screens/StaffList/StaffListScreen";
 import ResultPage from "../../screens/Result/ResultPage";
 import DailyResult from "../../screens/Result/DailyResult";
+
+import WeeklyReport from "../../screens/ReportsOfWeek/WeeklyReport";
+import AddButtonReport from '../../screens/ReportsOfWeek/AddButtonReport';
+import AddPaymentReport from '../../screens/ReportsOfWeek/AddPaymentReport';
+import VerifyReport from '../../screens/ReportsOfWeek/VerifyReport';
+
 import Advance from "../../screens/Advance/Advance";
 import EntryDelete from "../../screens/EntryDelete/EntryDelete";
 import AddPayment from "../../screens/AddPayment/AddPayment";
@@ -18,219 +228,182 @@ import PaymentReport from "../../screens/PaymentMethods/PaymentReport";
 import OldPaymentReport from "../../screens/PaymentMethods/OldPaymentReport";
 import BusinessReport from "../../screens/PaymentMethods/BusinessReport";
 import { globalColors } from "../../Theme/globalColors";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Drawer = createDrawerNavigator();
 
+const ALL_MENU_ITEMS = [
+    { name: "Dashboard", component: DashboardScreen, icon: "home" },
+    { name: "Daily Result", component: DailyResult, icon: "clipboard" },
+    { name: "Agent List", component: AgentList, icon: "users" },
+    { name: "Client List", component: StaffListScreen, icon: "user" },
+    { name: "My Account", component: SettingsScreen, icon: "user" },
+    { name: "Reports", component: null, icon: "file-text", isDropdown: true },  // Dropdown Item
+];
 
-const CustomHeaderLeft = () => {
-    const navigation = useNavigation();
-
-    return (
-        <TouchableOpacity onPress={() => navigation.openDrawer()} style={styles.menuButton}>
-            <Icon name="bars" size={24} color="white" />
-        </TouchableOpacity>
-    );
+const MENU_ITEMS = {
+    admin: ["Dashboard", "Daily Result", "Agent List", "Client List", "Reports", "My Account"],
+    staff: ["Dashboard", "My Account", "Client List", "Daily Result", "Reports"],
+    editor: ["Dashboard", "My Account", "Daily Result"],
 };
 
-
-const CustomHeaderTitle = () => {
-    return (
-        <View style={styles.logoContainer}>
-            {/* <Icon name="gamepad" size={24} color="white" /> */}
-            <Image source={DubaiGameslogo} style={{ height: 28, width: 40 }}></Image>
-            <Text style={styles.logoText}>Dubai Game</Text>
-        </View>
-    );
-};
-
-// Custom Drawer Content for Nested Menus
 const CustomDrawerContent = (props) => {
+    const [role, setRole] = useState(null);
+    const [dropdownOpen, setDropdownOpen] = useState(false);  // State for dropdown toggle
     const navigation = useNavigation();
-
-    const [isAttendanceOpen, setAttendanceOpen] = useState(false);
-    const [isReportsOpen, setReportsOpen] = useState(false);
-    const [PaymentMethods, setPaymentMethods] = useState(false);
-
 
     useEffect(() => {
-        const unsubscribe = navigation.addListener('blur', () => {
-            setAttendanceOpen(false);
-            setReportsOpen(false);
-            setPaymentMethods(false);
-        });
+        const fetchUserRole = async () => {
+            const userData = await AsyncStorage.getItem('userData');
+            if (userData) {
+                const parsedData = JSON.parse(userData);
+                setRole(parsedData.role);
+            }
+        };
+        fetchUserRole();
+    }, []);
 
-        return unsubscribe;
-    }, [navigation]);
+    const handleToggleDropdown = () => {
+        setDropdownOpen(!dropdownOpen);  // Toggle dropdown state
+    };
 
     return (
         <DrawerContentScrollView {...props}>
-            <DrawerItemList {...props} />
+            <View style={styles.drawerHeader}>
+                <Image source={DubaiGameslogo} style={styles.drawerLogo} />
+                <Text style={styles.drawerTitle}>Dubai Game</Text>
+            </View>
 
-            <TouchableOpacity style={styles.dropdownHeader} onPress={() => setAttendanceOpen(!isAttendanceOpen)}>
-                <Feather name="folder" size={24} color={globalColors.inputLabel} />
-                <Text style={styles.dropdownText}>Attendance</Text>
-                <Feather name={isAttendanceOpen ? "chevron-up" : "chevron-down"} size={24} color="black" />
-            </TouchableOpacity>
+            {/* Render menu items */}
+            {ALL_MENU_ITEMS.map((item, index) => {
+                if (role && MENU_ITEMS[role]?.includes(item.name)) {
+                    // If the item is a dropdown
+                    if (item.isDropdown) {
+                        return (
+                            <View key={index}>
+                                <DrawerItem
+                                    label="Reports"
+                                    icon={({ color }) => <Feather name={item.icon} size={22} color={color} />}
+                                    onPress={handleToggleDropdown}
+                                />
+                                {dropdownOpen && (
+                                    <View style={styles.dropdownItems}>
+                                        <DrawerItem
+                                            label="Weekly Report"
+                                            icon={({ color }) => <Feather name="file-text" size={22} color={color} />}
+                                            onPress={() => props.navigation.navigate('WeeklyReport')}
+                                        />
+                                        <DrawerItem
+                                            label="Verify Report"
+                                            icon={({ color }) => <Feather name="file-text" size={22} color={color} />}
+                                            onPress={() => props.navigation.navigate('VerifyReport')}
+                                        />
+                                        <DrawerItem
+                                            label="Add Payment report"
+                                            icon={({ color }) => <Feather name="file-text" size={22} color={color} />}
+                                            onPress={() => props.navigation.navigate('AddPaymentReport')}
+                                        />
 
-            {isAttendanceOpen && (
-                <View style={styles.nestedItem}>
-                    <DrawerItem
-                        label="Staff Attendance"
-                        icon={({ color }) => <Feather name="file-text" size={22} color={color}
-                        />}
-                        onPress={() => navigation.navigate("StaffAttendance")}
-                    />
-                </View>
-            )}
+                                        <DrawerItem
+                                            label="Add Button Report"
+                                            icon={({ color }) => <Feather name="file-text" size={22} color={color} />}
+                                            onPress={() => props.navigation.navigate('AddButtonReport')}
+                                        />
+                                    </View>
+                                )}
+                            </View>
+                        );
+                    }
 
-
-
-            <TouchableOpacity style={styles.dropdownHeader} onPress={() => setReportsOpen(!isReportsOpen)}>
-                <Feather name="folder" size={24} color={globalColors.inputLabel} />
-                <Text style={styles.dropdownText}>Reports of Week</Text>
-                <Feather name={isReportsOpen ? "chevron-up" : "chevron-down"} size={24} color="black" />
-            </TouchableOpacity>
-
-            {isReportsOpen && (
-                <View style={styles.nestedItem}>
-                    <DrawerItem label="Weekly Report" onPress={() => navigation.navigate("WeeklyReport")} />
-                    <DrawerItem label="Verify Report" onPress={() => navigation.navigate("VerifyReport")} />
-                    <DrawerItem label="Add Payment Report" onPress={() => navigation.navigate("AddPaymentReport")} />
-                    <DrawerItem label="Add Button Report" onPress={() => navigation.navigate("AddButtonReport")} />
-                </View>
-            )}
-
-
-            <TouchableOpacity style={styles.dropdownHeader} onPress={() => setPaymentMethods(!PaymentMethods)}>
-                <Feather name="folder" size={24} color={globalColors.inputLabel} />
-                <Text style={styles.dropdownText}>Payment Methods</Text>
-                <Feather name={PaymentMethods ? "chevron-up" : "chevron-down"} size={24} color="black" />
-            </TouchableOpacity>
-
-            {
-                PaymentMethods &&
-                <View style={styles.nestedItem}>
-                    <DrawerItem
-                        label="Payment Report"
-                        icon={({ color }) => <Feather name="database" size={22} color={color}
-                        />}
-                        onPress={() => navigation.navigate("PaymentReport")}
-                    />
-                    <DrawerItem
-                        label="Old Payment Report"
-                        icon={({ color }) => <Feather name="film" size={22} color={color}
-                        />}
-                        onPress={() => navigation.navigate("OldPaymentReport")}
-                    />
-                    <DrawerItem
-                        label="Business Report"
-                        icon={({ color }) => <Feather name="file-text" size={22} color={color}
-                        />}
-                        onPress={() => navigation.navigate("BusinessReport")}
-                    />
-
-                    <DrawerItem
-                        label="Payment Ledger"
-                        icon={({ color }) => <Feather name="file-text" size={22} color={color}
-                        />}
-                        onPress={() => navigation.navigate("PaymentLedger")}
-                    />
-
-
-                </View>
-            }
+                    // Render regular item
+                    return (
+                        <DrawerItem
+                            key={index}
+                            label={item.name}
+                            icon={({ color }) => <Feather name={item.icon} size={22} color={color} />}
+                            onPress={() => props.navigation.navigate(item.name)}
+                        />
+                    );
+                }
+                return null;
+            })}
         </DrawerContentScrollView>
     );
 };
 
-const DrawerNavigator = () => (
-    <Drawer.Navigator
-        drawerContent={(props) => <CustomDrawerContent {...props} />}
-        screenOptions={{
-            headerShown: true,
-            headerStyle: styles.header,
-            headerLeft: () => <CustomHeaderLeft />,
-            headerTitle: () => <CustomHeaderTitle />,
-            headerTitleAlign: "center",
-            drawerLabelStyle: {
-                fontFamily: 'Poppins-Medium',
-                fontSize: 16
-            }
-        }}
-    >
-        <Drawer.Screen
-            name="Dashboard"
-            component={DashboardScreen}
-            options={{
-                drawerIcon: ({ color }) => <Feather name="home" size={24} color={color} />,
+const DrawerNavigator = () => {
+    const CustomHeaderLeft = () => {
+        const navigation = useNavigation();
 
-            }}
-        />
-        <Drawer.Screen
-            name="ResultPage"
-            component={ResultPage}
-            options={{
-                drawerIcon: ({ color }) => <Feather name="clipboard" size={24} color={color} />,
-            }}
-        />
-        <Drawer.Screen
-            name="DailyResult"
-            component={DailyResult}
-            options={{
-                drawerIcon: ({ color }) => <Feather name="list" size={24} color={color} />,
-            }}
-        />
-        <Drawer.Screen
-            name="StaffList"
-            component={StaffListScreen}
-            options={{
-                drawerIcon: ({ color }) => <Feather name="users" size={24} color={color} />,
-            }}
-        />
-        <Drawer.Screen
-            name="AgentList"
-            component={AgentList}
-            options={{
-                drawerIcon: ({ color }) => <Feather name="users" size={24} color={color} />,
-            }}
-        />
-        <Drawer.Screen
-            name="Advance"
-            component={Advance}
-            options={{
-                drawerIcon: ({ color }) => <Feather name="shield" size={24} color={color} />,
-            }}
-        />
-        <Drawer.Screen
-            name="EntryDelete"
-            component={EntryDelete}
-            options={{
-                drawerIcon: ({ color }) => <Feather name="delete" size={24} color={color} />,
-            }}
-        />
-        <Drawer.Screen
-            name="AddPayment"
-            component={AddPayment}
-            options={{
-                drawerIcon: ({ color }) => <Feather name="credit-card" size={24} color={color} />,
-            }}
-        />
-        <Drawer.Screen
-            name="Logout"
-            component={SettingsScreen}
-            options={{
-                drawerIcon: ({ color }) => <Feather name="settings" size={24} color={color} />,
-            }}
-        />
-    </Drawer.Navigator>
-);
+        return (
+            <TouchableOpacity onPress={() => navigation.openDrawer()} style={styles.menuButton}>
+                <Icon name="bars" size={24} color="white" />
+            </TouchableOpacity>
+        );
+    };
 
-export default DrawerNavigator;
+    const CustomHeaderTitle = () => {
+        return (
+            <View style={styles.logoContainer}>
+                <Image source={DubaiGameslogo} style={{ height: 28, width: 40 }}></Image>
+                <Text style={styles.logoText}>Dubai Game </Text>
+            </View>
+        );
+    };
+    return (
+        <Drawer.Navigator drawerContent={(props) => <CustomDrawerContent {...props} />}
+            screenOptions={{
+                headerShown: true,
+                headerStyle: styles.header,
+                headerLeft: () => <CustomHeaderLeft />,
+                headerTitle: () => <CustomHeaderTitle />,
+                headerTitleAlign: "center",
+                drawerInactiveTintColor: "black",
+                drawerActiveTintColor: "red",
+                drawerLabelStyle: ({ focused }) => ({
+                    fontFamily: 'Poppins-Medium',
+                    fontSize: 16,
+                    color: focused ? "red" : "black",
+                }),
+            }}>
+            <Drawer.Screen name="Dashboard" component={DashboardScreen} />
+            <Drawer.Screen name="Daily Result" component={DailyResult} />
+            <Drawer.Screen name="Agent List" component={AgentList} />
+            <Drawer.Screen name="Client List" component={StaffListScreen} />
+            <Drawer.Screen name="My Account" component={SettingsScreen} />
 
-// 🔹 Styles
+
+            <Drawer.Screen name="WeeklyReport" component={WeeklyReport} />
+            <Drawer.Screen name="AddButtonReport" component={AddButtonReport} />
+            <Drawer.Screen name="AddPaymentReport" component={AddPaymentReport} />
+            <Drawer.Screen name="VerifyReport" component={VerifyReport} />
+        </Drawer.Navigator>
+    );
+};
+
 const styles = StyleSheet.create({
-    header: {
-        backgroundColor: "#1e293b",
+    drawerHeader: {
+        alignItems: "center",
+        justifyContent: 'center',
+        paddingVertical: 10,
+        flexDirection: 'row',
+        borderBottomWidth: 1,
+        borderBottomColor: globalColors.borderColor,
+        backgroundColor: globalColors.LightWhite,
+        marginBottom: 10,
+    },
+    drawerLogo: {
+        height: 40,
+        width: 60,
+        marginBottom: 10,
+    },
+    drawerTitle: {
+        fontSize: 20,
+        fontWeight: "bold",
+        color: "#333",
+    },
+    dropdownItems: {
+        marginLeft: 20, // Indent dropdown items
     },
     menuButton: {
         paddingLeft: 16,
@@ -238,6 +411,7 @@ const styles = StyleSheet.create({
     logoContainer: {
         flexDirection: "row",
         alignItems: "flex-end",
+        alignSelf: 'center'
     },
     logoText: {
         color: "white",
@@ -245,29 +419,9 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         marginLeft: 8,
     },
-    section: {
-        marginTop: 20,
-        paddingLeft: 15,
+    header: {
+        backgroundColor: "#1e293b",
     },
-    nestedItem: {
-        paddingLeft: 35, // Indent for nested menu
-    },
-    dropdownHeader: {
-        flexDirection: "row",
-        alignItems: "center",
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderRadius: 5,
-    },
-    dropdownText: {
-        flex: 1,
-        fontSize: 15,
-        marginLeft: 10,
-        fontFamily: 'Poppins-Medium',
-        color: globalColors.inputLabel
-    },
-    nestedItem: {
-        paddingLeft: 30,
-    },
-
 });
+
+export default DrawerNavigator;

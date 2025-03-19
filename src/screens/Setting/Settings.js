@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { use } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { globalColors } from '../../Theme/globalColors';
 import Header from '../../components/Header/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logoutUser } from '../../Redux/Slices/authSlice';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 const SettingsScreen = ({ navigation }) => {
     const dispatch = useDispatch();
-
+    const user = useSelector((state) => state.auth.user);
+    console.log("user======>", user)
     const handleLogout = async () => {
         await dispatch(logoutUser());
         navigation.replace('Login');
@@ -23,7 +24,8 @@ const SettingsScreen = ({ navigation }) => {
             />
 
             {/* User Name */}
-            <Text style={styles.userName}>John Doe</Text>
+            <Text style={styles.userName}>{user?.name}</Text>
+            <Text style={styles.userName}>{user?.email}</Text>
 
             <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
                 <Text style={styles.logoutText}>Logout</Text>
@@ -49,7 +51,7 @@ const styles = StyleSheet.create({
     userName: {
         fontSize: 20,
         fontFamily: 'Poppins-Bold',
-        marginBottom: 30,
+        marginBottom: 10,
     },
     logoutButton: {
         backgroundColor: globalColors.vividred,

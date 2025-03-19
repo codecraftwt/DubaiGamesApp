@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity, StyleSheet, Alert,
-    Image, Dimensions
+    Image, Dimensions,
+    ScrollView,
+    KeyboardAvoidingView
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -16,8 +18,8 @@ const LoginScreen = ({ navigation }) => {
     const dispatch = useDispatch();
     const authState = useSelector((state) => state.auth);
 
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    const [username, setUsername] = useState('admin@example.com');
+    const [password, setPassword] = useState('password');
     const [code, setCode] = useState('');
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
@@ -28,7 +30,7 @@ const LoginScreen = ({ navigation }) => {
         // } else {
         //     Alert.alert('Invalid Credentials', 'Please enter the correct username, password, and code.');
         // }
-        dispatch(loginUser(username, password));
+        dispatch(loginUser(username, password, code));
 
     };
 
@@ -41,69 +43,76 @@ const LoginScreen = ({ navigation }) => {
     }, [authState.isAuthenticated, authState.error, navigation]);
 
     return (
-        <View style={styles.container}>
-            <Image style={{
-                width: wp('90%'),
-                height: hp('30%'),
-                resizeMode: "contain",
-            }} source={DubaiGames} />
+        <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.container}
+        >
+            <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 
-            <Text style={styles.subtitle}>Sign in to continue</Text>
+                <Image style={{
+                    width: wp('90%'),
+                    height: hp('24%'),
+                    resizeMode: "contain",
+                }} source={DubaiGames} />
 
-            {/* Username Input */}
-            <View style={styles.inputContainer}>
-                <Icon name="account-outline" size={hp('3%')} color="#888" style={styles.icon} />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Username"
-                    placeholderTextColor={globalColors.inputLabel}
-                    value={username}
-                    onChangeText={setUsername}
-                />
-            </View>
+                <Text style={styles.subtitle}>Sign in to continue</Text>
 
-            {/* Password Input */}
-            <View style={styles.inputContainer}>
-                <Icon name="lock-outline" size={hp('3%')} color="#888" style={styles.icon} />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Password"
-                    placeholderTextColor={globalColors.inputLabel}
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry={!isPasswordVisible}
-                />
-                <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
-                    <Icon
-                        name={isPasswordVisible ? "eye-outline" : "eye-off-outline"}
-                        size={hp('3%')}
-                        color="#888"
+                {/* Username Input */}
+                <View style={styles.inputContainer}>
+                    <Icon name="account-outline" size={hp('3%')} color="#888" style={styles.icon} />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Username"
+                        placeholderTextColor={globalColors.inputLabel}
+                        value={username}
+                        onChangeText={setUsername}
                     />
+                </View>
+
+                {/* Password Input */}
+                <View style={styles.inputContainer}>
+                    <Icon name="lock-outline" size={hp('3%')} color="#888" style={styles.icon} />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Password"
+                        placeholderTextColor={globalColors.inputLabel}
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry={!isPasswordVisible}
+                    />
+                    <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
+                        <Icon
+                            name={isPasswordVisible ? "eye-outline" : "eye-off-outline"}
+                            size={hp('3%')}
+                            color="#888"
+                        />
+                    </TouchableOpacity>
+                </View>
+
+                {/* Code Input */}
+                <View style={styles.inputContainer}>
+                    <Icon name="key-outline" size={hp('3%')} color="#888" style={styles.icon} />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Enter Code"
+                        placeholderTextColor={globalColors.inputLabel}
+                        value={code}
+                        onChangeText={setCode}
+                        keyboardType="numeric"
+                    />
+                </View>
+
+                {/* Login Button */}
+                <TouchableOpacity style={styles.button} onPress={handleLogin}>
+                    {authState.loading ? (
+                        <ActivityIndicator size="small" color="#fff" />
+                    ) : (
+                        <Text style={styles.buttonText}>Login</Text>
+                    )}
                 </TouchableOpacity>
-            </View>
+            </ScrollView>
 
-            {/* Code Input */}
-            <View style={styles.inputContainer}>
-                <Icon name="key-outline" size={hp('3%')} color="#888" style={styles.icon} />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Enter Code"
-                    placeholderTextColor={globalColors.inputLabel}
-                    value={code}
-                    onChangeText={setCode}
-                    keyboardType="numeric"
-                />
-            </View>
-
-            {/* Login Button */}
-            <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                {authState.loading ? (
-                    <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                    <Text style={styles.buttonText}>Login</Text>
-                )}
-            </TouchableOpacity>
-        </View>
+        </KeyboardAvoidingView>
     );
 };
 
@@ -119,7 +128,12 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins-Light',
         color: '#666',
         textAlign: 'center',
-        marginBottom: hp('3%'),
+        marginBottom: hp('2%'),
+    },
+    scrollContainer: {
+        flexGrow: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     inputContainer: {
         flexDirection: 'row',
@@ -144,9 +158,10 @@ const styles = StyleSheet.create({
     button: {
         backgroundColor: globalColors.blue,
         paddingVertical: hp('2%'),
+        paddingHorizontal: wp('20%'),
         borderRadius: 12,
         alignItems: 'center',
-        marginTop: hp('3%'),
+        marginTop: hp('2%'),
     },
     buttonText: {
         color: globalColors.white,

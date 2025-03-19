@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
         textTransform: 'uppercase'
     },
     input: {
-        height: 40,
+        // height: 40,
         borderWidth: 1,
         fontFamily: 'Poppins-Medium',
         borderRadius: 5,
