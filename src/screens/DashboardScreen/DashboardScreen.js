@@ -22,6 +22,8 @@ import DynamicDropdown from "../DynamicDropdown";
 import { Dropdown } from "react-native-element-dropdown";
 import { fetchMarketData } from "../../Redux/Slices/marketSlice";
 import { useDispatch, useSelector } from "react-redux";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { submitEntry } from "../../Redux/Slices/entrySlice";
 
 
 const DashboardScreen = ({ navigation }) => {
@@ -41,7 +43,7 @@ const DashboardScreen = ({ navigation }) => {
     const [showPicker, setShowPicker] = useState(false);
 
     const [agentList, setAgentList] = useState([]);
-    const [loading, setLoading] = useState(false);
+    // const [loading, setLoading] = useState(false);
 
     const [openDropdown, setOpenDropdown] = useState(false); // To toggle dropdown visibility
     const [submittedData, setSubmittedData] = useState(data);
@@ -50,6 +52,8 @@ const DashboardScreen = ({ navigation }) => {
     const dispatch = useDispatch();
 
     const { data, status } = useSelector((state) => state.market);
+    const { loading, error, success } = useSelector((state) => state.entry);
+
     console.log("market data 11------->", data)
 
     // useEffect(() => {
@@ -81,22 +85,21 @@ const DashboardScreen = ({ navigation }) => {
     const [results, setResults] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
-    const [error, setError] = useState(null);
-    const [id, setId] = useState('')
+    const [id, setId] = useState(0)
 
     const handleSelect = async (value) => {
-        setLoading(true);
         try {
             const response = await axios.get(`https://staging.rdnidhi.com/agent/getByCode/${value}`);
-            const { name, agentcode } = response.data;
+            const { name, agentcode, id
+            } = response.data;
             console.log("handleSelect   api Printinted", response.data)
-            setAgentName(name); // Set name field
-            setAgentId(agentcode); // Set agentID field
+            setAgentName(name);
+            setAgentId(agentcode);
             setId(id)
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
-            setLoading(false); // Set loading to false when API request finishes
+            // setLoading(false);
         }
     };
 
@@ -107,7 +110,7 @@ const DashboardScreen = ({ navigation }) => {
                 console.log("date ==========", formatDate(date))
                 const dateFormated = formatDate(date)
 
-                const response = await dispatch(fetchMarketData({ agent_id: 1, market: market, date: dateFormated }));
+                const response = await dispatch(fetchMarketData({ agent_id: id, market: market, date: dateFormated }));
                 setResponse(response.data);
             } catch (error) {
                 console.error("Error fetching data:", error);
@@ -118,44 +121,60 @@ const DashboardScreen = ({ navigation }) => {
     }, [date, agentId, market]);
 
     const handleSubmit = async () => {
+
+        console.log("Handle submit clicking......................")
         // navigation.navigate("AgentList");
-        try {
-            console.log("date ==========", formatDate(date))
-            const dateFormated = formatDate(date)
-            await dispatch(fetchMarketData({ agent_id: 1, market: market, date: dateFormated }));
+        // try {
+        //     console.log("date ==========", formatDate(date))
+        //     const dateFormated = formatDate(date)
+        //     await dispatch(fetchMarketData({ agent_id: 1, market: market, date: dateFormated }));
 
-            console.log("market data 22------->", data)
+        //     console.log("market data 22------->", data)
 
-        } catch (error) {
-            console.error("Error fetching market data:", error);
-        }
+        // } catch (error) {
+        //     console.error("Error fetching market data:", error);
+        // }
 
-        console.log({
-            agentId,
-            agentName,
-            market,
-            date,
-            openMsg,
-            closeMsg,
-            selectedCategory,
-            amount,
-            anotherNumber,
-            number,
-        });
-        const newEntry = {
-            id: agentId,
-            category: selectedCategory,
+        // console.log({
+        //     agentId,
+        //     agentName,
+        //     market,
+        //     date,
+        //     openMsg,
+        //     closeMsg,
+        //     selectedCategory,
+        //     amount,
+        //     anotherNumber,
+        //     number,
+        // });
+        // const newEntry = {
+        //     id: agentId,
+        //     category: selectedCategory,
+        //     number: number,
+        //     amount: amount
+        // };
+
+        // setSubmittedData([...submittedData, newEntry]);
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        console.log("Handle submit clicking2222222222222222")
+        const payload = {
+            agentname: agentName,
+            agent_id: id,
+            agent_type: 1,
+            agentcode: "AG123",
+            market: market,
+            type: selectedCategory.toLowerCase(),
             number: number,
-            amount: amount
+            number2: "",
+            amount: amount,
+            amount2: "",
+            msg: "",
+            ocj: 1,
+            filterDate: formatDate(date),
+            _token: csrfToken
         };
-
-        setSubmittedData([...submittedData, newEntry]);
-        // setAgentId(agentId + 1); // Increment ID for uniqueness
-        // setNumber(""); // Clear inputs
-        // setAmount("");
-
-
-
+        console.log("payload", payload)
+        dispatch(submitEntry(payload));
     };
 
     const handleAddSaralPan = () => {

@@ -2,6 +2,7 @@ import { combineReducers } from '@reduxjs/toolkit';
 import authReducer from '../Slices/authSlice';
 import marketReducer from '../Slices/marketSlice'
 import AgentReducer from '../Slices/agentSlice';
+import EntryReducer from '../Slices/entrySlice'
 // import galleryReducer from '../Slices/gallerySlice';
 // import webSocketReducer from '../Slices/webSocketSlice';
 // import websiteReducer from '../Slices/websiteSlice';
@@ -9,7 +10,8 @@ import AgentReducer from '../Slices/agentSlice';
 const rootReducer = combineReducers({
     auth: authReducer,
     market: marketReducer,
-    agents: AgentReducer
+    agents: AgentReducer,
+    entry: EntryReducer
     // gallery: galleryReducer,
     // webSocket: webSocketReducer,
     // webSite: websiteReducer,
