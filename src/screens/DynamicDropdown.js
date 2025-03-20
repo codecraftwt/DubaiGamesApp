@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
     View,
     TextInput,
@@ -11,16 +11,24 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import debounce from 'lodash.debounce';
+import { API_BASE_URL } from '../utils/Api';
+import { useSelector } from 'react-redux';
 // import { Search, X } from 'lucide-react-native';
 
-export default function DynamicDropdown({ onSelect, placeholder = 'Search...' }) {
-    const [query, setQuery] = useState('');
+export default function DynamicDropdown({ onSelect, placeholder = 'Search...', searchType, value }) {
+    const [query, setQuery] = useState(value || '');
     const [results, setResults] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
     const [error, setError] = useState(null);
 
     const searchInput = useRef(null);
+    const token = useSelector((state) => state.auth.token);
+
+
+    useEffect(() => {
+        setQuery(value || ''); // Update query when value prop changes
+    }, [value]);
 
     const fetchResults = async (searchQuery) => {
         if (!searchQuery.trim()) {
@@ -33,10 +41,17 @@ export default function DynamicDropdown({ onSelect, placeholder = 'Search...' })
         setError(null);
 
         try {
-            const response = await axios.get(
-                `https://staging.rdnidhi.com/agent/autocode/${encodeURIComponent(searchQuery)}`
-            );
+            const endpoint = searchType === 'code'
+                ? `${API_BASE_URL}/agent/auto-code/${encodeURIComponent(searchQuery)}`
+                : `${API_BASE_URL}/agent/auto/${encodeURIComponent(searchQuery)}`;
 
+
+            const response = await axios.get(endpoint, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            console.log("API Response:", response.data);
             setResults(response.data);
             setShowDropdown(true);
         } catch (err) {
@@ -63,7 +78,6 @@ export default function DynamicDropdown({ onSelect, placeholder = 'Search...' })
         onSelect(item);
         searchInput.current?.blur();
     };
-
     const clearInput = () => {
         setQuery('');
         setResults([]);
@@ -114,7 +128,7 @@ export default function DynamicDropdown({ onSelect, placeholder = 'Search...' })
                         <FlatList
                             data={results}
                             renderItem={renderItem}
-                            keyExtractor={(item) => item}
+                            keyExtractor={(item) => item.agentcode || item.name}
                             style={styles.dropdown}
                             keyboardShouldPersistTaps="handled"
                         />

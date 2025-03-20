@@ -1,14 +1,24 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { API_BASE_URL } from '../../utils/Api';
 
 export const fetchMarketData = createAsyncThunk(
     'market/fetchMarketData',
-    async ({ agent_id, market, date }) => {
-        const response = await axios.get(
-            `https://staging.rdnidhi.com/entery-fetch-newcards?agent_id=${agent_id}&market=${market}&date=${date}`
-        );
-        console.log("Reponse comming from slice")
-        return response.data; // Assuming response is JSON
+    async ({ agent_id, market, date, token }) => {
+        try {
+            console.log("data inside fetchMarketData22222", `agent_id=${agent_id}&market=${market}&date=${date}`)
+            const response = await axios.get(
+                `${API_BASE_URL}/entery-fetch-newcards?agent_id=${agent_id}&market=${market}&date=${date}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+            );
+            return response.data;
+        } catch (error) {
+            console.log("Error", error)
+        }
+
     }
 );
 
@@ -16,10 +26,10 @@ const marketSlice = createSlice({
     name: 'market',
     initialState: {
         data: [],
-        status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
+        status: 'idle',
         error: null
     },
-    reducers: {}, // You can add more reducers if needed
+    reducers: {},
     extraReducers: (builder) => {
         builder
             .addCase(fetchMarketData.pending, (state) => {

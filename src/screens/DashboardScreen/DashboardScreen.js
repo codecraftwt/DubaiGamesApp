@@ -20,10 +20,12 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 import axios from "axios";
 import DynamicDropdown from "../DynamicDropdown";
 import { Dropdown } from "react-native-element-dropdown";
-import { fetchMarketData } from "../../Redux/Slices/marketSlice";
 import { useDispatch, useSelector } from "react-redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_BASE_URL } from "../../utils/Api";
+import { fetchMarketData } from "../../Redux/Slices/marketSlice";
 import { submitEntry } from "../../Redux/Slices/entrySlice";
+import EntriesList from "../../components/Dashboard/EntriesList";
 
 
 const DashboardScreen = ({ navigation }) => {
@@ -53,14 +55,11 @@ const DashboardScreen = ({ navigation }) => {
 
     const { data, status } = useSelector((state) => state.market);
     const { loading, error, success } = useSelector((state) => state.entry);
+    const token = useSelector((state) => state.auth.token);
+
 
     console.log("market data 11------->", data)
 
-    // useEffect(() => {
-    //     dispatch(fetchMarketData({ agent_id: 1, market: 'Kalyan', date: '2025-03-14' }));
-    // }, [dispatch]);
-
-    // setResponse(data)
 
     const formatDate = (date) => {
         return date.toISOString().split("T")[0]; // Extracts YYYY-MM-DD
@@ -79,20 +78,22 @@ const DashboardScreen = ({ navigation }) => {
         "OPEN PAN",
         "CLOSE PAN",
         "CLOSE",
-    ];
 
-    const [query, setQuery] = useState('');
-    const [results, setResults] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [showDropdown, setShowDropdown] = useState(false);
+    ];
     const [id, setId] = useState(0)
 
-    const handleSelect = async (value) => {
+    const handleSelectByCode = async (item) => {
         try {
-            const response = await axios.get(`https://staging.rdnidhi.com/agent/getByCode/${value}`);
+            console.log("Selected Item by Code:", item);
+            const response = await axios.get(`${API_BASE_URL}/agent/getByCode/${item}`
+                , {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
             const { name, agentcode, id
             } = response.data;
-            console.log("handleSelect   api Printinted", response.data)
             setAgentName(name);
             setAgentId(agentcode);
             setId(id)
@@ -103,14 +104,30 @@ const DashboardScreen = ({ navigation }) => {
         }
     };
 
+    const handleSelectByName = async (item) => {
+        try {
+
+            const response = await axios.get(`${API_BASE_URL}/agent/getByName/${item}`
+                , {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            const { name, agentcode, id } = response.data;
+            setAgentName(name);
+            setAgentId(agentcode);
+            setId(id);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                console.log("date ==========", formatDate(date))
                 const dateFormated = formatDate(date)
-
-                const response = await dispatch(fetchMarketData({ agent_id: id, market: market, date: dateFormated }));
+                const response = await dispatch(fetchMarketData({ agent_id: id, market: market, date: dateFormated, token }));
                 setResponse(response.data);
             } catch (error) {
                 console.error("Error fetching data:", error);
@@ -118,63 +135,37 @@ const DashboardScreen = ({ navigation }) => {
         };
 
         fetchData();
-    }, [date, agentId, market]);
+    }, [agentName, date, market, id]);
 
     const handleSubmit = async () => {
 
         console.log("Handle submit clicking......................")
-        // navigation.navigate("AgentList");
-        // try {
-        //     console.log("date ==========", formatDate(date))
-        //     const dateFormated = formatDate(date)
-        //     await dispatch(fetchMarketData({ agent_id: 1, market: market, date: dateFormated }));
-
-        //     console.log("market data 22------->", data)
-
-        // } catch (error) {
-        //     console.error("Error fetching market data:", error);
-        // }
-
-        // console.log({
-        //     agentId,
-        //     agentName,
-        //     market,
-        //     date,
-        //     openMsg,
-        //     closeMsg,
-        //     selectedCategory,
-        //     amount,
-        //     anotherNumber,
-        //     number,
-        // });
-        // const newEntry = {
-        //     id: agentId,
-        //     category: selectedCategory,
-        //     number: number,
-        //     amount: amount
-        // };
-
-        // setSubmittedData([...submittedData, newEntry]);
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        console.log("Handle submit clicking2222222222222222")
         const payload = {
-            agentname: agentName,
-            agent_id: id,
-            agent_type: 1,
+            agent_id: "1",
+            agent_type: "1",
             agentcode: "AG123",
-            market: market,
-            type: selectedCategory.toLowerCase(),
-            number: number,
-            number2: "",
+            agentname: agentName,
             amount: amount,
             amount2: "",
-            msg: "",
-            ocj: 1,
             filterDate: formatDate(date),
-            _token: csrfToken
+            market: market,
+            market_msg: "",
+            msg: "",
+            number: number,
+            number2: "",
+            ocj: 1,
+            type: selectedCategory.toLowerCase(),
+            panType: "undefined",
         };
-        console.log("payload", payload)
-        dispatch(submitEntry(payload));
+        console.log("payload inside the handle submit", payload)
+        try {
+            await dispatch(submitEntry({ payload, token }));
+
+        } catch (error) {
+            console.error("error", error)
+        }
+        console.log("payload inside the handle submit", token)
+
     };
 
     const handleAddSaralPan = () => {
@@ -192,23 +183,89 @@ const DashboardScreen = ({ navigation }) => {
         navigation.navigate("StaffList")
     }
 
-    const groupedData = Object.values(data?.reversedGroupedEntries || {}).reduce((acc, group) => {
-        Object.values(group).forEach((item) => {
-            if (item.msg_no) {
-                if (!acc[item.msg_no]) {
-                    acc[item.msg_no] = [];
-                }
-                acc[item.msg_no].push(item);
-            }
-        });
-        return acc;
-    }, {});
 
-    // Convert grouped data into sections for SectionList
-    const sections = Object.keys(groupedData).map((msg_no) => ({
-        title: `OPEN MSG - ${msg_no}`,
-        data: groupedData[msg_no],
-    }));
+
+    const formatNumbers = (numbers) => {
+        if (!numbers) return 'N/A';
+        try {
+            if (typeof numbers === 'string') {
+                if (numbers.startsWith('[')) {
+                    return JSON.parse(numbers).join(', ');
+                }
+                return numbers;
+            }
+            if (Array.isArray(numbers)) {
+                return numbers.join(', ');
+            }
+            return numbers;
+        } catch (e) {
+            return numbers;
+        }
+    };
+
+
+    const renderEntries = () => {
+        if (!data?.reversedGroupedEntries) return null;
+
+        return Object.entries(data.reversedGroupedEntries).map(([key, group]) => {
+            const totalAmount = Object.values(group).reduce((sum, item) => {
+                return sum + (typeof item === 'object' && 'amount' in item ? Number(item.amount) : 0);
+            }, 0);
+
+
+            const firstItem = Object.values(group).find(item => typeof item === 'object' && 'msg_no' in item && 'market_msg' in item);
+
+            const msg_no = firstItem?.msg_no || 'NULL';
+            const market_msg = firstItem?.market_msg || 'NULL';
+
+            const title = `${market_msg} MSG ${msg_no}`;
+
+            return (
+                <ScrollView horizontal style={{ alignContent: 'space-around', gap: 10 }}>
+                    <View key={key} style={styles.section}>
+                        <View style={styles.sectionHeader}>
+                            <Text style={styles.sectionTitle}>{title}</Text>
+                            <Text style={styles.totalAmount}>TOTAL = {totalAmount}</Text>
+                        </View>
+
+                        <View style={styles.cardsContainer}>
+                            {Object.values(group).map((item, index) => {
+                                if (typeof item === 'object' && 'type' in item) {
+                                    return (
+                                        <View key={index} style={styles.cardStyle}>
+                                            <View style={styles.cardHeader}>
+                                                <View style={styles.checkbox} />
+                                                <Text style={styles.cardType}>{item.type?.toUpperCase()}</Text>
+                                            </View>
+
+                                            <View style={styles.cardContent}>
+                                                <Text style={styles.numbers}>{formatNumbers(item.number)}</Text>
+                                                <Text style={styles.amount}>₹ {item.amount}</Text>
+                                            </View>
+
+                                            <View style={styles.cardActions}>
+                                                <TouchableOpacity style={styles.actionButton}>
+                                                    <Icon name="refresh" size={20} color="#FFB800" />
+                                                </TouchableOpacity>
+                                                <TouchableOpacity style={styles.actionButton}>
+                                                    <Icon name="edit" size={20} color="#0066FF" />
+                                                </TouchableOpacity>
+                                                <TouchableOpacity style={styles.actionButton}>
+                                                    <Icon name="trash" size={20} color="#FF0000" />
+                                                </TouchableOpacity>
+                                            </View>
+                                        </View>
+                                    );
+                                }
+                                return null;
+                            })}
+                        </View>
+                    </View>
+                </ScrollView>
+
+            );
+        });
+    };
 
 
     return (
@@ -221,30 +278,30 @@ const DashboardScreen = ({ navigation }) => {
                     <View style={styles.halfWidthInput}>
                         <Text style={styles.label}>AGENT ID</Text>
                         <DynamicDropdown
-                            onSelect={handleSelect}
+                            onSelect={handleSelectByCode}
                             placeholder="Agent Code"
+                            searchType="code"
+                            value={agentId}
+                            setAgentId={setAgentId}
+
                         />
                     </View>
                     <View style={styles.halfWidthInput}>
                         <Text style={styles.label}>AGENT NAME</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Enter Agent Name"
+
+                        <DynamicDropdown
+                            onSelect={handleSelectByName}
+                            placeholder="Agent Name"
+                            searchType="name"
                             value={agentName}
-                            onChangeText={setAgentName}
                         />
+
                     </View>
                 </View>
 
                 <View style={styles.row}>
                     <View style={styles.halfWidthInput}>
                         <Text style={styles.label}>MARKET</Text>
-                        {/* <TextInput
-                            style={styles.input}
-                            placeholder="Enter Market Name"
-                            value={market}
-                            onChangeText={setMarket}
-                        /> */}
                         <Dropdown
                             data={[
                                 { label: 'Kalyan', value: 'Kalyan' },
@@ -284,11 +341,15 @@ const DashboardScreen = ({ navigation }) => {
                     numColumns={3}
                     showsVerticalScrollIndicator={false}
                     keyExtractor={(item) => item}
-                    renderItem={({ item }) => (
+                    renderItem={({ item, index }) => (
                         <TouchableOpacity
                             style={[
                                 styles.radioButton,
                                 selectedCategory === item && styles.selectedRadioButton,
+                                {
+                                    flex: 1,
+                                    marginRight: (index + 1) % 3 === 0 ? 0 : 10,
+                                },
                             ]}
                             onPress={() => setSelectedCategory(item)}
                         >
@@ -546,37 +607,10 @@ const DashboardScreen = ({ navigation }) => {
 
             </View>
 
-            {data?.reversedGroupedEntries ? (
-                <SectionList
-                    sections={sections}
-                    keyExtractor={(item, index) => index.toString()}
-                    renderItem={({ item }) => (
-                        <View style={styles.card}>
-                            <Text style={styles.cardText}><Text style={styles.bold}>Type:</Text> {item.type}</Text>
-                            <Text style={styles.cardText}>
-                                <Text style={styles.bold}>Number:</Text>
-                                {Array.isArray(item?.number)
-                                    ? item.number.join(", ")
-                                    : (typeof item?.number === "string" && item.number.startsWith("[")
-                                        ? JSON.parse(item.number).join(", ")
-                                        : item?.number || "N/A"
-                                    )}
-                            </Text>
 
-                            <Text style={styles.cardText}><Text style={styles.bold}>Amount:</Text> {item.amount}</Text>
-                        </View>
-                    )}
-                    renderSectionHeader={({ section }) => (
-                        <View style={styles.sectionHeader}>
-                            <Text style={styles.sectionHeaderText}>{section.title}</Text>
-                            <Text style={styles.sectionHeaderTotal}>TOTAL = {section.data.reduce((sum, item) => sum + item.amount, 0)}</Text>
-                        </View>
-                    )}
-                />
-            ) : (
-                <Text></Text>
-            )}
 
+
+            <EntriesList reversedGroupedEntries={data?.reversedGroupedEntries} />
         </ScrollView >
     );
 };
@@ -831,6 +865,107 @@ const styles = StyleSheet.create({
     bold: {
         fontWeight: "bold",
     },
+    summaryHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 15,
+        backgroundColor: '#fff',
+        marginBottom: 10,
+    },
+    summaryText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#333',
+    },
+    reverifyButton: {
+        backgroundColor: '#FFB800',
+        paddingHorizontal: 15,
+        paddingVertical: 8,
+        borderRadius: 5,
+    },
+    reverifyText: {
+        color: '#fff',
+        fontWeight: '600',
+    },
+    section: {
+        marginBottom: 15,
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        overflow: 'hidden',
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 15,
+        backgroundColor: '#F5F5F5',
+    },
+    sectionTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#333',
+    },
+    totalAmount: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#666',
+    },
+    cardsContainer: {
+        padding: 10,
+        flexDirection: 'row'
+    },
+    cardStyle: {
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        marginBottom: 10,
+        borderWidth: 1,
+        borderColor: '#E0E0E0',
+        width: 200
+    },
+    cardHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E0E0E0',
+    },
+    checkbox: {
+        width: 20,
+        height: 20,
+        borderWidth: 1,
+        borderColor: '#999',
+        borderRadius: 4,
+        marginRight: 10,
+    },
+    cardType: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#333',
+    },
+    cardContent: {
+        padding: 10,
+    },
+    numbers: {
+        fontSize: 16,
+        color: '#333',
+        marginBottom: 5,
+    },
+    amount: {
+        fontSize: 14,
+        color: '#666',
+    },
+    cardActions: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        padding: 10,
+        borderTopWidth: 1,
+        borderTopColor: '#E0E0E0',
+    },
+    actionButton: {
+        marginLeft: 15,
+    },
+
 });
 
 export default DashboardScreen;

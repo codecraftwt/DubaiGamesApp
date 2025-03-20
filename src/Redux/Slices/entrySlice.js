@@ -1,24 +1,21 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { API_BASE_URL } from '../../utils/Api';
 
 export const submitEntry = createAsyncThunk(
     'entry/submitEntry',
-    async (payload, { rejectWithValue }) => {
+    async ({ payload, token }, { rejectWithValue }) => {
         try {
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            payload._token = csrfToken;
-            console.log("submitEntry api hitting .........")
-
-            const response = await axios.post('https://staging.rdnidhi.com/entery', payload, {
+            console.log("payload data-->", payload)
+            const response = await axios.post(`${API_BASE_URL}/entery/store`, payload, {
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken, // Include the CSRF token in the headers
+                    Authorization: `Bearer ${token}`
                 },
             });
             console.log("submitEntry response", response.data)
             return response.data;
         } catch (error) {
-            console.error('Error details:', error.response); // Log the full error response
+            console.error('Error details:', error.response);
             return rejectWithValue(error.response.data);
         }
     }
