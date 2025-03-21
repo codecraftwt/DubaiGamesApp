@@ -1,49 +1,174 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { format } from 'date-fns';
 import { globalColors } from '../../Theme/globalColors';
+import { fetchAgentByCode, fetchAgentByName } from '../../Redux/Slices/autoCompleteSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import DynamicDropdown from '../DynamicDropdown';
+import { fetchDailyResult } from '../../Redux/Slices/dailyResultSlice';
 
 const DailyResult = () => {
-    const [agentCode, setAgentCode] = useState('');
+    const dispatch = useDispatch();
+
+    const [agentId, setAgentId] = useState('');
     const [agentName, setAgentName] = useState('');
     const [market, setMarket] = useState(null);
     const [date, setDate] = useState(new Date());
     const [showPicker, setShowPicker] = useState(false);
+    const [id, setId] = useState(0);
+
+    const { agentInfo } = useSelector((state) => state.autoComplete);
+    const { data } = useSelector((state) => state.dailyResult);
 
     const markets = [
-        { label: 'Market 1', value: 'market1' },
-        { label: 'Market 2', value: 'market2' },
-        { label: 'Market 3', value: 'market3' }
+        { label: 'Kalyan', value: 'Kalyan' },
+        { label: 'Mumbai', value: 'Mumbai' }
     ];
 
+    const handleSelectByCode = (code) => {
+        dispatch(fetchAgentByCode(code));
+    };
+
+    const handleSelectByName = (name) => {
+        dispatch(fetchAgentByName(name));
+    };
+
+    const formatDate = (date) => {
+        return date.toISOString().split("T")[0];
+    };
+
+    useEffect(() => {
+        if (agentInfo) {
+            setAgentName(agentInfo.name);
+            setAgentId(agentInfo.agentcode);
+            setId(agentInfo.id);
+        }
+    }, [agentInfo]);
+
+    const HandlePress = () => {
+        const formattedDate = formatDate(date);
+        dispatch(fetchDailyResult({
+            agentName,
+            market,
+            date: formattedDate,
+            agentId: id,
+        }));
+    };
+
+    const ResultDisplay = ({ data }) => {
+        if (!data || Object.keys(data.results || {}).length === 0) return null;
+
+        const result = Object.values(data.results)[0];
+
+        return (
+            <View style={styles.resultContainer}>
+                <View style={styles.resultHeader}>
+                    <Text style={styles.resultHeaderText}>
+                        AGENT - {result.market} - {result.result} - DATE: {format(date, 'yyyy-MM-dd')}
+                    </Text>
+                </View>
+
+                <View style={styles.resultContent}>
+                    <View style={styles.resultColumn}>
+                        <View style={styles.resultSection}>
+                            <Text style={styles.sectionHeader}>पेमेंट</Text>
+                            <View style={styles.row}>
+                                <Text style={styles.label}>जोडी</Text>
+                                <Text style={styles.value}>{result.jodi}</Text>
+                            </View>
+                            <View style={styles.row}>
+                                <Text style={styles.label}>एकूण</Text>
+                                <Text style={styles.value}>{result.totalOpenWin}</Text>
+                            </View>
+                        </View>
+                    </View>
+
+                    <View style={styles.resultColumn}>
+                        <View style={styles.resultSection}>
+                            <Text style={styles.sectionHeader}>एकूण</Text>
+                            <View style={styles.row}>
+                                <Text style={styles.label}>ओपन काम</Text>
+                                <Text style={styles.value}>{result.totalOpenPlay}</Text>
+                            </View>
+                            <View style={styles.row}>
+                                <Text style={styles.label}>क्लोज काम</Text>
+                                <Text style={styles.value}>{result.totalClosePlay}</Text>
+                            </View>
+                            <View style={styles.row}>
+                                <Text style={styles.label}>एकूण</Text>
+                                <Text style={styles.value}>{parseFloat(result.totalOpenPlay) + parseFloat(result.totalClosePlay)}</Text>
+                            </View>
+                            <View style={styles.row}>
+                                <Text style={styles.label}>कट क्लोज</Text>
+                                <Text style={styles.value}>{parseFloat(result.cut_close)}</Text>
+                            </View>
+                            {/* cut_close */}
+                            <View style={styles.row}>
+                                <Text style={styles.label}>कमीशन</Text>
+                                <Text style={styles.value}>{result.commission}</Text>
+                            </View>
+                            <View style={styles.row}>
+                                <Text style={styles.label}>एकूण</Text>
+                                <Text style={styles.value}>{parseFloat(result.totalOpenPlay) - parseFloat(result.commission)}</Text>
+                            </View>
+                            <View style={styles.row}>
+                                <Text style={styles.label}>पेमेंट</Text>
+                                <Text style={styles.value}>{result.totalOpenWin}</Text>
+                            </View>
+                            {/* मागील पेमेंट */}
+
+
+                            <View style={styles.row}>
+                                <Text style={styles.label}>देणे</Text>
+                                <Text style={[styles.value, { color: 'red' }]}>{(parseFloat(result.totalOpenPlay) - parseFloat(result.commission)) - result.totalOpenWin}</Text>
+                            </View>
+
+                            <View style={styles.row}>
+                                <Text style={styles.label}>मागील पेमेंट</Text>
+                                <Text style={[styles.value, { color: 'red' }]}>{result.remaining}</Text>
+                            </View>
+                            {/* एकूण देणे */}
+                            <View style={styles.row}>
+                                <Text style={styles.label}> एकूण देणे</Text>
+                                <Text style={[styles.value, { color: 'red' }]}>{(parseFloat(result.totalOpenPlay) - parseFloat(result.commission)) - result.totalOpenWin - result.remaining}</Text>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+
+                <TouchableOpacity style={styles.addLedgerButton}>
+                    <Text style={styles.addLedgerButtonText}>ADD TO LEDGER</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    };
+
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             <Text style={styles.header}>Daily Result</Text>
             <View style={styles.row}>
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>AGENT CODE</Text>
-                    <TextInput
-                        style={styles.input}
+                    <DynamicDropdown
+                        onSelect={handleSelectByCode}
                         placeholder="Agent Code"
-                        value={agentCode}
-                        onChangeText={setAgentCode}
+                        searchType="code"
+                        value={agentId}
                     />
                 </View>
 
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>AGENT NAME</Text>
-                    <TextInput
-                        style={styles.input}
+                    <DynamicDropdown
+                        onSelect={handleSelectByName}
                         placeholder="Agent Name"
+                        searchType="name"
                         value={agentName}
-                        onChangeText={setAgentName}
                     />
                 </View>
             </View>
-
-
 
             <View style={styles.row}>
                 <View style={styles.inputGroup}>
@@ -59,9 +184,7 @@ const DailyResult = () => {
                     />
                 </View>
 
-
                 <View style={styles.inputGroup}>
-
                     <Text style={styles.label}>DATE</Text>
                     <TouchableOpacity onPress={() => setShowPicker(true)} style={styles.datePicker}>
                         <Text>{format(date, 'dd-MM-yyyy')}</Text>
@@ -81,14 +204,14 @@ const DailyResult = () => {
                         />
                     )}
                 </View>
-
             </View>
 
-
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity onPress={HandlePress} style={styles.button}>
                 <Text style={styles.buttonText}>Show</Text>
             </TouchableOpacity>
-        </View>
+
+            <ResultDisplay data={data} />
+        </ScrollView>
     );
 };
 
@@ -96,7 +219,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 16,
-        borderColor: globalColors.white,
+        backgroundColor: globalColors.white,
     },
     header: {
         fontSize: 20,
@@ -108,7 +231,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '600',
         fontFamily: 'Poppins-Bold',
-        color: globalColors.labelField,
         color: globalColors.inputLabel,
     },
     input: {
@@ -155,6 +277,62 @@ const styles = StyleSheet.create({
         padding: 12,
         borderRadius: 8,
         marginBottom: 12,
+    },
+    resultContainer: {
+        marginTop: 20,
+        borderWidth: 1,
+        borderColor: globalColors.borderColor,
+        borderRadius: 8,
+        overflow: 'hidden',
+    },
+    resultHeader: {
+        backgroundColor: globalColors.Wisteria,
+        padding: 12,
+    },
+    resultHeaderText: {
+        color: globalColors.white,
+        fontSize: 16,
+        fontFamily: 'Poppins-Bold',
+        textAlign: 'center',
+    },
+    resultContent: {
+        // flexDirection: 'row',
+        padding: 16,
+    },
+    resultColumn: {
+        flex: 1,
+    },
+    resultSection: {
+        marginBottom: 16,
+    },
+    sectionHeader: {
+        fontSize: 16,
+        fontFamily: 'Poppins-Bold',
+        color: globalColors.blue,
+        marginBottom: 8,
+        textAlign: 'center',
+    },
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 8,
+    },
+    value: {
+        fontSize: 14,
+        fontFamily: 'Poppins-Medium',
+        color: globalColors.textPrimary,
+    },
+    addLedgerButton: {
+        backgroundColor: globalColors.blue,
+        padding: 12,
+        margin: 16,
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    addLedgerButtonText: {
+        color: globalColors.white,
+        fontSize: 14,
+        fontFamily: 'Poppins-Bold',
     },
 });
 

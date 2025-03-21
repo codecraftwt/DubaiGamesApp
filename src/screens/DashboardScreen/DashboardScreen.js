@@ -26,6 +26,7 @@ import { API_BASE_URL } from "../../utils/Api";
 import { fetchMarketData } from "../../Redux/Slices/marketSlice";
 import { submitEntry } from "../../Redux/Slices/entrySlice";
 import EntriesList from "../../components/Dashboard/EntriesList";
+import { fetchAgentByCode, fetchAgentByName } from "../../Redux/Slices/autoCompleteSlice";
 
 
 const DashboardScreen = ({ navigation }) => {
@@ -54,6 +55,8 @@ const DashboardScreen = ({ navigation }) => {
     const dispatch = useDispatch();
 
     const { data, status } = useSelector((state) => state.market);
+    const { agentInfo } = useSelector((state) => state.autoComplete)
+
     const { loading, error, success } = useSelector((state) => state.entry);
     const token = useSelector((state) => state.auth.token);
 
@@ -62,7 +65,7 @@ const DashboardScreen = ({ navigation }) => {
 
 
     const formatDate = (date) => {
-        return date.toISOString().split("T")[0]; // Extracts YYYY-MM-DD
+        return date.toISOString().split("T")[0]; // 
     };
     const categories = [
         "OPEN",
@@ -80,48 +83,30 @@ const DashboardScreen = ({ navigation }) => {
         "CLOSE",
 
     ];
+
+    useEffect(() => {
+        setAgentId("");
+        setAgentName("");
+    }, []);
+
     const [id, setId] = useState(0)
 
-    const handleSelectByCode = async (item) => {
-        try {
-            console.log("Selected Item by Code:", item);
-            const response = await axios.get(`${API_BASE_URL}/agent/getByCode/${item}`
-                , {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-            const { name, agentcode, id
-            } = response.data;
-            setAgentName(name);
-            setAgentId(agentcode);
-            setId(id)
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        } finally {
-            // setLoading(false);
-        }
+    const handleSelectByCode = (code) => {
+        dispatch(fetchAgentByCode(code));
     };
 
-    const handleSelectByName = async (item) => {
-        try {
-
-            const response = await axios.get(`${API_BASE_URL}/agent/getByName/${item}`
-                , {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-            const { name, agentcode, id } = response.data;
-            setAgentName(name);
-            setAgentId(agentcode);
-            setId(id);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
+    const handleSelectByName = (name) => {
+        dispatch(fetchAgentByName(name));
     };
+
+    useEffect(() => {
+        if (agentInfo) {
+            setAgentName(agentInfo.name);
+            setAgentId(agentInfo.agentcode);
+            setId(agentInfo.id);
+        }
+    }, [agentInfo]);
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -133,13 +118,10 @@ const DashboardScreen = ({ navigation }) => {
                 console.error("Error fetching data:", error);
             }
         };
-
         fetchData();
     }, [agentName, date, market, id]);
 
     const handleSubmit = async () => {
-
-        console.log("Handle submit clicking......................")
         const payload = {
             agent_id: "1",
             agent_type: "1",
@@ -153,7 +135,7 @@ const DashboardScreen = ({ navigation }) => {
             msg: "",
             number: number,
             number2: "",
-            ocj: 1,
+            ocj: "1",
             type: selectedCategory.toLowerCase(),
             panType: "undefined",
         };
@@ -183,8 +165,6 @@ const DashboardScreen = ({ navigation }) => {
         navigation.navigate("StaffList")
     }
 
-
-
     const formatNumbers = (numbers) => {
         if (!numbers) return 'N/A';
         try {
@@ -202,71 +182,6 @@ const DashboardScreen = ({ navigation }) => {
             return numbers;
         }
     };
-
-
-    const renderEntries = () => {
-        if (!data?.reversedGroupedEntries) return null;
-
-        return Object.entries(data.reversedGroupedEntries).map(([key, group]) => {
-            const totalAmount = Object.values(group).reduce((sum, item) => {
-                return sum + (typeof item === 'object' && 'amount' in item ? Number(item.amount) : 0);
-            }, 0);
-
-
-            const firstItem = Object.values(group).find(item => typeof item === 'object' && 'msg_no' in item && 'market_msg' in item);
-
-            const msg_no = firstItem?.msg_no || 'NULL';
-            const market_msg = firstItem?.market_msg || 'NULL';
-
-            const title = `${market_msg} MSG ${msg_no}`;
-
-            return (
-                <ScrollView horizontal style={{ alignContent: 'space-around', gap: 10 }}>
-                    <View key={key} style={styles.section}>
-                        <View style={styles.sectionHeader}>
-                            <Text style={styles.sectionTitle}>{title}</Text>
-                            <Text style={styles.totalAmount}>TOTAL = {totalAmount}</Text>
-                        </View>
-
-                        <View style={styles.cardsContainer}>
-                            {Object.values(group).map((item, index) => {
-                                if (typeof item === 'object' && 'type' in item) {
-                                    return (
-                                        <View key={index} style={styles.cardStyle}>
-                                            <View style={styles.cardHeader}>
-                                                <View style={styles.checkbox} />
-                                                <Text style={styles.cardType}>{item.type?.toUpperCase()}</Text>
-                                            </View>
-
-                                            <View style={styles.cardContent}>
-                                                <Text style={styles.numbers}>{formatNumbers(item.number)}</Text>
-                                                <Text style={styles.amount}>₹ {item.amount}</Text>
-                                            </View>
-
-                                            <View style={styles.cardActions}>
-                                                <TouchableOpacity style={styles.actionButton}>
-                                                    <Icon name="refresh" size={20} color="#FFB800" />
-                                                </TouchableOpacity>
-                                                <TouchableOpacity style={styles.actionButton}>
-                                                    <Icon name="edit" size={20} color="#0066FF" />
-                                                </TouchableOpacity>
-                                                <TouchableOpacity style={styles.actionButton}>
-                                                    <Icon name="trash" size={20} color="#FF0000" />
-                                                </TouchableOpacity>
-                                            </View>
-                                        </View>
-                                    );
-                                }
-                                return null;
-                            })}
-                        </View>
-                    </View>
-                </ScrollView>
-
-            );
-        });
-    };
-
 
     return (
         <ScrollView style={styles.container}>
@@ -606,10 +521,6 @@ const DashboardScreen = ({ navigation }) => {
 
 
             </View>
-
-
-
-
             <EntriesList reversedGroupedEntries={data?.reversedGroupedEntries} />
         </ScrollView >
     );
@@ -888,84 +799,6 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: '600',
     },
-    section: {
-        marginBottom: 15,
-        backgroundColor: '#fff',
-        borderRadius: 8,
-        overflow: 'hidden',
-    },
-    sectionHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: 15,
-        backgroundColor: '#F5F5F5',
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#333',
-    },
-    totalAmount: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#666',
-    },
-    cardsContainer: {
-        padding: 10,
-        flexDirection: 'row'
-    },
-    cardStyle: {
-        backgroundColor: '#fff',
-        borderRadius: 8,
-        marginBottom: 10,
-        borderWidth: 1,
-        borderColor: '#E0E0E0',
-        width: 200
-    },
-    cardHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#E0E0E0',
-    },
-    checkbox: {
-        width: 20,
-        height: 20,
-        borderWidth: 1,
-        borderColor: '#999',
-        borderRadius: 4,
-        marginRight: 10,
-    },
-    cardType: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#333',
-    },
-    cardContent: {
-        padding: 10,
-    },
-    numbers: {
-        fontSize: 16,
-        color: '#333',
-        marginBottom: 5,
-    },
-    amount: {
-        fontSize: 14,
-        color: '#666',
-    },
-    cardActions: {
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        padding: 10,
-        borderTopWidth: 1,
-        borderTopColor: '#E0E0E0',
-    },
-    actionButton: {
-        marginLeft: 15,
-    },
-
 });
 
 export default DashboardScreen;

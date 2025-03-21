@@ -32,6 +32,7 @@ const Drawer = createDrawerNavigator();
 const ALL_MENU_ITEMS = [
     { name: "Dashboard", component: DashboardScreen, icon: "home" },
     { name: "Daily Result", component: DailyResult, icon: "clipboard" },
+    { name: "ResultPage", component: ResultPage, icon: "clipboard" },
     { name: "Agent List", component: AgentList, icon: "users" },
     { name: "Client List", component: StaffListScreen, icon: "user" },
     { name: "My Account", component: SettingsScreen, icon: "user" },
@@ -39,7 +40,7 @@ const ALL_MENU_ITEMS = [
 ];
 
 const MENU_ITEMS = {
-    admin: ["Dashboard", "Daily Result", "Agent List", "Client List", "Reports", "My Account"],
+    admin: ["Dashboard", "Daily Result", "ResultPage", "Agent List", "Client List", "Reports", "My Account"],
     staff: ["Dashboard", "My Account", "Client List", "Daily Result", "Reports"],
     editor: ["Dashboard", "My Account", "Daily Result"],
 };
@@ -194,6 +195,10 @@ const DrawerNavigator = () => {
             <Drawer.Screen name="VerifyReport" component={VerifyReport}
 
             />
+            <Drawer.Screen name="ResultPage" component={ResultPage}
+
+            />
+            {/* ResultPage */}
         </Drawer.Navigator>
     );
 };
