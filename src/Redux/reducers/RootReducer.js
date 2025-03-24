@@ -7,7 +7,7 @@ import autoCompleteReducer from "../Slices/autoCompleteSlice"
 import dailyResultReducer from "../Slices/dailyResultSlice"
 import beforeOpenReducer from "../Slices/beforeOpenSlice"
 import afterOpenReducer from "../Slices/afterOpenSlice"
-
+import staffListReducer from "../Slices/staffSlice"
 
 // import galleryReducer from '../Slices/gallerySlice';
 // import webSocketReducer from '../Slices/webSocketSlice';
@@ -21,7 +21,9 @@ const rootReducer = combineReducers({
     autoComplete: autoCompleteReducer,
     dailyResult: dailyResultReducer,
     beforeOpen: beforeOpenReducer,
-    afterOpen: afterOpenReducer
+    afterOpen: afterOpenReducer,
+    staff: staffListReducer
+
     // gallery: galleryReducer,
     // webSocket: webSocketReducer,
     // webSite: websiteReducer,

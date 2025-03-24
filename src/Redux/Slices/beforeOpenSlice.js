@@ -4,12 +4,12 @@ import { API_BASE_URL } from '../../utils/Api';
 
 export const fetchBeforeOpenData = createAsyncThunk(
     'beforeOpen/fetch',
-    async ({ market, agentId, filterDate }, { getState }) => {
+    async ({ market, id, filterDate }, { getState }) => {
         const { token } = getState().auth;
-        const response = await axios.get(`${API_BASE_URL}/api/beforopenload`, {
-            params: { market, agentid: agentId, filterDate },
+        const response = await axios.get(`${API_BASE_URL}/beforopenload?market=${market}&agentid=${id}&filterDate=${filterDate}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
+        console.log("Response fetchBeforeOpenData", response.data)
         return response.data;
     }
 );
@@ -17,7 +17,7 @@ export const fetchBeforeOpenData = createAsyncThunk(
 const beforeOpenSlice = createSlice({
     name: 'beforeOpen',
     initialState: {
-        data: null,
+        beforeOpenData: null,
         status: 'idle',
         error: null,
     },
@@ -29,7 +29,7 @@ const beforeOpenSlice = createSlice({
             })
             .addCase(fetchBeforeOpenData.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.data = action.payload;
+                state.beforeOpenData = action.payload;
             })
             .addCase(fetchBeforeOpenData.rejected, (state, action) => {
                 state.status = 'failed';

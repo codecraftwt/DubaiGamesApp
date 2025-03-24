@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 
-const EntriesList = ({ reversedGroupedEntries }) => {
+const EntriesList = ({ reversedGroupedEntries, Delete }) => {
     if (!reversedGroupedEntries) return null;
 
     const formatNumbers = (numbers) => {
@@ -66,7 +66,7 @@ const EntriesList = ({ reversedGroupedEntries }) => {
                                                 <Icon name="edit" size={20} color="#0066FF" />
                                             </TouchableOpacity>
                                             <TouchableOpacity style={styles.actionButton}>
-                                                <Icon name="trash" size={20} color="#FF0000" />
+                                                <Icon name="trash" size={20} color="#FF0000" onPress={() => Delete(item.id)} />
                                             </TouchableOpacity>
                                         </View>
                                     </View>

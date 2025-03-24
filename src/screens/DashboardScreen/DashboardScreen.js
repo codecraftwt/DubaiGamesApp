@@ -23,7 +23,7 @@ import { Dropdown } from "react-native-element-dropdown";
 import { useDispatch, useSelector } from "react-redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_BASE_URL } from "../../utils/Api";
-import { fetchMarketData } from "../../Redux/Slices/marketSlice";
+import { deleteEntryData, fetchMarketData } from "../../Redux/Slices/marketSlice";
 import { submitEntry } from "../../Redux/Slices/entrySlice";
 import EntriesList from "../../components/Dashboard/EntriesList";
 import { fetchAgentByCode, fetchAgentByName } from "../../Redux/Slices/autoCompleteSlice";
@@ -35,7 +35,9 @@ const DashboardScreen = ({ navigation }) => {
     const [market, setMarket] = useState("Kalyan");
     const [date, setDate] = useState(new Date());
     const [number, setNumber] = useState("");
+    const [ocj, setOcj] = useState("");
     const [amount, setAmount] = useState("");
+    const [secAmount, setsecAmount] = useState("")
     const [selectedCategory, setSelectedCategory] = useState("JODI");
     const [anotherNumber, setAnotherNumber] = useState("");
     const [saralPanNumber, setSaralPanNumber] = useState("");
@@ -73,12 +75,12 @@ const DashboardScreen = ({ navigation }) => {
         "CHOKADA",
         "CYCLE",
         "CUT",
-        "RUNNING PAN",
+        "RUNNINGPAN",
         "SARALPAN",
         "ULTA PAN",
         "BERIZ",
         "FARAK",
-        "OPEN PAN",
+        "OPENPAN",
         "CLOSE PAN",
         "CLOSE",
 
@@ -89,7 +91,7 @@ const DashboardScreen = ({ navigation }) => {
         setAgentName("");
     }, []);
 
-    const [id, setId] = useState(0)
+    const [id, setId] = useState('')
 
     const handleSelectByCode = (code) => {
         dispatch(fetchAgentByCode(code));
@@ -107,49 +109,168 @@ const DashboardScreen = ({ navigation }) => {
         }
     }, [agentInfo]);
 
+    const fetchData = async () => {
+        try {
+            console.log("Fetch Data Is reloading====")
+            const dateFormated = formatDate(date)
+            const response = await dispatch(fetchMarketData({ agent_id: id, market: market, date: dateFormated, token }));
+            setResponse(response.data);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    };
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const dateFormated = formatDate(date)
-                const response = await dispatch(fetchMarketData({ agent_id: id, market: market, date: dateFormated, token }));
-                setResponse(response.data);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        };
+
         fetchData();
     }, [agentName, date, market, id]);
 
+    // const handleSubmit = async () => {
+    //     if (selectedCategory.toLowerCase() === "OPEN" || selectedCategory.toLowerCase() === "JODI" || selectedCategory.toLowerCase() === "CHOKADA" || selectedCategory.toLowerCase() === "BERIZ" || selectedCategory.toLowerCase() === "FARAK" || selectedCategory.toLowerCase() === "OPENPAN" || selectedCategory.toLowerCase() === "CLOSEPAN") {
+    //         const payload = {
+    //             agent_id: "1",
+    //             agent_type: "1",
+    //             agentcode: "AG123",
+    //             agentname: agentName,
+    //             amount: amount,
+    //             amount2: "",
+    //             filterDate: formatDate(date),
+    //             market: market,
+    //             market_msg: "",
+    //             msg: "",
+    //             number: '',
+    //             number2: "",
+    //             ocj: number,
+    //             type: selectedCategory.toLowerCase(),
+    //             panType: "undefined",
+    //         };
+    //     } else if (selectedCategory.toLowerCase() === "CYCLE" || selectedCategory.toLowerCase() === 'RUNNINGPAN') {
+    //         const payload = {
+    //             agent_id: "1",
+    //             agent_type: "1",
+    //             agentcode: "AG123",
+    //             agentname: agentName,
+    //             amount: amount,
+    //             amount2: "",
+    //             filterDate: formatDate(date),
+    //             market: market,
+    //             market_msg: "",
+    //             msg: "",
+    //             number: number,
+    //             number2: anotherNumber,
+    //             ocj: '',
+    //             type: selectedCategory.toLowerCase(),
+    //             panType: "undefined",
+    //         };
+    //     } else if (selectedCategory.localeCompare === "CUT") {
+    //         const payload = {
+    //             agent_id: "1",
+    //             agent_type: "1",
+    //             agentcode: "AG123",
+    //             agentname: agentName,
+    //             amount: amount,
+    //             amount2: secAmount,
+    //             filterDate: formatDate(date),
+    //             market: market,
+    //             market_msg: "",
+    //             msg: "",
+    //             number: number,
+    //             number2: '',
+    //             ocj: '',
+    //             type: selectedCategory.toLowerCase(),
+    //             panType: "undefined",
+    //         };
+    //     }
+
+    //     console.log("payload inside the handle submit", payload)
+    //     try {
+    //         await dispatch(submitEntry({ payload, token }));
+
+    //     } catch (error) {
+    //         console.error("error", error)
+    //     }
+    //     console.log("payload inside the handle submit", token)
+
+    // };
+
     const handleSubmit = async () => {
-        const payload = {
-            agent_id: "1",
-            agent_type: "1",
-            agentcode: "AG123",
-            agentname: agentName,
-            amount: amount,
-            amount2: "",
-            filterDate: formatDate(date),
-            market: market,
-            market_msg: "",
-            msg: "",
-            number: number,
-            number2: "",
-            ocj: "1",
-            type: selectedCategory.toLowerCase(),
-            panType: "undefined",
-        };
-        console.log("payload inside the handle submit", payload)
-        try {
-            await dispatch(submitEntry({ payload, token }));
+        let payload = {}; // Declare the payload variable here
 
-        } catch (error) {
-            console.error("error", error)
+        console.log("Selected Category:", selectedCategory);
+        console.log("Selected Category in Lowercase:", selectedCategory.toLowerCase());
+
+        if (selectedCategory === "OPEN" || selectedCategory === "JODI" || selectedCategory === "CHOKADA" || selectedCategory === "BERIZ" || selectedCategory === "FARAK" || selectedCategory === "OPENPAN" || selectedCategory === "CLOSEPAN") {
+            payload = {
+                agent_id: id.toString(),
+                agent_type: "1",
+                agentcode: agentId,
+                agentname: agentName,
+                amount: amount,
+                amount2: "",
+                filterDate: formatDate(date),
+                market: market,
+                market_msg: "",
+                msg: "",
+                number: '',
+                number2: "",
+                ocj: number,
+                type: selectedCategory.toLowerCase(),
+                panType: "undefined",
+            };
+        } else if (selectedCategory.toLowerCase() === "CYCLE" || selectedCategory.toLowerCase() === 'RUNNINGPAN') {
+            payload = {
+                agent_id: id.toString(),
+                agent_type: "1",
+                agentcode: agentId,
+                agentname: agentName,
+                amount: amount,
+                amount2: "",
+                filterDate: formatDate(date),
+                market: market,
+                market_msg: "",
+                msg: "",
+                number: number,
+                number2: anotherNumber,
+                ocj: '',
+                type: selectedCategory.toLowerCase(),
+                panType: "undefined",
+            };
+        } else if (selectedCategory.toLowerCase() === "cut") {
+            payload = {
+                agent_id: id.toString(),
+                agent_type: "1",
+                agentcode: agentId,
+                agentname: agentName,
+                amount: amount,
+                amount2: secAmount,
+                filterDate: formatDate(date),
+                market: market,
+                market_msg: "",
+                msg: "",
+                number: number,
+                number2: '',
+                ocj: '',
+                type: selectedCategory.toLowerCase(),
+                panType: "undefined",
+            };
         }
-        console.log("payload inside the handle submit", token)
 
-    };
+        console.log("Payload before dispatch:", payload);
 
+        if (Object.keys(payload).length === 0) {
+            console.error("Payload is empty, check your conditions and variables.");
+        } else {
+            try {
+                // await dispatch(submitEntry({ payload, token }));
+            } catch (error) {
+                console.error("Error during dispatch:", error);
+            }
+        }
+
+        console.log("Token:", token);
+
+
+    }
     const handleAddSaralPan = () => {
         if (saralPanNumber && saralPanAmount) {
             const newSaralPan = {
@@ -163,6 +284,16 @@ const DashboardScreen = ({ navigation }) => {
     };
     const handleClear = () => {
         navigation.navigate("StaffList")
+    }
+
+    const handleDelete = (id) => {
+        console.log("HandleDelete--------->", id)
+        dispatch(deleteEntryData(id));
+        fetchData();
+    }
+
+    const handleEdit = (id) => {
+        console.log("HandleEdit Button Clicked", id)
     }
 
     const formatNumbers = (numbers) => {
@@ -290,7 +421,7 @@ const DashboardScreen = ({ navigation }) => {
                         <Text style={styles.deleteAllButtonText}>CLEAR</Text>
                     </TouchableOpacity>
                 </View>
-                {(selectedCategory === "CYCLE" || selectedCategory === "RUNNING PAN") && (
+                {(selectedCategory === "CYCLE" || selectedCategory === "RUNNINGPAN") && (
                     <>
                         <View style={styles.row}>
                             <View style={styles.inputGroup}>
@@ -338,14 +469,19 @@ const DashboardScreen = ({ navigation }) => {
                             </View>
                         </View>
                         <View style={styles.inputGroup}>
-                            <Text style={styles.label}>ENTER ANOTHER NUMBER</Text>
-                            <TextInput style={styles.input} placeholder="Enter Another No" keyboardType="numeric"
-                                value={anotherNumber} onChangeText={setAnotherNumber} />
+                            <Text style={styles.label}>AMOUNT SECOUND</Text>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Enter Amount"
+                                value={secAmount}
+                                onChangeText={setsecAmount}
+                                keyboardType="numeric"
+                            />
                         </View>
                     </>
                 )}
 
-                {selectedCategory !== "CYCLE" && selectedCategory !== "RUNNING PAN" && selectedCategory !== "CUT" && selectedCategory !== "SARALPAN" && selectedCategory !== "ULTA PAN" && (
+                {selectedCategory !== "CYCLE" && selectedCategory !== "RUNNINGPAN" && selectedCategory !== "CUT" && selectedCategory !== "SARALPAN" && selectedCategory !== "ULTA PAN" && (
                     <>
                         <View style={styles.row}>
                             <View style={styles.inputGroup}>
@@ -521,7 +657,7 @@ const DashboardScreen = ({ navigation }) => {
 
 
             </View>
-            <EntriesList reversedGroupedEntries={data?.reversedGroupedEntries} />
+            <EntriesList reversedGroupedEntries={data?.reversedGroupedEntries} Delete={handleDelete} />
         </ScrollView >
     );
 };
