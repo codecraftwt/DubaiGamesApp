@@ -10,6 +10,7 @@ import {
     FlatList,
     Dimensions,
     SectionList,
+    Alert,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import Header from "../../components/Header/Header";
@@ -27,6 +28,7 @@ import { deleteEntryData, fetchMarketData } from "../../Redux/Slices/marketSlice
 import { submitEntry } from "../../Redux/Slices/entrySlice";
 import EntriesList from "../../components/Dashboard/EntriesList";
 import { fetchAgentByCode, fetchAgentByName } from "../../Redux/Slices/autoCompleteSlice";
+import EditEntryModal from "../../components/Modal/EditEntryModal";
 
 
 const DashboardScreen = ({ navigation }) => {
@@ -35,7 +37,10 @@ const DashboardScreen = ({ navigation }) => {
     const [market, setMarket] = useState("Kalyan");
     const [date, setDate] = useState(new Date());
     const [number, setNumber] = useState("");
+    const [numbersList, setNumbersList] = useState([]);
     const [ocj, setOcj] = useState("");
+    const [payloadString, setPayloadString] = useState('');
+
     const [amount, setAmount] = useState("");
     const [secAmount, setsecAmount] = useState("")
     const [selectedCategory, setSelectedCategory] = useState("JODI");
@@ -46,6 +51,7 @@ const DashboardScreen = ({ navigation }) => {
     const [saralPanGunule, setsaralPanGunule] = useState([]);
     const [saralPanGunuleAmount, setsaralPanGunuleAmount] = useState([]);
     const [showPicker, setShowPicker] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
     const [agentList, setAgentList] = useState([]);
     // const [loading, setLoading] = useState(false);
@@ -61,7 +67,10 @@ const DashboardScreen = ({ navigation }) => {
 
     const { loading, error, success } = useSelector((state) => state.entry);
     const token = useSelector((state) => state.auth.token);
-
+    const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+    const [editingEntry, setEditingEntry] = useState(null);
+    const [editAmount, setEditAmount] = useState("");
+    const [editNumber, setEditNumber] = useState("");
 
     console.log("market data 11------->", data)
 
@@ -75,13 +84,13 @@ const DashboardScreen = ({ navigation }) => {
         "CHOKADA",
         "CYCLE",
         "CUT",
-        "RUNNINGPAN",
-        "SARALPAN",
+        "RUNNING_PAN",
+        "SARAL_PAN",
         "ULTA PAN",
-        "BERIZ",
+        "BEERICH",
         "FARAK",
         "OPENPAN",
-        "CLOSE PAN",
+        "CLOSEPAN",
         "CLOSE",
 
     ];
@@ -125,81 +134,135 @@ const DashboardScreen = ({ navigation }) => {
         fetchData();
     }, [agentName, date, market, id]);
 
-    // const handleSubmit = async () => {
-    //     if (selectedCategory.toLowerCase() === "OPEN" || selectedCategory.toLowerCase() === "JODI" || selectedCategory.toLowerCase() === "CHOKADA" || selectedCategory.toLowerCase() === "BERIZ" || selectedCategory.toLowerCase() === "FARAK" || selectedCategory.toLowerCase() === "OPENPAN" || selectedCategory.toLowerCase() === "CLOSEPAN") {
-    //         const payload = {
-    //             agent_id: "1",
-    //             agent_type: "1",
-    //             agentcode: "AG123",
-    //             agentname: agentName,
-    //             amount: amount,
-    //             amount2: "",
-    //             filterDate: formatDate(date),
-    //             market: market,
-    //             market_msg: "",
-    //             msg: "",
-    //             number: '',
-    //             number2: "",
-    //             ocj: number,
-    //             type: selectedCategory.toLowerCase(),
-    //             panType: "undefined",
-    //         };
-    //     } else if (selectedCategory.toLowerCase() === "CYCLE" || selectedCategory.toLowerCase() === 'RUNNINGPAN') {
-    //         const payload = {
-    //             agent_id: "1",
-    //             agent_type: "1",
-    //             agentcode: "AG123",
-    //             agentname: agentName,
-    //             amount: amount,
-    //             amount2: "",
-    //             filterDate: formatDate(date),
-    //             market: market,
-    //             market_msg: "",
-    //             msg: "",
-    //             number: number,
-    //             number2: anotherNumber,
-    //             ocj: '',
-    //             type: selectedCategory.toLowerCase(),
-    //             panType: "undefined",
-    //         };
-    //     } else if (selectedCategory.localeCompare === "CUT") {
-    //         const payload = {
-    //             agent_id: "1",
-    //             agent_type: "1",
-    //             agentcode: "AG123",
-    //             agentname: agentName,
-    //             amount: amount,
-    //             amount2: secAmount,
-    //             filterDate: formatDate(date),
-    //             market: market,
-    //             market_msg: "",
-    //             msg: "",
-    //             number: number,
-    //             number2: '',
-    //             ocj: '',
-    //             type: selectedCategory.toLowerCase(),
-    //             panType: "undefined",
-    //         };
-    //     }
 
-    //     console.log("payload inside the handle submit", payload)
-    //     try {
-    //         await dispatch(submitEntry({ payload, token }));
+    const validateNumber = (value, category) => {
+        if (!value) return true;
 
-    //     } catch (error) {
-    //         console.error("error", error)
-    //     }
-    //     console.log("payload inside the handle submit", token)
+        if (!/^\d+$/.test(value)) return false;
 
-    // };
+        switch (category) {
+            case "OPEN":
+            case "BEERICH":
+            case "FARAK":
+                return value.length === 1;
+
+            case "JODI":
+            case "CHOKADA":
+                return value.length === 2;
+
+            case "RUNNING_PAN":
+            case "OPENPAN":
+            case "CLOSEPAN":
+                return value.length === 3;
+
+            case "CYCLE":
+            case "CUT":
+                return value.length <= 10;
+
+            default:
+                return true;
+        }
+    };
+
+    const getMaxLength = (category) => {
+        switch (category) {
+            case "OPEN":
+            case "BEERICH":
+            case "FARAK":
+                return 1;
+            case "JODI":
+            case "CHOKADA":
+                return 2;
+            case "RUNNING_PAN":
+            case "OPENPAN":
+            case "CLOSEPAN":
+                return 3;
+            case "CYCLE":
+            case "CUT":
+                return 10;
+            default:
+                return 100; // Default large number for other categories
+        }
+    };
+
+    const handleNumberChange2 = (text) => {
+        const numericValue = text.replace(/[^0-9]/g, '');
+        const maxLength = getMaxLength(selectedCategory);
+        const truncatedValue = numericValue.slice(0, maxLength);
+        setNumber(truncatedValue);
+
+        // Auto add when valid length is reached
+        if (truncatedValue.length === maxLength) {
+            if (selectedCategory === "OPEN") {
+                // "OPEN" type does not allow duplicates
+                if (!numbersList.includes(truncatedValue)) {
+                    const updatedList = [...numbersList, truncatedValue];
+                    setNumbersList(updatedList);
+                    setPayloadString(updatedList.join(','));
+                    setNumber('');
+                    setErrorMessage('');
+                } else {
+                    setErrorMessage("The number already exists");
+                }
+            } else {
+                // For other categories, duplicates are allowed
+                const updatedList = [...numbersList, truncatedValue];
+                setNumbersList(updatedList);
+                setPayloadString(updatedList.join(','));
+                setNumber('');
+                setErrorMessage('');
+            }
+        } else {
+            setErrorMessage('');
+        }
+    };
+
+
+
+    const getValidationMessage = (category) => {
+        switch (category) {
+            case "OPEN":
+            case "BEERICH":
+            case "FARAK":
+                return "Please enter exactly 1 digit (0-9)";
+
+            case "JODI":
+            case "CHOKADA":
+                return "Please enter exactly 2 digits";
+
+            case "RUNNING_PAN":
+            case "OPENPAN":
+            case "CLOSEPAN":
+                return "Please enter exactly 3 digits";
+
+            case "CYCLE":
+            case "CUT":
+                return "Maximum 10 digits allowed";
+
+            default:
+                return "Invalid input";
+        }
+    };
 
     const handleSubmit = async () => {
-        let payload = {}; // Declare the payload variable here
+
+        if (!validateNumber(number, selectedCategory)) {
+            alert(`Invalid number format for ${selectedCategory} category`);
+            return;
+        }
+
+        if ((selectedCategory === "CYCLE" || selectedCategory === "RUNNING_PAN") &&
+            !validateNumber(anotherNumber, selectedCategory)) {
+            alert(`Invalid another number format for ${selectedCategory} category`);
+            return;
+        }
+
+        let payload = {};
 
         console.log("Selected Category:", selectedCategory);
         console.log("Selected Category in Lowercase:", selectedCategory.toLowerCase());
 
-        if (selectedCategory === "OPEN" || selectedCategory === "JODI" || selectedCategory === "CHOKADA" || selectedCategory === "BERIZ" || selectedCategory === "FARAK" || selectedCategory === "OPENPAN" || selectedCategory === "CLOSEPAN") {
+        if (selectedCategory === "OPEN" || selectedCategory === "JODI" || selectedCategory === "CHOKADA" || selectedCategory === "BEERICH" || selectedCategory === "FARAK" || selectedCategory === "OPENPAN" || selectedCategory === "CLOSEPAN") {
             payload = {
                 agent_id: id.toString(),
                 agent_type: "1",
@@ -213,11 +276,11 @@ const DashboardScreen = ({ navigation }) => {
                 msg: "",
                 number: '',
                 number2: "",
-                ocj: number,
+                ocj: payloadString,
                 type: selectedCategory.toLowerCase(),
                 panType: "undefined",
             };
-        } else if (selectedCategory.toLowerCase() === "CYCLE" || selectedCategory.toLowerCase() === 'RUNNINGPAN') {
+        } else if (selectedCategory === "CYCLE" || selectedCategory === 'RUNNING_PAN') {
             payload = {
                 agent_id: id.toString(),
                 agent_type: "1",
@@ -235,7 +298,7 @@ const DashboardScreen = ({ navigation }) => {
                 type: selectedCategory.toLowerCase(),
                 panType: "undefined",
             };
-        } else if (selectedCategory.toLowerCase() === "cut") {
+        } else if (selectedCategory === "CUT") {
             payload = {
                 agent_id: id.toString(),
                 agent_type: "1",
@@ -261,7 +324,12 @@ const DashboardScreen = ({ navigation }) => {
             console.error("Payload is empty, check your conditions and variables.");
         } else {
             try {
-                // await dispatch(submitEntry({ payload, token }));
+                // const response = await dispatch(submitEntry({ payload, token }));
+                if (submitEntry?.fulfilled?.match(response)) {
+                    fetchData();
+                } else {
+                    console.error("submitEntry failed:", response);
+                }
             } catch (error) {
                 console.error("Error during dispatch:", error);
             }
@@ -286,33 +354,173 @@ const DashboardScreen = ({ navigation }) => {
         navigation.navigate("StaffList")
     }
 
-    const handleDelete = (id) => {
-        console.log("HandleDelete--------->", id)
-        dispatch(deleteEntryData(id));
-        fetchData();
-    }
 
-    const handleEdit = (id) => {
-        console.log("HandleEdit Button Clicked", id)
-    }
-
-    const formatNumbers = (numbers) => {
-        if (!numbers) return 'N/A';
-        try {
-            if (typeof numbers === 'string') {
-                if (numbers.startsWith('[')) {
-                    return JSON.parse(numbers).join(', ');
+    const handleDelete = async (id) => {
+        console.log("handleDelete", id)
+        Alert.alert(
+            "Confirm Deletion",
+            "Are you sure you want to delete this entry?",
+            [
+                {
+                    text: "Cancel",
+                    onPress: () => console.log("Deletion cancelled"),
+                    style: "cancel"
+                },
+                {
+                    text: "Delete",
+                    onPress: async () => {
+                        try {
+                            await dispatch(deleteEntryData(id));
+                            fetchData();
+                        } catch (error) {
+                            console.error("Error while deleting:", error);
+                        }
+                    },
+                    style: "destructive"
                 }
-                return numbers;
+            ],
+            { cancelable: true }
+        );
+    }
+
+    const handleEdit = async (id) => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/entries/${id}/edit`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const entryData = response.data;
+            setEditingEntry(entryData);
+            setEditAmount(entryData.amount.toString());
+
+            // Handle different number formats
+            let displayNumber = '';
+            if (entryData.type === 'running_pan' && entryData.entry_number && Array.isArray(entryData.entry_number)) {
+                displayNumber = entryData.entry_number.join(', '); // Join array with comma
+            } else if (entryData.type === 'jodi' && entryData.number && Array.isArray(entryData.number)) {
+                displayNumber = entryData.number.join(', '); // For JODI, join array with comma
+            } else if (entryData.number) {
+                displayNumber = Array.isArray(entryData.number) ? entryData.number.join(', ') : entryData.number.toString();
             }
-            if (Array.isArray(numbers)) {
-                return numbers.join(', ');
+
+            setEditNumber(displayNumber);
+            setIsEditModalVisible(true);
+
+        } catch (error) {
+            console.error("Error fetching entry data:", error);
+            Alert.alert("Error", "Failed to fetch entry data");
+        }
+    }
+
+    const handleSaveEdit = async () => {
+        if (!editingEntry) return;
+
+        try {
+            let payload = {
+                amount: editAmount,
+                type: editingEntry.type,
+            };
+
+            // Handle different number formats based on entry type
+            switch (editingEntry.type.toLowerCase()) {
+                case 'jodi':
+                case 'chokada':
+                    // For JODI/CHOKADA, number should be an array of strings
+                    payload.number = editNumber.split(',').map(num => num.trim());
+                    break;
+
+                case 'running_pan':
+                    // For RUNNING_PAN, entry_number should be an array of separate numbers
+                    payload.entry_number = editNumber.split(',').map(num => num.trim());
+                    break;
+
+                case 'openpan':
+                case 'closepan':
+                    // For PAN types, number should be a single value
+                    payload.number = [editNumber];
+                    break;
+
+                case 'open':
+                case 'close':
+                    // For these types, use ocj field
+                    payload.number = [editNumber];
+                    break;
+
+                case 'beriz':
+                case 'farak':
+                    payload.entry_number = [editNumber];
+                    break;
+
+                case 'cycle':
+                case 'cut':
+                    // For these types, number is a single value
+                    payload.number = [editNumber];
+                    break;
+
+                default:
+                    // Default case for other types
+                    payload.number = editNumber;
             }
-            return numbers;
-        } catch (e) {
-            return numbers;
+
+            // Ensure arrays don't contain empty strings
+            if (payload.number && Array.isArray(payload.number)) {
+                payload.number = payload.number.filter(num => num !== '');
+            }
+            if (payload.entry_number && Array.isArray(payload.entry_number)) {
+                payload.entry_number = payload.entry_number.filter(num => num !== '');
+            }
+
+            console.log("Final payload for handleSaveEdit:", payload);
+
+            const response = await axios.put(`${API_BASE_URL}/entries/${editingEntry.id}`, payload, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            console.log("Update response:", response);
+            setIsEditModalVisible(false);
+            fetchData();
+            Alert.alert("Success", "Entry updated successfully");
+        } catch (error) {
+            console.error("Error updating entry:", error);
+            let errorMessage = "Failed to update entry";
+            if (error.response && error.response.data && error.response.data.message) {
+                errorMessage = error.response.data.message;
+            }
+            Alert.alert("Error", errorMessage);
         }
     };
+
+
+    const handleNumberChange = (text) => {
+        const numericValue = text.replace(/[^0-9]/g, '');
+        const maxLength = getMaxLength(selectedCategory);
+        const truncatedValue = numericValue.slice(0, maxLength);
+
+        setNumber(truncatedValue);
+    };
+
+    const handleAddNumber = () => {
+        if (number.length === getMaxLength(selectedCategory)) {
+            if (numbersList.includes(number)) {
+                setErrorMessage("The number already exists");
+                setNumber('');
+            } else {
+                setNumbersList([...numbersList, number]);
+                setNumber('');
+                setErrorMessage('');
+            }
+        }
+    };
+
+    const handleRemoveNumber = (num) => {
+        setNumbersList(numbersList.filter(item => item !== num));
+
+    };
+
 
     return (
         <ScrollView style={styles.container}>
@@ -418,30 +626,49 @@ const DashboardScreen = ({ navigation }) => {
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.deleteAllButton} onPress={handleClear}>
                         <Icon name="trash" size={16} color="white" />
-                        <Text style={styles.deleteAllButtonText}>CLEAR</Text>
+                        <Text style={styles.deleteAllButtonText}>Save</Text>
                     </TouchableOpacity>
                 </View>
-                {(selectedCategory === "CYCLE" || selectedCategory === "RUNNINGPAN") && (
+
+                {(selectedCategory === "CYCLE" || selectedCategory === "RUNNING_PAN") && (
                     <>
                         <View style={styles.row}>
                             <View style={styles.inputGroup}>
                                 <Text style={styles.label}>ENTER NUMBER</Text>
                                 <TextInput
-                                    style={styles.input}
+                                    style={[
+                                        styles.input,
+                                        !validateNumber(number, selectedCategory) && number.length > 0 && styles.invalidInput
+                                    ]}
                                     placeholder="Enter Number"
                                     value={number}
                                     keyboardType="numeric"
-                                    onChangeText={setNumber} />
+                                    onChangeText={(text) => handleNumberChange(text, setNumber, selectedCategory)} />
+                                {!validateNumber(number, selectedCategory) && number.length > 0 && (
+                                    <Text style={styles.errorText}>
+                                        {getValidationMessage(selectedCategory)}
+                                    </Text>
+                                )}
+
                             </View>
 
                             <View style={styles.inputGroup}>
                                 <Text style={styles.label}>ANOTHER NUMBER</Text>
                                 <TextInput
-                                    style={styles.input}
+                                    style={[
+                                        styles.input,
+                                        !validateNumber(anotherNumber, selectedCategory) && anotherNumber.length > 0 && styles.invalidInput
+                                    ]}
                                     placeholder="Enter Another No"
                                     value={anotherNumber}
                                     keyboardType="numeric"
-                                    onChangeText={setAnotherNumber} />
+                                    onChangeText={(text) => handleNumberChange(text, setAnotherNumber, selectedCategory)}
+                                />
+                                {!validateNumber(anotherNumber, selectedCategory) && anotherNumber.length > 0 && (
+                                    <Text style={styles.errorText}>
+                                        {getValidationMessage(selectedCategory)}
+                                    </Text>
+                                )}
                             </View>
                         </View>
                         <View style={styles.inputGroup}>
@@ -458,14 +685,29 @@ const DashboardScreen = ({ navigation }) => {
 
                             <View style={styles.inputGroup}>
                                 <Text style={styles.label}>ENTER NUMBER</Text>
-                                <TextInput style={styles.input} placeholder="Enter Number" keyboardType="numeric"
-                                    value={number} onChangeText={setNumber} />
+                                <TextInput
+                                    style={[
+                                        styles.input,
+                                        !validateNumber(number, selectedCategory) && number.length > 0 && styles.invalidInput
+                                    ]}
+                                    placeholder="Enter Number" keyboardType="numeric"
+                                    value={number}
+                                    onChangeText={(text) => handleNumberChange(text, setNumber, selectedCategory)}
+                                />
+                                {!validateNumber(number, selectedCategory) && number.length > 0 && (
+                                    <Text style={styles.errorText}>
+                                        {getValidationMessage(selectedCategory)}
+                                    </Text>
+                                )}
                             </View>
 
                             <View style={styles.inputGroup}>
                                 <Text style={styles.label}>ENTER AMOUNT</Text>
-                                <TextInput style={styles.input} placeholder="Enter Amount" keyboardType="numeric"
-                                    value={amount} onChangeText={setAmount} />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Enter Amount" keyboardType="numeric"
+                                    value={amount}
+                                    onChangeText={setAmount} />
                             </View>
                         </View>
                         <View style={styles.inputGroup}>
@@ -481,13 +723,24 @@ const DashboardScreen = ({ navigation }) => {
                     </>
                 )}
 
-                {selectedCategory !== "CYCLE" && selectedCategory !== "RUNNINGPAN" && selectedCategory !== "CUT" && selectedCategory !== "SARALPAN" && selectedCategory !== "ULTA PAN" && (
+                {selectedCategory !== "CYCLE" && selectedCategory !== "RUNNING_PAN" && selectedCategory !== "CUT" && selectedCategory !== "SARAL_PAN" && selectedCategory !== "ULTA PAN" && (
                     <>
                         <View style={styles.row}>
                             <View style={styles.inputGroup}>
                                 <Text style={styles.label}>ENTER NUMBER</Text>
-                                <TextInput style={styles.input} keyboardType="numeric"
-                                    placeholder="Enter Number" value={number} onChangeText={setNumber} />
+                                <TextInput
+                                    style={[
+                                        styles.input,
+                                        !validateNumber(number, selectedCategory) && number.length > 0 && styles.invalidInput
+                                    ]}
+                                    keyboardType="numeric"
+                                    placeholder="Enter Number"
+                                    value={number}
+                                    onChangeText={handleNumberChange2}
+                                    maxLength={getMaxLength(selectedCategory)}
+                                // onBlur={handleAddNumber
+                                />
+                                {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
                             </View>
 
                             <View style={styles.inputGroup}>
@@ -500,7 +753,8 @@ const DashboardScreen = ({ navigation }) => {
                     </>
                 )}
 
-                {selectedCategory === "SARALPAN" && (
+                {/* vlidation remains */}
+                {selectedCategory === "SARAL_PAN" && (
                     <View>
                         <View style={styles.row}>
                             <View style={styles.inputGroup}>
@@ -656,8 +910,33 @@ const DashboardScreen = ({ navigation }) => {
                 )}
 
 
+                <FlatList
+                    data={numbersList}
+                    keyExtractor={(item, index) => index.toString()}
+                    horizontal
+                    renderItem={({ item }) => (
+                        <View style={styles.numberContainer}>
+                            <Text style={styles.numberText}>{item}</Text>
+                            <TouchableOpacity onPress={() => handleRemoveNumber(item)}>
+                                <Text style={styles.removeText}>X</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                />
+
             </View>
-            <EntriesList reversedGroupedEntries={data?.reversedGroupedEntries} Delete={handleDelete} />
+
+            <EntriesList reversedGroupedEntries={data?.reversedGroupedEntries} Delete={handleDelete} handleEdit={handleEdit} />
+            <EditEntryModal
+                visible={isEditModalVisible}
+                entry={editingEntry}
+                onClose={() => setIsEditModalVisible(false)}
+                onSave={handleSaveEdit}
+                editNumber={editNumber}
+                setEditNumber={setEditNumber}
+                editAmount={editAmount}
+                setEditAmount={setEditAmount}
+            />
         </ScrollView >
     );
 };
@@ -665,6 +944,22 @@ const DashboardScreen = ({ navigation }) => {
 const { width } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
+    numberContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#ddd',
+        padding: 10,
+        borderRadius: 5,
+        marginRight: 5,
+    },
+    numberText: {
+        fontSize: 16,
+        marginRight: 5,
+    },
+    removeText: {
+        color: 'red',
+        fontWeight: 'bold',
+    },
     container: {
         flex: 1,
         backgroundColor: globalColors.LightWhite,
@@ -782,7 +1077,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins-Bold',
     },
     deleteAllButton: {
-        backgroundColor: globalColors.vividred,
+        backgroundColor: globalColors.Wisteria,
         flexDirection: "row",
         alignItems: "center",
         padding: 14,
@@ -934,6 +1229,15 @@ const styles = StyleSheet.create({
     reverifyText: {
         color: '#fff',
         fontWeight: '600',
+    },
+    invalidInput: {
+        borderColor: 'red',
+        borderWidth: 1,
+    },
+    errorText: {
+        color: 'red',
+        fontSize: 12,
+        marginTop: 4,
     },
 });
 
