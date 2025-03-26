@@ -52,12 +52,6 @@ const DashboardScreen = ({ navigation }) => {
     const [saralPanGunuleAmount, setsaralPanGunuleAmount] = useState([]);
     const [showPicker, setShowPicker] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-
-    const [agentList, setAgentList] = useState([]);
-    // const [loading, setLoading] = useState(false);
-
-    const [openDropdown, setOpenDropdown] = useState(false); // To toggle dropdown visibility
-    const [submittedData, setSubmittedData] = useState(data);
     const [response, setResponse] = useState([])
 
     const dispatch = useDispatch();
@@ -72,7 +66,7 @@ const DashboardScreen = ({ navigation }) => {
     const [editAmount, setEditAmount] = useState("");
     const [editNumber, setEditNumber] = useState("");
 
-    console.log("market data 11------->", data)
+    console.log("market data 11 fetch------->", data)
 
 
     const formatDate = (date) => {
@@ -324,7 +318,7 @@ const DashboardScreen = ({ navigation }) => {
             console.error("Payload is empty, check your conditions and variables.");
         } else {
             try {
-                // const response = await dispatch(submitEntry({ payload, token }));
+                const response = await dispatch(submitEntry({ payload, token }));
                 if (submitEntry?.fulfilled?.match(response)) {
                     fetchData();
                 } else {
@@ -384,6 +378,7 @@ const DashboardScreen = ({ navigation }) => {
     }
 
     const handleEdit = async (id) => {
+        //handle Edit Inside change numbers.
         try {
             const response = await axios.get(`${API_BASE_URL}/entries/${id}/edit`, {
                 headers: {
@@ -399,9 +394,17 @@ const DashboardScreen = ({ navigation }) => {
             let displayNumber = '';
             if (entryData.type === 'running_pan' && entryData.entry_number && Array.isArray(entryData.entry_number)) {
                 displayNumber = entryData.entry_number.join(', '); // Join array with comma
-            } else if (entryData.type === 'jodi' && entryData.number && Array.isArray(entryData.number)) {
+            }
+            else if (entryData.type === 'jodi' && entryData.number && Array.isArray(entryData.number)) {
                 displayNumber = entryData.number.join(', '); // For JODI, join array with comma
-            } else if (entryData.number) {
+            }
+            else if (entryData.type === 'chokada' && entryData.number && Array.isArray(entryData.number)) {
+                displayNumber = entryData.entry_number.join(','); // For JODI, join array with comma
+            }
+            else if (entryData.type === 'cycle' && entryData.entry_number && Array.isArray(entryData.entry_number)) {
+                displayNumber = entryData.entry_number.join(','); // For JODI, join array with comma
+            }
+            else if (entryData.number) {
                 displayNumber = Array.isArray(entryData.number) ? entryData.number.join(', ') : entryData.number.toString();
             }
 
@@ -426,9 +429,14 @@ const DashboardScreen = ({ navigation }) => {
             // Handle different number formats based on entry type
             switch (editingEntry.type.toLowerCase()) {
                 case 'jodi':
-                case 'chokada':
-                    // For JODI/CHOKADA, number should be an array of strings
                     payload.number = editNumber.split(',').map(num => num.trim());
+                    break;
+                case 'chokada':
+                    payload.number = editNumber.split(',').map(num => num.trim());
+                    break;
+
+                case 'cycle':
+                    payload.entry_number = editNumber.split(',').map(num => num.trim());
                     break;
 
                 case 'running_pan':
@@ -453,12 +461,14 @@ const DashboardScreen = ({ navigation }) => {
                     payload.entry_number = [editNumber];
                     break;
 
-                case 'cycle':
-                case 'cut':
-                    // For these types, number is a single value
-                    payload.number = [editNumber];
-                    break;
 
+                case 'cut':
+                    payload.number = editNumber.split(',').map(num => num.trim());
+                    break;
+                case 'cut_open':
+                case 'cut_close':
+                    payload.number = editNumber.split(',').map(num => num.trim());
+                    break;
                 default:
                     // Default case for other types
                     payload.number = editNumber;
@@ -501,6 +511,13 @@ const DashboardScreen = ({ navigation }) => {
         const truncatedValue = numericValue.slice(0, maxLength);
 
         setNumber(truncatedValue);
+    };
+    const handleNumberChangeAnother = (text) => {
+        const numericValue = text.replace(/[^0-9]/g, '');
+        const maxLength = getMaxLength(selectedCategory);
+        const truncatedValue = numericValue.slice(0, maxLength);
+
+        setAnotherNumber(truncatedValue);
     };
 
     const handleAddNumber = () => {
@@ -653,7 +670,7 @@ const DashboardScreen = ({ navigation }) => {
                             </View>
 
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>ANOTHER NUMBER</Text>
+                                <Text style={styles.label}>ANOTHER NUMBERs</Text>
                                 <TextInput
                                     style={[
                                         styles.input,
@@ -662,7 +679,7 @@ const DashboardScreen = ({ navigation }) => {
                                     placeholder="Enter Another No"
                                     value={anotherNumber}
                                     keyboardType="numeric"
-                                    onChangeText={(text) => handleNumberChange(text, setAnotherNumber, selectedCategory)}
+                                    onChangeText={(text) => handleNumberChangeAnother(text, setAnotherNumber, selectedCategory)}
                                 />
                                 {!validateNumber(anotherNumber, selectedCategory) && anotherNumber.length > 0 && (
                                     <Text style={styles.errorText}>

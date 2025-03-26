@@ -46,6 +46,9 @@ const EntriesList = ({ reversedGroupedEntries, Delete, handleEdit }) => {
                     <View style={styles.cardsContainer}>
                         {Object.values(group).map((item, index) => {
                             if (typeof item === 'object' && 'type' in item) {
+                                const displayField = item.type?.toLowerCase() === 'chokada' || item.type?.toLowerCase() === 'cycle' || item.type?.toLowerCase() === 'farak'
+                                    ? item.entry_number
+                                    : item.number;
                                 return (
                                     <View key={index} style={styles.cardStyle}>
                                         <View style={styles.cardHeader}>
@@ -54,7 +57,7 @@ const EntriesList = ({ reversedGroupedEntries, Delete, handleEdit }) => {
                                         </View>
 
                                         <View style={styles.cardContent}>
-                                            <Text style={styles.numbers}>{formatNumbers(item.number)}</Text>
+                                            <Text style={styles.numbers}>{formatNumbers(displayField)}</Text>
                                             <Text style={styles.amount}>₹ {item.amount}</Text>
                                         </View>
 

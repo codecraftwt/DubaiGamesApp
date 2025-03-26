@@ -11,6 +11,8 @@ import { fetchAfterOpenData } from "../../Redux/Slices/afterOpenSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAgentByCode, fetchAgentByName } from "../../Redux/Slices/autoCompleteSlice";
 import DynamicDropdown from "../DynamicDropdown";
+import PanNumberScreen from "./PanNumberScreen";
+import { addResult } from "../../Redux/Slices/panNumberSlice";
 
 export default function ResultPage() {
     const dispatch = useDispatch();
@@ -46,8 +48,8 @@ export default function ResultPage() {
     ];
 
     const Type = [
-        { label: 'open', value: 'open' },
-        { label: 'close', value: 'close' }
+        { label: 'open', value: 'open-pan' },
+        { label: 'close', value: 'close-pan' }
     ];
 
     const formatDate = (date) => {
@@ -84,16 +86,19 @@ export default function ResultPage() {
     }, [agentInfo]);
 
     const addEntry = () => {
-        if (panNumber && number && market) {
-            setTableData([...tableData, { panNumber, number, market, agentCode, agentName, type, selectedMarket }]);
+        const formattedDate = format(date, 'yyyy-MM-dd');
+        dispatch(addResult({
+            pannumber: panNumber,
+            number: number,
+            market: market2,
+            type: type,
+            filterDate: formattedDate
+        })).then(() => {
             setPanNumber("");
             setNumber("");
-            setMarket("");
-            setAgentCode("");
-            setAgentName("");
-            setSelectedMarket("");
-            setType("open");
-        }
+            setMarket2(null);
+            setType("open-pan");
+        });
     };
 
     // Render the numbers table (0-9 with values)
@@ -322,7 +327,13 @@ export default function ResultPage() {
                                     }}
                                 />
                             )}
-
+                            <PanNumberScreen
+                                date={date}
+                                panNumber={panNumber}
+                                number={number}
+                                type={type}
+                                market2={market2}
+                            />
                             <Button
                                 mode="contained"
                                 style={styles.submitButton}
