@@ -68,7 +68,12 @@ const DashboardScreen = ({ navigation }) => {
 
     console.log("market data 11 fetch------->", data)
 
-
+    const [ultaPanNumber, setUltaPanNumber] = useState("");
+    const [ultaPanAmount, setUltaPanAmount] = useState("");
+    const [ultaPanGunule, setUltaPanGunule] = useState("");
+    const [ultaPanGunuleAmount, setUltaPanGunuleAmount] = useState("");
+    const [ultaPanEntries, setUltaPanEntries] = useState([]);
+    const [ultaGunuleEntries, setUltaGunuleEntries] = useState([]);
     const formatDate = (date) => {
         return date.toISOString().split("T")[0]; // 
     };
@@ -137,6 +142,7 @@ const DashboardScreen = ({ navigation }) => {
         switch (category) {
             case "OPEN":
             case "BEERICH":
+            case "CLOSE":
             case "FARAK":
                 return value.length === 1;
 
@@ -161,6 +167,7 @@ const DashboardScreen = ({ navigation }) => {
     const getMaxLength = (category) => {
         switch (category) {
             case "OPEN":
+            case "CLOSE":
             case "BEERICH":
             case "FARAK":
                 return 1;
@@ -211,13 +218,56 @@ const DashboardScreen = ({ navigation }) => {
         }
     };
 
+    const resetFormStates = () => {
+        // Reset common fields
+        setNumber("");
+        setAmount("");
+        setNumbersList([]);
+        setPayloadString("");
+        setOcj("");
+        setErrorMessage('');
 
+        // Reset category-specific fields
+        if (selectedCategory === "CYCLE" || selectedCategory === "RUNNING_PAN") {
+            setAnotherNumber("");
+        }
+
+        if (selectedCategory === "CUT") {
+            setsecAmount("");
+        }
+
+        if (selectedCategory === "SARAL_PAN") {
+            setSaralPanNumber("");
+            setSaralPanAmount("");
+            setSaralPanData([]);
+            setsaralPanGunule([]);
+            setsaralPanGunuleAmount([]);
+            setSaralPanEntries([])
+            setGunuleEntries([])
+        }
+
+        if (selectedCategory === "ULTA PAN") {
+            setSaralPanNumber("");
+            setSaralPanAmount("");
+            setsaralPanGunule([]);
+            setsaralPanGunuleAmount([]);
+        }
+        if (selectedCategory === "ULTA PAN") {
+            setUltaPanNumber("");
+            setUltaPanAmount("");
+            setUltaPanGunule("");
+            setUltaPanGunuleAmount("");
+            setUltaPanEntries([]);
+            setUltaGunuleEntries([]);
+        }
+    };
 
     const getValidationMessage = (category) => {
         switch (category) {
             case "OPEN":
             case "BEERICH":
             case "FARAK":
+            case "CLOSE":
                 return "Please enter exactly 1 digit (0-9)";
 
             case "JODI":
@@ -256,7 +306,7 @@ const DashboardScreen = ({ navigation }) => {
         console.log("Selected Category:", selectedCategory);
         console.log("Selected Category in Lowercase:", selectedCategory.toLowerCase());
 
-        if (selectedCategory === "OPEN" || selectedCategory === "JODI" || selectedCategory === "CHOKADA" || selectedCategory === "BEERICH" || selectedCategory === "FARAK" || selectedCategory === "OPENPAN" || selectedCategory === "CLOSEPAN") {
+        if (selectedCategory === "OPEN" || selectedCategory === "JODI" || selectedCategory === "CHOKADA" || selectedCategory === "BEERICH" || selectedCategory === "FARAK" || selectedCategory === "CLOSE") {
             payload = {
                 agent_id: id.toString(),
                 agent_type: "1",
@@ -310,6 +360,87 @@ const DashboardScreen = ({ navigation }) => {
                 type: selectedCategory.toLowerCase(),
                 panType: "undefined",
             };
+        } else if (selectedCategory === "OPENPAN" || selectedCategory === "CLOSEPAN") {
+            payload = {
+                agent_id: id.toString(),
+                agent_type: "1",
+                agentcode: agentId,
+                agentname: agentName,
+                amount: amount,
+                amount2: "",
+                filterDate: formatDate(date),
+                market: market,
+                market_msg: "",
+                msg: "",
+                number: '',
+                number2: "",
+                ocj: payloadString,
+                type: selectedCategory.toLowerCase(),
+            };
+        }
+        else if (selectedCategory === "SARAL_PAN") {
+            const saralPanNumbers = [];
+            const saralPanAmounts = [];
+            const gunuleNumbers = [];
+            const gunuleAmounts = [];
+
+            // Add main entries
+            if (saralPanNumber && saralPanAmount) {
+                saralPanNumbers.push(saralPanNumber);
+                saralPanAmounts.push(saralPanAmount);
+            }
+
+            // Add gunule entries if they exist
+            if (saralPanGunule && saralPanGunuleAmount) {
+                gunuleNumbers.push(saralPanGunule);
+                gunuleAmounts.push(saralPanGunuleAmount);
+            }
+
+            // Add entries from the table
+            saralPanData.forEach(item => {
+                saralPanNumbers.push(item.number);
+                saralPanAmounts.push(item.amount);
+            });
+
+            payload = {
+                agent_id: id.toString(),
+                agent_type: "1",
+                agentcode: agentId,
+                agentname: agentName,
+                type: "saral_pan",
+                market: market,
+                filterDate: formatDate(date),
+                number: number || "1",
+                amount: amount || "1",
+                saral_pan: saralPanEntries.map(entry => entry.number),
+                saral_pan_amount: saralPanEntries.map(entry => entry.amount),
+                gunule: gunuleEntries.map(entry => entry.number),
+                gunule_amount: gunuleEntries.map(entry => entry.amount),
+                msg: null,
+                market_msg: null
+            };
+        } else if (selectedCategory === "ULTA PAN") {
+            payload = {
+                agent_id: id.toString(),
+                agent_type: "1",
+                agentcode: agentId,
+                agentname: agentName,
+                type: "ulta_pan",
+                market: market,
+                filterDate: formatDate(date),
+                number: number || "1",
+                amount: amount || "1",
+                gunule: ultaPanEntries.map(entry => entry.number),
+                gunule_amount: ultaPanEntries.map(entry => entry.amount),
+                saral_pan_amount: ultaGunuleEntries.map(entry => entry.amount),
+                saral_pan: ultaGunuleEntries.map(entry => entry.number),
+                msg: null,
+                market_msg: null
+            };
+            // gunule_amount: ultaGunuleEntries.map(entry => entry.amount),
+            // saral_pan: ultaPanEntries.map(entry => entry.number),
+            // saral_pan_amount: ultaPanEntries.map(entry => entry.amount),
+            // gunule: ultaGunuleEntries.map(entry => entry.number),
         }
 
         console.log("Payload before dispatch:", payload);
@@ -320,6 +451,7 @@ const DashboardScreen = ({ navigation }) => {
             try {
                 const response = await dispatch(submitEntry({ payload, token }));
                 if (submitEntry?.fulfilled?.match(response)) {
+                    resetFormStates();
                     fetchData();
                 } else {
                     console.error("submitEntry failed:", response);
@@ -333,17 +465,51 @@ const DashboardScreen = ({ navigation }) => {
 
 
     }
+
+    const [saralPanEntries, setSaralPanEntries] = useState([]);
+    const [gunuleEntries, setGunuleEntries] = useState([]);
+
     const handleAddSaralPan = () => {
         if (saralPanNumber && saralPanAmount) {
-            const newSaralPan = {
+            const newEntry = {
                 number: saralPanNumber,
-                amount: saralPanAmount,
+                amount: saralPanAmount
             };
-            setSaralPanData([...saralPanData, newSaralPan]);
-            setSaralPanNumber("");  // Reset inputs after adding
+            setSaralPanEntries([...saralPanEntries, newEntry]);
+            setSaralPanNumber("");
             setSaralPanAmount("");
+        } else {
+            Alert.alert("Error", "Please enter both number and amount");
         }
     };
+
+    const handleAddGunule = () => {
+        if (saralPanGunule && saralPanGunuleAmount) {
+            const newEntry = {
+                number: saralPanGunule,
+                amount: saralPanGunuleAmount
+            };
+            setGunuleEntries([...gunuleEntries, newEntry]);
+            setsaralPanGunule("");
+            setsaralPanGunuleAmount("");
+        } else {
+            Alert.alert("Error", "Please enter both gunule and amount");
+        }
+    };
+    const handleRemoveSaralPan = (index) => {
+        const updatedEntries = [...saralPanEntries];
+        updatedEntries.splice(index, 1);
+        setSaralPanEntries(updatedEntries);
+    };
+
+    // Remove Gunule entry
+    const handleRemoveGunule = (index) => {
+        const updatedEntries = [...gunuleEntries];
+        updatedEntries.splice(index, 1);
+        setGunuleEntries(updatedEntries);
+    };
+
+
     const handleClear = () => {
         navigation.navigate("StaffList")
     }
@@ -392,7 +558,7 @@ const DashboardScreen = ({ navigation }) => {
 
             // Handle different number formats
             let displayNumber = '';
-            if (entryData.type === 'running_pan' && entryData.entry_number && Array.isArray(entryData.entry_number)) {
+            if (entryData.type === 'running_pan' || entryData.type === 'beerich' && entryData.entry_number && Array.isArray(entryData.entry_number)) {
                 displayNumber = entryData.entry_number.join(', '); // Join array with comma
             }
             else if (entryData.type === 'jodi' && entryData.number && Array.isArray(entryData.number)) {
@@ -401,7 +567,7 @@ const DashboardScreen = ({ navigation }) => {
             else if (entryData.type === 'chokada' && entryData.number && Array.isArray(entryData.number)) {
                 displayNumber = entryData.entry_number.join(','); // For JODI, join array with comma
             }
-            else if (entryData.type === 'cycle' && entryData.entry_number && Array.isArray(entryData.entry_number)) {
+            else if (entryData.type === 'cycle' || entryData.type === 'farak' && entryData.entry_number && Array.isArray(entryData.entry_number)) {
                 displayNumber = entryData.entry_number.join(','); // For JODI, join array with comma
             }
             else if (entryData.number) {
@@ -431,36 +597,10 @@ const DashboardScreen = ({ navigation }) => {
                 case 'jodi':
                     payload.number = editNumber.split(',').map(num => num.trim());
                     break;
+
                 case 'chokada':
-                    payload.number = editNumber.split(',').map(num => num.trim());
-                    break;
-
-                case 'cycle':
                     payload.entry_number = editNumber.split(',').map(num => num.trim());
                     break;
-
-                case 'running_pan':
-                    // For RUNNING_PAN, entry_number should be an array of separate numbers
-                    payload.entry_number = editNumber.split(',').map(num => num.trim());
-                    break;
-
-                case 'openpan':
-                case 'closepan':
-                    // For PAN types, number should be a single value
-                    payload.number = [editNumber];
-                    break;
-
-                case 'open':
-                case 'close':
-                    // For these types, use ocj field
-                    payload.number = [editNumber];
-                    break;
-
-                case 'beriz':
-                case 'farak':
-                    payload.entry_number = [editNumber];
-                    break;
-
 
                 case 'cut':
                     payload.number = editNumber.split(',').map(num => num.trim());
@@ -469,6 +609,39 @@ const DashboardScreen = ({ navigation }) => {
                 case 'cut_close':
                     payload.number = editNumber.split(',').map(num => num.trim());
                     break;
+
+
+                case 'cycle':
+                    payload.entry_number = editNumber.split(',').map(num => num.trim());
+                    break;
+                // case 'cycle':
+                //     payload.number = [editNumber];
+                //     break;
+
+                case 'running_pan':
+                    // For RUNNING_PAN, entry_number should be an array of separate numbers
+                    payload.entry_number = editNumber.split(',').map(num => num.trim());
+                    break;
+
+                case 'openpan':
+                case 'closepan':
+                case 'farak':
+                    // For PAN types, number should be a single value
+                    payload.entry_number = [editNumber];
+                    break;
+
+                case 'open':
+                case 'close':
+                    // For these types, use ocj field
+                    payload.number = [editNumber];
+                    break;
+
+                case 'beerich':
+                    payload.entry_number = [editNumber];
+                    break;
+
+
+
                 default:
                     // Default case for other types
                     payload.number = editNumber;
@@ -512,6 +685,7 @@ const DashboardScreen = ({ navigation }) => {
 
         setNumber(truncatedValue);
     };
+
     const handleNumberChangeAnother = (text) => {
         const numericValue = text.replace(/[^0-9]/g, '');
         const maxLength = getMaxLength(selectedCategory);
@@ -534,10 +708,51 @@ const DashboardScreen = ({ navigation }) => {
     };
 
     const handleRemoveNumber = (num) => {
-        setNumbersList(numbersList.filter(item => item !== num));
+        const updatedNumbersList = numbersList.filter(item => item !== num);
+        setNumbersList(updatedNumbersList);
 
+        setPayloadString(updatedNumbersList.join(','));
     };
 
+    const handleAddUltaPan = () => {
+        if (ultaPanNumber && ultaPanAmount) {
+            const newEntry = {
+                number: ultaPanNumber,
+                amount: ultaPanAmount
+            };
+            setUltaPanEntries([...ultaPanEntries, newEntry]);
+            setUltaPanNumber("");
+            setUltaPanAmount("");
+        } else {
+            Alert.alert("Error", "Please enter both number and amount");
+        }
+    };
+
+    const handleAddUltaGunule = () => {
+        if (ultaPanGunule && ultaPanGunuleAmount) {
+            const newEntry = {
+                number: ultaPanGunule,
+                amount: ultaPanGunuleAmount
+            };
+            setUltaGunuleEntries([...ultaGunuleEntries, newEntry]);
+            setUltaPanGunule("");
+            setUltaPanGunuleAmount("");
+        } else {
+            Alert.alert("Error", "Please enter both gunule and amount");
+        }
+    };
+
+    const handleRemoveUltaPan = (index) => {
+        const updatedEntries = [...ultaPanEntries];
+        updatedEntries.splice(index, 1);
+        setUltaPanEntries(updatedEntries);
+    };
+
+    const handleRemoveUltaGunule = (index) => {
+        const updatedEntries = [...ultaGunuleEntries];
+        updatedEntries.splice(index, 1);
+        setUltaGunuleEntries(updatedEntries);
+    };
 
     return (
         <ScrollView style={styles.container}>
@@ -796,6 +1011,38 @@ const DashboardScreen = ({ navigation }) => {
                                 />
                             </View>
                         </View>
+
+                        <TouchableOpacity
+                            style={styles.addButton}
+                            onPress={handleAddSaralPan}
+                        >
+                            <Text style={styles.addButtonText}>Add Saral Pan</Text>
+                        </TouchableOpacity>
+
+                        {/* Display Saral-Pan Table */}
+
+                        {saralPanEntries.length !== 0 ? <View style={styles.table}>
+                            <View style={styles.tableHeader}>
+                                <Text style={styles.tableHeaderText}>Number</Text>
+                                <Text style={styles.tableHeaderText}>Amount</Text>
+                                <Text style={styles.tableHeaderText}>Action</Text>
+                            </View>
+                            {saralPanEntries.map((entry, index) => (
+                                <View key={`saral-${index}`} style={styles.tableRow}>
+                                    <Text style={styles.tableCell}>{entry.number}</Text>
+                                    <Text style={styles.tableCell}>{entry.amount}</Text>
+                                    <TouchableOpacity
+                                        style={styles.deleteButton}
+                                        onPress={() => handleRemoveSaralPan(index)}
+                                    >
+                                        <Icon name="trash" size={18} color="red" />
+                                    </TouchableOpacity>
+                                </View>
+                            ))}
+                        </View> : ''
+                        }
+
+
                         <View style={styles.row}>
                             <View style={styles.inputGroup}>
                                 <Text style={styles.label}>GUNULE</Text>
@@ -819,30 +1066,35 @@ const DashboardScreen = ({ navigation }) => {
                             </View>
                         </View>
 
-
-                        <TouchableOpacity style={styles.addButton} onPress={handleAddSaralPan}>
-                            <Text style={styles.addButtonText}>Add Saral-Pan</Text>
+                        <TouchableOpacity
+                            style={styles.addButton}
+                            onPress={handleAddGunule}
+                        >
+                            <Text style={styles.addButtonText}>Add Gunule</Text>
                         </TouchableOpacity>
-
-                        {/* Display Saral-Pan Table */}
-                        <View style={styles.table}>
-                            <Text style={styles.tableHeader}>Saral-Pan</Text>
-                            {saralPanData.map((item, index) => (
-                                <View key={index} style={styles.tableRow}>
-                                    <Text style={styles.tableCell}>{item.number}</Text>
-                                    <Text style={styles.tableCell}>{item.amount}</Text>
-                                    <TouchableOpacity
-                                        style={styles.deleteButton}
-                                        onPress={() => {
-                                            const updatedData = saralPanData.filter((_, i) => i !== index);
-                                            setSaralPanData(updatedData);
-                                        }}
-                                    >
-                                        <Icon name="trash" size={18} color="red" />
-                                    </TouchableOpacity>
+                        {
+                            gunuleEntries.length !== 0 ? <View style={styles.table}>
+                                <View style={styles.tableHeader}>
+                                    <Text style={styles.tableHeaderText}>Gunule</Text>
+                                    <Text style={styles.tableHeaderText}>Amount</Text>
+                                    <Text style={styles.tableHeaderText}>Action</Text>
                                 </View>
-                            ))}
-                        </View>
+                                {gunuleEntries.map((entry, index) => (
+                                    <View key={`gunule-${index}`} style={styles.tableRow}>
+                                        <Text style={styles.tableCell}>{entry.number}</Text>
+                                        <Text style={styles.tableCell}>{entry.amount}</Text>
+                                        <TouchableOpacity
+                                            style={styles.deleteButton}
+                                            onPress={() => handleRemoveGunule(index)}
+                                        >
+                                            <Icon name="trash" size={18} color="red" />
+                                        </TouchableOpacity>
+                                    </View>
+                                ))}
+                            </View> : ''
+                        }
+
+
                     </View>
                 )}
 
@@ -856,8 +1108,7 @@ const DashboardScreen = ({ navigation }) => {
                                 <TextInput
                                     style={styles.input}
                                     placeholder="Enter Gunule"
-                                    value={saralPanGunule}
-                                    onChangeText={setsaralPanGunule}
+                                    value={ultaPanGunule} onChangeText={setUltaPanGunule}
                                     keyboardType="numeric"
                                 />
                             </View>
@@ -867,13 +1118,43 @@ const DashboardScreen = ({ navigation }) => {
                                 <TextInput
                                     style={styles.input}
                                     placeholder="Enter Amount"
-                                    value={saralPanGunuleAmount}
-                                    onChangeText={setsaralPanGunuleAmount}
+                                    value={ultaPanGunuleAmount}
+                                    onChangeText={setUltaPanGunuleAmount}
+
                                     keyboardType="numeric"
                                 />
                             </View>
-                        </View>
 
+
+                        </View>
+                        <TouchableOpacity
+                            style={styles.addButton}
+                            onPress={handleAddUltaGunule}
+                        >
+                            <Text style={styles.addButtonText}>Add Gunule</Text>
+                        </TouchableOpacity>
+
+                        {ultaGunuleEntries.length > 0 && (
+                            <View style={styles.table}>
+                                <View style={styles.tableHeader}>
+                                    <Text style={styles.tableHeaderText}>Gunule</Text>
+                                    <Text style={styles.tableHeaderText}>Amount</Text>
+                                    <Text style={styles.tableHeaderText}>Action</Text>
+                                </View>
+                                {ultaGunuleEntries.map((entry, index) => (
+                                    <View key={`ulta-gunule-${index}`} style={styles.tableRow}>
+                                        <Text style={styles.tableCell}>{entry.number}</Text>
+                                        <Text style={styles.tableCell}>{entry.amount}</Text>
+                                        <TouchableOpacity
+                                            style={styles.deleteButton}
+                                            onPress={() => handleRemoveUltaGunule(index)}
+                                        >
+                                            <Icon name="trash" size={18} color="red" />
+                                        </TouchableOpacity>
+                                    </View>
+                                ))}
+                            </View>
+                        )}
 
                         <View style={styles.row}>
                             <View style={styles.inputGroup}>
@@ -881,8 +1162,8 @@ const DashboardScreen = ({ navigation }) => {
                                 <TextInput
                                     style={styles.input}
                                     placeholder="Enter Saral-Pan No"
-                                    value={saralPanNumber}
-                                    onChangeText={setSaralPanNumber}
+                                    value={ultaPanNumber}
+                                    onChangeText={setUltaPanNumber}
                                     keyboardType="numeric"
                                 />
                             </View>
@@ -892,12 +1173,42 @@ const DashboardScreen = ({ navigation }) => {
                                 <TextInput
                                     style={styles.input}
                                     placeholder="Enter Amount"
-                                    value={saralPanAmount}
-                                    onChangeText={setSaralPanAmount}
+                                    value={ultaPanAmount}
+                                    onChangeText={setUltaPanAmount}
                                     keyboardType="numeric"
                                 />
                             </View>
+
+
                         </View>
+                        <TouchableOpacity
+                            style={styles.addButton}
+                            onPress={handleAddUltaPan}
+                        >
+                            <Text style={styles.addButtonText}>Add Ulta Pan</Text>
+                        </TouchableOpacity>
+
+                        {ultaPanEntries.length > 0 && (
+                            <View style={styles.table}>
+                                <View style={styles.tableHeader}>
+                                    <Text style={styles.tableHeaderText}>Number</Text>
+                                    <Text style={styles.tableHeaderText}>Amount</Text>
+                                    <Text style={styles.tableHeaderText}>Action</Text>
+                                </View>
+                                {ultaPanEntries.map((entry, index) => (
+                                    <View key={`ulta-${index}`} style={styles.tableRow}>
+                                        <Text style={styles.tableCell}>{entry.number}</Text>
+                                        <Text style={styles.tableCell}>{entry.amount}</Text>
+                                        <TouchableOpacity
+                                            style={styles.deleteButton}
+                                            onPress={() => handleRemoveUltaPan(index)}
+                                        >
+                                            <Icon name="trash" size={18} color="red" />
+                                        </TouchableOpacity>
+                                    </View>
+                                ))}
+                            </View>
+                        )}
 
 
                         {/* <TouchableOpacity style={styles.addButton} onPress={handleAddSaralPan}>
@@ -1255,6 +1566,57 @@ const styles = StyleSheet.create({
         color: 'red',
         fontSize: 12,
         marginTop: 4,
+    },
+    subSectionTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginTop: 15,
+        marginBottom: 10,
+        color: '#333',
+    },
+    table: {
+        marginTop: 10,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 5,
+        marginBottom: 15,
+    },
+    tableHeader: {
+        flexDirection: 'row',
+        backgroundColor: '#f5f5f5',
+        padding: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ddd',
+    },
+    tableHeaderText: {
+        flex: 1,
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    tableRow: {
+        flexDirection: 'row',
+        padding: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+    },
+    tableCell: {
+        flex: 1,
+        textAlign: 'center',
+    },
+    deleteButton: {
+        flex: 1,
+        alignItems: 'center',
+    },
+    addButton: {
+        backgroundColor: '#4CAF50',
+        padding: 10,
+        borderRadius: 5,
+        alignItems: 'center',
+        marginVertical: 10,
+    },
+    addButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
     },
 });
 
