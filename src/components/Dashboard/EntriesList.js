@@ -142,83 +142,80 @@ const EntriesList = ({
             }
         });
 
-        return Object.keys(childrenGrouped).map((parentKey, index) => {
-            const parentIds = JSON.parse(parentKey);
-            const type = childrenGrouped[parentKey].type;
-            const children = childrenGrouped[parentKey].children;
+        return (
+            <View style={styles.panContainer}>
+                {Object.keys(childrenGrouped).map((parentKey, index) => {
+                    const parentIds = JSON.parse(parentKey);
+                    const type = childrenGrouped[parentKey].type;
+                    const children = childrenGrouped[parentKey].children;
 
-            let parentContent = [];
-            let childContent = [];
+                    let parentContent = [];
+                    let childContent = [];
 
-            // Render parent entries
-            parentIds.forEach(parentId => {
-                if (parents[parentId]) {
-                    const parent = parents[parentId];
-                    const isHighlighted =
-                        (type === 'ulta_pan' && resultnum === parent.number) ||
-                        (type === 'saral_pan' && resultpan === parent.number);
+                    // Render parent entries
+                    parentIds.forEach(parentId => {
+                        if (parents[parentId]) {
+                            const parent = parents[parentId];
+                            const isHighlighted =
+                                (type === 'ulta_pan' && resultnum === parent.number) ||
+                                (type === 'saral_pan' && resultpan === parent.number);
 
-                    parentContent.push(
-                        <View key={`parent-${parentId}`} style={styles.panEntry}>
-                            <Text style={isHighlighted ? styles.highlightedText : styles.normalText}>
-                                {parent.number}X{parent.amount}
-                            </Text>
+                            parentContent.push(
+                                <View key={`parent-${parentId}`} style={styles.panEntry}>
+                                    <Text style={isHighlighted ? styles.highlightedText : styles.normalText}>
+                                        {parent.number}X{parent.amount}
+                                    </Text>
+                                </View>
+                            );
+                        }
+                    });
+
+                    // Render child entries
+                    children.forEach(child => {
+                        childContent.push(
+                            <View key={`child-${child.id}`} style={styles.panEntry}>
+                                <Text style={styles.normalText}>
+                                    {child.number}X{child.amount}
+                                </Text>
+                            </View>
+                        );
+                    });
+
+                    const mergedIds = [...parentIds, ...children.map(child => child.id)];
+                    const backgroundColor = parents[parentIds[0]]?.verified_by === 0 ? '#fff' : 'lightgreen';
+
+                    return (
+                        <View
+                            key={`pan-${index}`}
+                            style={[
+                                styles.cardStyle,
+                                { backgroundColor },
+                            ]}
+                        >
+                            <View style={styles.cardHeader}>
+                                <TouchableOpacity onPress={() => {/* verify_status would go here */ }}>
+                                    <Text style={styles.cardType}>{type.toUpperCase()}</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <View style={styles.panContent}>
+                                {parentContent}
+                                {childContent}
+                            </View>
+                            {(parents[parentIds[0]]?.verified_by === 0 || userRole === "admin") && (
+                                <View style={styles.cardActions}>
+                                    <TouchableOpacity
+                                        style={styles.actionButton}
+                                        onPress={() => Delete(JSON.stringify(mergedIds))}
+                                    >
+                                        <Icon name="trash" size={20} color="#FF0000" />
+                                    </TouchableOpacity>
+                                </View>
+                            )}
                         </View>
                     );
-                }
-            });
-
-            // Render child entries
-            children.forEach(child => {
-                childContent.push(
-                    <View key={`child-${child.id}`} style={styles.panEntry}>
-                        <Text style={styles.normalText}>
-                            {child.number}X{child.amount}
-                        </Text>
-                    </View>
-                );
-            });
-
-            const mergedIds = [...parentIds, ...children.map(child => child.id)];
-            const backgroundColor = parents[parentIds[0]]?.verified_by === 0 ? '#fff' : 'lightgreen';
-
-            return (
-                <View
-                    key={`pan-${index}`}
-                    style={[
-                        styles.cardStyle,
-                        { backgroundColor },
-                        styles.panCard
-                    ]}
-                >
-                    <View style={styles.cardHeader}>
-                        <TouchableOpacity onPress={() => {/* verify_status would go here */ }}>
-                            <Text style={styles.cardType}>{type.toUpperCase()}</Text>
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.panContent}>
-                        {parentContent}
-                        {childContent}
-                    </View>
-                    {(parents[parentIds[0]]?.verified_by === 0 || userRole === "admin") && (
-                        <View style={styles.cardActions}>
-                            {/* <TouchableOpacity
-                                style={styles.actionButton}
-                                onPress={() => handleChangeMsg(JSON.stringify(mergedIds))}
-                            >
-                                <Icon name="recycle" size={20} color="#FFA500" />
-                            </TouchableOpacity> */}
-                            <TouchableOpacity
-                                style={styles.actionButton}
-                                onPress={() => Delete(JSON.stringify(mergedIds))}
-                            >
-                                <Icon name="trash" size={20} color="#FF0000" />
-                            </TouchableOpacity>
-                        </View>
-                    )}
-                </View>
-            );
-        });
+                })}
+            </View>
+        );
     };
 
     const renderAllEntries = () => {
@@ -326,6 +323,19 @@ const styles = StyleSheet.create({
     },
     checkboxContainer: {
         marginRight: 10,
+    },
+    panContainer: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "space-between",
+    },
+    cardStyle: {
+        backgroundColor: "#fff",
+        borderRadius: 8,
+        marginBottom: 10,
+        borderWidth: 1,
+        borderColor: "#000",
+        width: "48%", // This makes each card take up 48% width
     },
 });
 

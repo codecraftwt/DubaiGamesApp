@@ -29,6 +29,7 @@ import { submitEntry } from "../../Redux/Slices/entrySlice";
 import EntriesList from "../../components/Dashboard/EntriesList";
 import { fetchAgentByCode, fetchAgentByName } from "../../Redux/Slices/autoCompleteSlice";
 import EditEntryModal from "../../components/Modal/EditEntryModal";
+import { deleteSaralUltadel, resetSaralUltadelState } from "../../Redux/Slices/saralUltadelSlice";
 
 
 const DashboardScreen = ({ navigation }) => {
@@ -58,6 +59,8 @@ const DashboardScreen = ({ navigation }) => {
 
     const { data, status } = useSelector((state) => state.market);
     const { agentInfo } = useSelector((state) => state.autoComplete)
+    const { loading: saralUltadelLoading, error: saralUltadelError, success: saralUltadelSuccess } =
+        useSelector((state) => state.saralUltadel);
 
     const { loading, error, success } = useSelector((state) => state.entry);
     const token = useSelector((state) => state.auth.token);
@@ -133,7 +136,13 @@ const DashboardScreen = ({ navigation }) => {
         fetchData();
     }, [agentName, date, market, id]);
 
-
+    useEffect(() => {
+        if (saralUltadelSuccess) {
+            Alert.alert("Success", "Entries deleted successfully");
+            dispatch(resetSaralUltadelState());
+            fetchData();
+        }
+    }, [saralUltadelSuccess]);
     const validateNumber = (value, category) => {
         if (!value) return true;
 
@@ -530,10 +539,18 @@ const DashboardScreen = ({ navigation }) => {
                     text: "Delete",
                     onPress: async () => {
                         try {
-                            await dispatch(deleteEntryData(id));
+                            // Check if the id is a stringified array (for saral/ulta pan)
+                            if (typeof id === 'string' && id.startsWith('[')) {
+                                const ids = JSON.parse(id);
+                                await dispatch(deleteSaralUltadel({ ids, token }));
+                            } else {
+                                // Regular entry deletion
+                                await dispatch(deleteEntryData(id));
+                            }
                             fetchData();
                         } catch (error) {
                             console.error("Error while deleting:", error);
+                            Alert.alert("Error", "Failed to delete entry");
                         }
                     },
                     style: "destructive"
@@ -852,15 +869,7 @@ const DashboardScreen = ({ navigation }) => {
                 />
 
                 {/* Action Buttons */}
-                <View style={styles.buttonGroup}>
-                    <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                        <Text style={styles.submitButtonText}>SUBMIT</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.deleteAllButton} onPress={handleClear}>
-                        <Icon name="trash" size={16} color="white" />
-                        <Text style={styles.deleteAllButtonText}>Save</Text>
-                    </TouchableOpacity>
-                </View>
+
 
                 {(selectedCategory === "CYCLE" || selectedCategory === "RUNNING_PAN") && (
                     <>
@@ -1010,14 +1019,15 @@ const DashboardScreen = ({ navigation }) => {
                                     keyboardType="numeric"
                                 />
                             </View>
+                            <TouchableOpacity
+                                style={styles.addButton}
+                                onPress={handleAddSaralPan}
+                            >
+                                <Text style={styles.addButtonText}>+</Text>
+                            </TouchableOpacity>
                         </View>
 
-                        <TouchableOpacity
-                            style={styles.addButton}
-                            onPress={handleAddSaralPan}
-                        >
-                            <Text style={styles.addButtonText}>Add Saral Pan</Text>
-                        </TouchableOpacity>
+
 
                         {/* Display Saral-Pan Table */}
 
@@ -1064,14 +1074,15 @@ const DashboardScreen = ({ navigation }) => {
                                     keyboardType="numeric"
                                 />
                             </View>
+                            <TouchableOpacity
+                                style={styles.addButton}
+                                onPress={handleAddGunule}
+                            >
+                                <Text style={styles.addButtonText}>+</Text>
+                            </TouchableOpacity>
                         </View>
 
-                        <TouchableOpacity
-                            style={styles.addButton}
-                            onPress={handleAddGunule}
-                        >
-                            <Text style={styles.addButtonText}>Add Gunule</Text>
-                        </TouchableOpacity>
+
                         {
                             gunuleEntries.length !== 0 ? <View style={styles.table}>
                                 <View style={styles.tableHeader}>
@@ -1125,14 +1136,14 @@ const DashboardScreen = ({ navigation }) => {
                                 />
                             </View>
 
-
+                            <TouchableOpacity
+                                style={styles.addButton}
+                                onPress={handleAddUltaGunule}
+                            >
+                                <Text style={styles.addButtonText}>+</Text>
+                            </TouchableOpacity>
                         </View>
-                        <TouchableOpacity
-                            style={styles.addButton}
-                            onPress={handleAddUltaGunule}
-                        >
-                            <Text style={styles.addButtonText}>Add Gunule</Text>
-                        </TouchableOpacity>
+
 
                         {ultaGunuleEntries.length > 0 && (
                             <View style={styles.table}>
@@ -1179,14 +1190,14 @@ const DashboardScreen = ({ navigation }) => {
                                 />
                             </View>
 
+                            <TouchableOpacity
+                                style={styles.addButton}
+                                onPress={handleAddUltaPan}
+                            >
+                                <Text style={styles.addButtonText}>+</Text>
+                            </TouchableOpacity>
 
                         </View>
-                        <TouchableOpacity
-                            style={styles.addButton}
-                            onPress={handleAddUltaPan}
-                        >
-                            <Text style={styles.addButtonText}>Add Ulta Pan</Text>
-                        </TouchableOpacity>
 
                         {ultaPanEntries.length > 0 && (
                             <View style={styles.table}>
@@ -1254,6 +1265,15 @@ const DashboardScreen = ({ navigation }) => {
 
             </View>
 
+            <View style={styles.buttonGroup}>
+                <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+                    <Text style={styles.submitButtonText}>SUBMIT</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.deleteAllButton} onPress={handleClear}>
+                    {/* <Icon name="payment" size={16} color="white" /> */}
+                    <Text style={styles.deleteAllButtonText}>Payment</Text>
+                </TouchableOpacity>
+            </View>
             <EntriesList reversedGroupedEntries={data?.reversedGroupedEntries} Delete={handleDelete} handleEdit={handleEdit} />
             <EditEntryModal
                 visible={isEditModalVisible}
@@ -1340,8 +1360,8 @@ const styles = StyleSheet.create({
         color: globalColors.darkBlue,
     },
     inputGroup: {
-        marginBottom: 16,
-        width: '48%'
+        marginVertical: 10,
+        width: '42%'
     },
     label: {
         fontSize: 14,
@@ -1610,6 +1630,7 @@ const styles = StyleSheet.create({
     addButton: {
         backgroundColor: '#4CAF50',
         padding: 10,
+        marginTop: 30,
         borderRadius: 5,
         alignItems: 'center',
         marginVertical: 10,
