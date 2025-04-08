@@ -18,8 +18,8 @@ const LoginScreen = ({ navigation }) => {
     const dispatch = useDispatch();
     const authState = useSelector((state) => state.auth);
 
-    const [username, setUsername] = useState('admin@example.com');
-    const [password, setPassword] = useState('password');
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
     const [code, setCode] = useState('');
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
@@ -90,7 +90,7 @@ const LoginScreen = ({ navigation }) => {
                 </View>
 
                 {/* Code Input */}
-                <View style={styles.inputContainer}>
+                {/* <View style={styles.inputContainer}>
                     <Icon name="key-outline" size={hp('3%')} color="#888" style={styles.icon} />
                     <TextInput
                         style={styles.input}
@@ -100,7 +100,7 @@ const LoginScreen = ({ navigation }) => {
                         onChangeText={setCode}
                         keyboardType="numeric"
                     />
-                </View>
+                </View> */}
 
                 {/* Login Button */}
                 <TouchableOpacity style={styles.button} onPress={handleLogin}>
@@ -110,6 +110,12 @@ const LoginScreen = ({ navigation }) => {
                         <Text style={styles.buttonText}>Login</Text>
                     )}
                 </TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+                    <Text style={[styles.subtitle, { fontSize: hp('2%'), color: globalColors.black, marginTop: hp('1.5%') }]}>
+                        Create a new account?</Text>
+                </TouchableOpacity>
+
+
             </ScrollView>
 
         </KeyboardAvoidingView>

@@ -313,8 +313,8 @@ const StaffListScreen = () => {
                             <Text style={styles.entriesLabel}>ENTRIES</Text>
                         </View> */}
 
-                        <View style={styles.searchContainer}>
-                            {/* <Text style={styles.searchLabel}>SEARCH:</Text> */}
+                        {/* <View style={styles.searchContainer}>
+                            <Text style={styles.searchLabel}>SEARCH:</Text>
                             <TextInput
                                 style={styles.searchInput}
                                 value={searchQuery}
@@ -328,7 +328,7 @@ const StaffListScreen = () => {
                             onPress={handleAddStaff}
                         >
                             <Text style={styles.addStaffText}>Add Staff</Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                     </View>
 
                     {loading ? (
@@ -338,17 +338,23 @@ const StaffListScreen = () => {
                             <ScrollView horizontal>
                                 <View>
                                     {renderTableHeader()}
-                                    <FlatList
-                                        data={filteredStaffList}
-                                        renderItem={renderStaffItem}
-                                        keyExtractor={(item) => item.id.toString()}
-                                        contentContainerStyle={styles.tableContainer}
-                                        ListEmptyComponent={
-                                            <View style={styles.emptyContainer}>
-                                                <Text style={styles.emptyText}>No staff members found</Text>
-                                            </View>
-                                        }
-                                    />
+                                    <ScrollView
+                                        style={styles.verticalScroll}
+                                        nestedScrollEnabled={true}
+                                    >
+                                        <FlatList
+                                            data={filteredStaffList}
+                                            renderItem={renderStaffItem}
+                                            keyExtractor={(item) => item.id.toString()}
+                                            contentContainerStyle={styles.tableContainer}
+                                            ListEmptyComponent={
+                                                <View style={styles.emptyContainer}>
+                                                    <Text style={styles.emptyText}>No staff members found</Text>
+                                                </View>
+                                            }
+                                            scrollEnabled={false} // Disable FlatList's built-in scroll
+                                        />
+                                    </ScrollView>
                                 </View>
                             </ScrollView>
 
@@ -505,7 +511,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 16,
+        padding: 10,
         borderBottomWidth: 1,
         borderBottomColor: '#e0e0e0',
         flexWrap: 'wrap',

@@ -12,6 +12,9 @@ const initialState = {
     token: null,
     loading: false,
     error: null,
+    registrationLoading: false,
+    registrationError: null,
+    isRegistered: false,
 };
 
 const authSlice = createSlice({
@@ -37,10 +40,29 @@ const authSlice = createSlice({
             state.user = null;
             state.token = null;
         },
+        registrationStart: (state) => {
+            state.registrationLoading = true;
+            state.registrationError = null;
+        },
+        registrationSuccess: (state) => {
+            state.registrationLoading = false;
+            state.isRegistered = true;
+        },
+        registrationFailure: (state, action) => {
+            state.registrationLoading = false;
+            state.registrationError = action.payload;
+        },
+        resetRegistration: (state) => {
+            state.isRegistered = false;
+            state.registrationError = null;
+        }
     },
 });
 
-export const { loginStart, loginSuccess, loginFailure, logout } = authSlice.actions;
+export const { loginStart, loginSuccess, loginFailure, logout, registrationStart,
+    registrationSuccess,
+    registrationFailure,
+    resetRegistration } = authSlice.actions;
 
 export const loginUser = (username, password, code) => async (dispatch) => {
     dispatch(loginStart());
@@ -94,5 +116,53 @@ export const logoutUser = () => async (dispatch, getState) => {
     }
 };
 
+
+export const registerUser = (userData) => async (dispatch) => {
+    dispatch(registrationStart());
+    try {
+        console.log("Sending registration data:", userData);
+
+        const response = await axios.post('http://staging.rdnidhi.com/api/register', {
+            name: userData.name,
+            email: userData.email,
+            phone: userData.phone_number,
+            password: userData.pass,
+            password_confirmation: userData.confirm_pass
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+
+        console.log("Registration response:", response.data);
+
+        dispatch(registrationSuccess());
+        Toast.show({
+            type: 'success',
+            text1: response.data.message || 'Registration successful!',
+        });
+        return response.data;
+    } catch (error) {
+        console.log("Registration error:", error.response);
+        let errorMessage = 'Registration failed';
+        if (error.response?.status === 422) {
+            // Extract validation messages from the response
+            errorMessage = Object.values(error.response.data.errors || {})
+                .flat()
+                .join('\n');
+        } else {
+            errorMessage = error.response?.data?.message || error.message;
+        }
+
+        Toast.show({
+            type: 'error',
+            text1: 'Registration Failed',
+            text2: errorMessage,
+        });
+        dispatch(registrationFailure(errorMessage));
+        throw error;
+    }
+};
 
 export default authSlice.reducer;

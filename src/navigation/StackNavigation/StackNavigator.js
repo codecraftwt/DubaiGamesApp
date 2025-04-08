@@ -21,6 +21,8 @@ import OldPaymentReport from '../../screens/PaymentMethods/OldPaymentReport';
 import BusinessReport from '../../screens/PaymentMethods/BusinessReport';
 import PaymentLedger from '../../screens/PaymentMethods/PaymentLedger';
 import DashboardScreen from '../../screens/DashboardScreen/DashboardScreen';
+import RegistrationForm from '../../screens/Auth/RegistrationForm';
+import CustomerList from '../../screens/Customer/CustomerList';
 
 
 
@@ -50,6 +52,10 @@ const StackNavigator = () => (
         <Stack.Screen name="OldPaymentReport" component={OldPaymentReport} />
         <Stack.Screen name="BusinessReport" component={BusinessReport} />
         <Stack.Screen name="PaymentLedger" component={PaymentLedger} />
+        <Stack.Screen name="Register" component={RegistrationForm} />
+        <Stack.Screen name="CustomerList" component={CustomerList} />
+
+
 
     </Stack.Navigator>
 );

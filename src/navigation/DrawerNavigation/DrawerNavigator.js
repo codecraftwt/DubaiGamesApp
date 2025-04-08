@@ -26,6 +26,7 @@ import OldPaymentReport from "../../screens/PaymentMethods/OldPaymentReport";
 import BusinessReport from "../../screens/PaymentMethods/BusinessReport";
 import { globalColors } from "../../Theme/globalColors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import CustomerList from "../../screens/Customer/CustomerList";
 
 const Drawer = createDrawerNavigator();
 
@@ -36,13 +37,22 @@ const ALL_MENU_ITEMS = [
     { name: "Agent List", component: AgentList, icon: "users" },
     { name: "Client List", component: StaffListScreen, icon: "user" },
     { name: "My Account", component: SettingsScreen, icon: "user" },
+    { name: "CustomerList", component: CustomerList, icon: "user" },
     { name: "Reports", component: null, icon: "file-text", isDropdown: true },  // Dropdown Item
 ];
 
+// const MENU_ITEMS = {
+//     admin: ["Dashboard", "Daily Result", "ResultPage", "Agent List", "Client List", "Reports", "My Account", "CustomerList"],
+//     staff: ["Dashboard", "My Account", "Client List", "Daily Result", "Reports"],
+//     editor: ["Dashboard", "My Account", "Daily Result"],
+// };
+
 const MENU_ITEMS = {
-    admin: ["Dashboard", "Daily Result", "ResultPage", "Agent List", "Client List", "Reports", "My Account"],
+    admin: ["Dashboard", "Daily Result", "My Account", "CustomerList"],
     staff: ["Dashboard", "My Account", "Client List", "Daily Result", "Reports"],
     editor: ["Dashboard", "My Account", "Daily Result"],
+    online_customer: ["Dashboard", "My Account"],
+
 };
 
 const CustomDrawerContent = (props) => {
@@ -195,9 +205,8 @@ const DrawerNavigator = () => {
             <Drawer.Screen name="VerifyReport" component={VerifyReport}
 
             />
-            <Drawer.Screen name="ResultPage" component={ResultPage}
-
-            />
+            <Drawer.Screen name="ResultPage" component={ResultPage} />
+            <Drawer.Screen name="CustomerList" component={CustomerList} />
             {/* ResultPage */}
         </Drawer.Navigator>
     );

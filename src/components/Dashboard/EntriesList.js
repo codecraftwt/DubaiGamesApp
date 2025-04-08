@@ -8,9 +8,15 @@ const EntriesList = ({
     handleChangeMsg,
     resultnum,
     resultpan,
-    userRole
+    userRole,
+    marketResults
 }) => {
     if (!reversedGroupedEntries) return null;
+
+    // Function to check if results are out for a specific category
+    const isKalyanResultOut = marketResults?.some(result =>
+        result.market === "Kalyan"
+    );
 
     const formatNumbers = (entry, type) => {
         if (!entry) return "N/A";
@@ -18,35 +24,13 @@ const EntriesList = ({
         try {
             if (type === 'running_pan' || type === 'beerich' || type === 'farak' || type === 'cycle' || type === 'chokada') {
                 const numbers = JSON.parse(entry.entry_number).join(', ');
-                const numbersArray = numbers.split(",");
-
-                // if (type === 'running_pan') {
-                //     const formatted = numbersArray[0].replace(
-                //         new RegExp(resultpan, 'g'),
-                //         resultpan
-                //     );
-                //     return formatted + ',' + numbersArray[1];
-                // } else if (type === 'cycle') {
-                //     const formatted = numbersArray[0].replace(
-                //         new RegExp(resultnum, 'g'),
-                //         resultnum
-                //     );
-                //     return formatted + ',' + numbersArray[1];
-                // } else if (type === 'beerich' || type === 'farak') {
-                //     if (resultpan !== "null") {
-                //         return numbersArray.map(num => num).join(', ');
-                //     }
-                //     return numbers;
-                // }
                 return numbers;
             }
-            else if (type === 'openpan') {
+            else if (type === 'openpan' || type === 'openpan_dp' || type === 'openpan_sp' || type === 'openpan_tp') {
                 const numbersArray = JSON.parse(entry.entry_number);
-                return numbersArray.map(num =>
-                    num === resultpan ? num : num
-                ).join(', ');
+                return numbersArray.map(num => num === resultpan ? num : num).join(', ');
             }
-            else if (type === 'closepan') {
+            else if (type === 'closepan' || type === 'closepan_dp' || type === 'closepan_sp' || type === 'closepan_tp') {
                 return JSON.parse(entry.entry_number).join(', ');
             }
             else {
@@ -69,59 +53,59 @@ const EntriesList = ({
     };
 
     const renderNormalEntries = (entries) => {
-        return entries.map((entry, index) => (
-            <View
-                key={`normal-${entry.id}-${index}`}
-                style={[
-                    styles.cardStyle,
-                    { backgroundColor: entry.verified_by === 0 ? '#fff' : 'lightgreen' }
-                ]}
-            >
-                <View style={styles.cardHeader}>
-                    {userRole === "admin" && (
-                        <View style={styles.checkboxContainer}>
-                            {/* Checkbox would go here */}
-                        </View>
-                    )}
-                    <TouchableOpacity onPress={() => {/* verify_status would go here */ }}>
-                        <Text style={styles.cardType}>{entry.type.toUpperCase()}</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.cardContent}>
-                    <Text style={styles.numbers}>{formatNumbers(entry, entry.type)}</Text>
-                    <Text style={styles.amount}>₹ {entry.amount}</Text>
-                </View>
-                {(entry.verified_by === 0 || userRole === "admin") && (
-                    <View style={styles.cardActions}>
-                        {/* <TouchableOpacity
-                            style={styles.actionButton}
-                            onPress={() => handleChangeMsg(entry.id)}
-                        >
-                            <Icon name="recycle" size={20} color="#FFA500" />
-                        </TouchableOpacity> */}
-                        <TouchableOpacity
-                            style={styles.actionButton}
-                            onPress={() => handleEdit(entry.id)}
-                        >
-                            <Icon name="edit" size={20} color="#0066FF" />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.actionButton}
-                            onPress={() => Delete(entry.id)}
-                        >
-                            <Icon name="trash" size={20} color="#FF0000" />
+        return entries.map((entry, index) => {
+            // Show edit/delete buttons if:
+            // 1. User is admin OR
+            // 2. Results are not out for this entry type
+            // const showActions = userRole === "admin" || !isResultOut(entry.type);
+
+            return (
+                <View
+                    key={`normal-${entry.id}-${index}`}
+                    style={[
+                        styles.cardStyle,
+                        { backgroundColor: entry.verified_by === 0 ? '#fff' : 'lightgreen' }
+                    ]}
+                >
+                    <View style={styles.cardHeader}>
+                        {userRole === "admin" && (
+                            <View style={styles.checkboxContainer}>
+                                {/* Checkbox would go here */}
+                            </View>
+                        )}
+                        <TouchableOpacity onPress={() => {/* verify_status would go here */ }}>
+                            <Text style={styles.cardType}>{entry.type.toUpperCase()}</Text>
                         </TouchableOpacity>
                     </View>
-                )}
-            </View>
-        ));
+                    <View style={styles.cardContent}>
+                        <Text style={styles.numbers}>{formatNumbers(entry, entry.type)}</Text>
+                        <Text style={styles.amount}>₹ {entry.amount}</Text>
+                    </View>
+                    {(entry.verified_by === 0 && (userRole === "admin" || !isKalyanResultOut)) && (
+                        <View style={styles.cardActions}>
+                            <TouchableOpacity
+                                style={styles.actionButton}
+                                onPress={() => handleEdit(entry.id)}
+                            >
+                                <Icon name="edit" size={20} color="#0066FF" />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.actionButton}
+                                onPress={() => Delete(entry.id)}
+                            >
+                                <Icon name="trash" size={20} color="#FF0000" />
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                </View>
+            );
+        });
     };
 
     const renderPanTableEntries = (panEntries) => {
         const childrenGrouped = {};
         const parents = {};
 
-        // Process pan entries to group children with parents
         panEntries.forEach(entry => {
             if (entry.type === 'saral_pan' || entry.type === 'ulta_pan') {
                 if (entry.parent !== "0") {
@@ -149,10 +133,14 @@ const EntriesList = ({
                     const type = childrenGrouped[parentKey].type;
                     const children = childrenGrouped[parentKey].children;
 
+                    // Show delete button if:
+                    // 1. User is admin OR
+                    // 2. Results are not out for this entry type
+                    // const showActions = userRole === "admin" || !isResultOut(type);
+
                     let parentContent = [];
                     let childContent = [];
 
-                    // Render parent entries
                     parentIds.forEach(parentId => {
                         if (parents[parentId]) {
                             const parent = parents[parentId];
@@ -170,7 +158,6 @@ const EntriesList = ({
                         }
                     });
 
-                    // Render child entries
                     children.forEach(child => {
                         childContent.push(
                             <View key={`child-${child.id}`} style={styles.panEntry}>
@@ -201,7 +188,7 @@ const EntriesList = ({
                                 {parentContent}
                                 {childContent}
                             </View>
-                            {(parents[parentIds[0]]?.verified_by === 0 || userRole === "admin") && (
+                            {(parents[parentIds[0]]?.verified_by === 0 && (userRole === "admin" || !isKalyanResultOut)) && (
                                 <View style={styles.cardActions}>
                                     <TouchableOpacity
                                         style={styles.actionButton}
@@ -219,7 +206,6 @@ const EntriesList = ({
     };
 
     const renderAllEntries = () => {
-        // Flatten all entries from all groups
         const allEntries = [];
         Object.values(reversedGroupedEntries).forEach(group => {
             Object.values(group).forEach(entry => {
@@ -229,7 +215,6 @@ const EntriesList = ({
             });
         });
 
-        // Separate normal entries from pan entries
         const normalEntries = allEntries.filter(
             entry => entry.type !== 'saral_pan' && entry.type !== 'ulta_pan'
         );
@@ -326,16 +311,9 @@ const styles = StyleSheet.create({
     },
     panContainer: {
         flexDirection: "row",
+        width: '100%',
         flexWrap: "wrap",
         justifyContent: "space-between",
-    },
-    cardStyle: {
-        backgroundColor: "#fff",
-        borderRadius: 8,
-        marginBottom: 10,
-        borderWidth: 1,
-        borderColor: "#000",
-        width: "48%", // This makes each card take up 48% width
     },
 });
 

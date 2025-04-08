@@ -33,8 +33,8 @@ import { deleteSaralUltadel, resetSaralUltadelState } from "../../Redux/Slices/s
 
 
 const DashboardScreen = ({ navigation }) => {
-    const [agentId, setAgentId] = useState("");
-    const [agentName, setAgentName] = useState("");
+    const [agentId, setAgentId] = useState("5");
+    const [agentName, setAgentName] = useState("Online user");
     const [market, setMarket] = useState("Kalyan");
     const [date, setDate] = useState(new Date());
     const [number, setNumber] = useState("");
@@ -61,7 +61,7 @@ const DashboardScreen = ({ navigation }) => {
     const { agentInfo } = useSelector((state) => state.autoComplete)
     const { loading: saralUltadelLoading, error: saralUltadelError, success: saralUltadelSuccess } =
         useSelector((state) => state.saralUltadel);
-
+    const { role } = useSelector((state) => state.auth);
     const { loading, error, success } = useSelector((state) => state.entry);
     const token = useSelector((state) => state.auth.token);
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -96,13 +96,28 @@ const DashboardScreen = ({ navigation }) => {
         "CLOSE",
 
     ];
-
+    const categoryDisplayNames = {
+        "OPEN": "OPEN",
+        "JODI": "JODI",
+        "CHOKADA": "CHOKADA",
+        "CYCLE": "CYCLE",
+        "CUT": "CUT",
+        "RUNNING_PAN": "RUNNINGPAN",
+        "SARAL_PAN": "SARAL PAN",
+        "ULTA PAN": "ULTA PAN",
+        "BEERICH": "BEERICH",
+        "FARAK": "FARAK",
+        "OPENPAN": "OPEN PAN",
+        "CLOSEPAN": "CLOSE PAN",
+        "CLOSE": "CLOSE"
+    };
     useEffect(() => {
         setAgentId("");
         setAgentName("");
     }, []);
 
-    const [id, setId] = useState('')
+
+    const [id, setId] = useState('5')
 
     const handleSelectByCode = (code) => {
         dispatch(fetchAgentByCode(code));
@@ -143,7 +158,41 @@ const DashboardScreen = ({ navigation }) => {
             fetchData();
         }
     }, [saralUltadelSuccess]);
-    const validateNumber = (value, category) => {
+
+
+    const getFilteredCategories = useCallback((results, userRole) => {
+        if (!results || !results.length || userRole === "admin") {
+            return categories;
+        }
+        const hasOpenPan = results.some(entry => entry.type === "open-pan");
+        const hasClosePan = results.some(entry => entry.type === "close-pan");
+
+        if (hasOpenPan && hasClosePan) {
+            return [];
+        } else if (hasOpenPan) {
+            return categories.filter(cat =>
+                cat === "CLOSE" || cat === "CLOSEPAN"
+            );
+        } else if (hasClosePan) {
+            return categories.filter(cat =>
+                cat !== "CLOSE" && cat !== "CLOSEPAN"
+            );
+        }
+
+        return categories;
+    }, []);
+    console.log("GGGGGGGGGGGG", data?.role)
+
+    const filteredCategories = getFilteredCategories(data?.results, data?.role);
+
+    useEffect(() => {
+        // Reset selected category if it's not in the filtered list
+        if (filteredCategories.length > 0 && !filteredCategories.includes(selectedCategory)) {
+            setSelectedCategory(filteredCategories[0]);
+        }
+    }, [filteredCategories]);
+
+    const validateNumber = (value, category, panType) => {
         if (!value) return true;
 
         if (!/^\d+$/.test(value)) return false;
@@ -153,7 +202,7 @@ const DashboardScreen = ({ navigation }) => {
             case "BEERICH":
             case "CLOSE":
             case "FARAK":
-                return value.length === 1;
+                return value.length === 1 && /^[1-9]$/.test(value);
 
             case "JODI":
             case "CHOKADA":
@@ -162,6 +211,9 @@ const DashboardScreen = ({ navigation }) => {
             case "RUNNING_PAN":
             case "OPENPAN":
             case "CLOSEPAN":
+                if (panType === 'SP' || panType === 'DP' || panType === 'TP') {
+                    return value.length === 1;
+                }
                 return value.length === 3;
 
             case "CYCLE":
@@ -173,7 +225,7 @@ const DashboardScreen = ({ navigation }) => {
         }
     };
 
-    const getMaxLength = (category) => {
+    const getMaxLength = (category, panType) => {
         switch (category) {
             case "OPEN":
             case "CLOSE":
@@ -186,6 +238,9 @@ const DashboardScreen = ({ navigation }) => {
             case "RUNNING_PAN":
             case "OPENPAN":
             case "CLOSEPAN":
+                if (panType === 'SP' || panType === 'DP' || panType === 'TP') {
+                    return 1;
+                }
                 return 3;
             case "CYCLE":
             case "CUT":
@@ -226,6 +281,10 @@ const DashboardScreen = ({ navigation }) => {
             setErrorMessage('');
         }
     };
+
+    useEffect(() => {
+        resetFormStates();
+    }, [selectedCategory]);
 
     const resetFormStates = () => {
         // Reset common fields
@@ -277,7 +336,7 @@ const DashboardScreen = ({ navigation }) => {
             case "BEERICH":
             case "FARAK":
             case "CLOSE":
-                return "Please enter exactly 1 digit (0-9)";
+                return "Please enter exactly 1 digit (-9)";
 
             case "JODI":
             case "CHOKADA":
@@ -299,7 +358,7 @@ const DashboardScreen = ({ navigation }) => {
 
     const handleSubmit = async () => {
 
-        if (!validateNumber(number, selectedCategory)) {
+        if (!validateNumber(number, selectedCategory, selectedButton)) {
             alert(`Invalid number format for ${selectedCategory} category`);
             return;
         }
@@ -320,7 +379,7 @@ const DashboardScreen = ({ navigation }) => {
                 agent_id: id.toString(),
                 agent_type: "1",
                 agentcode: agentId,
-                agentname: agentName,
+                agentname: 'agentName',
                 amount: amount,
                 amount2: "",
                 filterDate: formatDate(date),
@@ -338,7 +397,7 @@ const DashboardScreen = ({ navigation }) => {
                 agent_id: id.toString(),
                 agent_type: "1",
                 agentcode: agentId,
-                agentname: agentName,
+                agentname: 'agentName',
                 amount: amount,
                 amount2: "",
                 filterDate: formatDate(date),
@@ -356,7 +415,7 @@ const DashboardScreen = ({ navigation }) => {
                 agent_id: id.toString(),
                 agent_type: "1",
                 agentcode: agentId,
-                agentname: agentName,
+                agentname: 'agentName',
                 amount: amount,
                 amount2: secAmount,
                 filterDate: formatDate(date),
@@ -370,22 +429,44 @@ const DashboardScreen = ({ navigation }) => {
                 panType: "undefined",
             };
         } else if (selectedCategory === "OPENPAN" || selectedCategory === "CLOSEPAN") {
-            payload = {
-                agent_id: id.toString(),
-                agent_type: "1",
-                agentcode: agentId,
-                agentname: agentName,
-                amount: amount,
-                amount2: "",
-                filterDate: formatDate(date),
-                market: market,
-                market_msg: "",
-                msg: "",
-                number: '',
-                number2: "",
-                ocj: payloadString,
-                type: selectedCategory.toLowerCase(),
-            };
+
+            if (selectedButton !== null) {
+                payload = {
+                    agent_id: id.toString(),
+                    agent_type: "1",
+                    agentcode: agentId,
+                    agentname: 'agentName',
+                    amount: amount,
+                    amount2: "",
+                    filterDate: formatDate(date),
+                    market: market,
+                    market_msg: "",
+                    msg: "",
+                    number: number,
+                    number2: "",
+                    ocj: '',
+                    type: selectedCategory.toLowerCase(),
+                    panType: selectedButton.toLowerCase(),
+
+                }
+            } else {
+                payload = {
+                    agent_id: id.toString(),
+                    agent_type: "1",
+                    agentcode: agentId,
+                    agentname: 'agentName',
+                    amount: amount,
+                    amount2: "",
+                    filterDate: formatDate(date),
+                    market: market,
+                    market_msg: "",
+                    msg: "",
+                    number: '',
+                    number2: "",
+                    ocj: payloadString,
+                    type: selectedCategory.toLowerCase(),
+                };
+            }
         }
         else if (selectedCategory === "SARAL_PAN") {
             const saralPanNumbers = [];
@@ -433,7 +514,7 @@ const DashboardScreen = ({ navigation }) => {
                 agent_id: id.toString(),
                 agent_type: "1",
                 agentcode: agentId,
-                agentname: agentName,
+                agentname: 'agentName',
                 type: "ulta_pan",
                 market: market,
                 filterDate: formatDate(date),
@@ -520,7 +601,7 @@ const DashboardScreen = ({ navigation }) => {
 
 
     const handleClear = () => {
-        navigation.navigate("StaffList")
+        // navigation.navigate("StaffList")
     }
 
 
@@ -582,6 +663,10 @@ const DashboardScreen = ({ navigation }) => {
                 displayNumber = entryData.number.join(', '); // For JODI, join array with comma
             }
             else if (entryData.type === 'chokada' && entryData.number && Array.isArray(entryData.number)) {
+                displayNumber = entryData.entry_number.join(','); // For JODI, join array with comma
+            }
+
+            else if (entryData.type === 'closepan_dp' || entryData.type === 'closepan_sp' || entryData.type === 'closepan_tp' && entryData.number && Array.isArray(entryData.number)) {
                 displayNumber = entryData.entry_number.join(','); // For JODI, join array with comma
             }
             else if (entryData.type === 'cycle' || entryData.type === 'farak' && entryData.entry_number && Array.isArray(entryData.entry_number)) {
@@ -771,36 +856,99 @@ const DashboardScreen = ({ navigation }) => {
         setUltaGunuleEntries(updatedEntries);
     };
 
+    const [selectedButton, setSelectedButton] = useState(null);
+
+    useEffect(() => {
+        setSelectedButton(null);
+    }, [selectedCategory]);
+
+    const ButtonGroup = ({ onSelect }) => {
+        return (
+            <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                    style={[
+                        styles.button,
+                        selectedButton === 'SP' && styles.selectedButton
+                    ]}
+                    onPress={() => {
+                        setSelectedButton('SP');
+                        onSelect('SP');
+                    }}
+                >
+                    <Text style={[
+                        styles.buttonText,
+                        selectedButton === 'SP' && styles.selectedButtonText
+                    ]}>SP</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[
+                        styles.button,
+                        selectedButton === 'DP' && styles.selectedButton
+                    ]}
+                    onPress={() => {
+                        setSelectedButton('DP');
+                        onSelect('DP');
+                    }}
+                >
+                    <Text style={[
+                        styles.buttonText,
+                        selectedButton === 'DP' && styles.selectedButtonText
+                    ]}>DP</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[
+                        styles.button,
+                        selectedButton === 'TP' && styles.selectedButton
+                    ]}
+                    onPress={() => {
+                        setSelectedButton('TP');
+                        onSelect('TP');
+                    }}
+                >
+                    <Text style={[
+                        styles.buttonText,
+                        selectedButton === 'TP' && styles.selectedButtonText
+                    ]}>TP</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    };
+
+
     return (
         <ScrollView style={styles.container}>
             <Text style={styles.sectionTitle}>Agent Details</Text>
             <View style={styles.formContainer}>
+                {
+                    data?.role !== "online_customer" ? <View style={styles.row}>
+                        <View style={styles.halfWidthInput}>
+                            <Text style={styles.label}>AGENT ID</Text>
+                            <DynamicDropdown
+                                onSelect={handleSelectByCode}
+                                placeholder="Agent Code"
+                                searchType="code"
+                                value={agentId}
+                                setAgentId={setAgentId}
 
+                            />
+                        </View>
+                        <View style={styles.halfWidthInput}>
+                            <Text style={styles.label}>AGENT NAME</Text>
 
-                <View style={styles.row}>
-                    <View style={styles.halfWidthInput}>
-                        <Text style={styles.label}>AGENT ID</Text>
-                        <DynamicDropdown
-                            onSelect={handleSelectByCode}
-                            placeholder="Agent Code"
-                            searchType="code"
-                            value={agentId}
-                            setAgentId={setAgentId}
+                            <DynamicDropdown
+                                onSelect={handleSelectByName}
+                                placeholder="Agent Name"
+                                searchType="name"
+                                value={agentName}
+                            />
 
-                        />
+                        </View>
                     </View>
-                    <View style={styles.halfWidthInput}>
-                        <Text style={styles.label}>AGENT NAME</Text>
+                        : ''
 
-                        <DynamicDropdown
-                            onSelect={handleSelectByName}
-                            placeholder="Agent Name"
-                            searchType="name"
-                            value={agentName}
-                        />
 
-                    </View>
-                </View>
+                }
+
 
                 <View style={styles.row}>
                     <View style={styles.halfWidthInput}>
@@ -840,7 +988,7 @@ const DashboardScreen = ({ navigation }) => {
                 </View>
                 <Text style={styles.sectionTitle}>Select Category</Text>
                 <FlatList
-                    data={categories}
+                    data={filteredCategories}
                     numColumns={3}
                     showsVerticalScrollIndicator={false}
                     keyExtractor={(item) => item}
@@ -862,7 +1010,7 @@ const DashboardScreen = ({ navigation }) => {
                                     selectedCategory === item && styles.selectedRadioText,
                                 ]}
                             >
-                                {item}
+                                {categoryDisplayNames[item]}
                             </Text>
                         </TouchableOpacity>
                     )}
@@ -964,7 +1112,7 @@ const DashboardScreen = ({ navigation }) => {
                     </>
                 )}
 
-                {selectedCategory !== "CYCLE" && selectedCategory !== "RUNNING_PAN" && selectedCategory !== "CUT" && selectedCategory !== "SARAL_PAN" && selectedCategory !== "ULTA PAN" && (
+                {selectedCategory !== "CYCLE" && selectedCategory !== "RUNNING_PAN" && selectedCategory !== "CUT" && selectedCategory !== "SARAL_PAN" && selectedCategory !== "ULTA PAN" && selectedCategory !== "OPENPAN" && selectedCategory !== "CLOSEPAN" && (
                     <>
                         <View style={styles.row}>
                             <View style={styles.inputGroup}>
@@ -982,6 +1130,44 @@ const DashboardScreen = ({ navigation }) => {
                                 // onBlur={handleAddNumber
                                 />
                                 {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+                            </View>
+
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>ENTER AMOUNT</Text>
+                                <TextInput style={styles.input} keyboardType="numeric"
+                                    placeholder="Enter Amount" value={amount} onChangeText={setAmount} />
+                            </View>
+                        </View>
+
+                    </>
+                )}
+
+                {(selectedCategory === "OPENPAN" || selectedCategory === "CLOSEPAN") && (
+                    <>
+                        <ButtonGroup onSelect={(type) => setSelectedButton(type)}
+                        />
+                        <View style={styles.row}>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>ENTER NUMBER</Text>
+                                <TextInput
+                                    style={[
+                                        styles.input,
+                                        !validateNumber(number, selectedCategory, selectedButton) &&
+                                        number.length > 0 && styles.invalidInput
+                                    ]}
+                                    keyboardType="numeric"
+                                    placeholder="Enter Number"
+                                    value={number}
+                                    onChangeText={handleNumberChange2}
+                                    maxLength={getMaxLength(selectedCategory, selectedButton)}
+                                // onBlur={handleAddNumber
+                                />
+                                {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+                                {!validateNumber(number, selectedCategory, selectedButton) && number.length > 0 && (
+                                    <Text style={styles.errorText}>
+                                        {selectedButton ? "Please enter exactly 1 digit" : "Please enter exactly 3 digits"}
+                                    </Text>
+                                )}
                             </View>
 
                             <View style={styles.inputGroup}>
@@ -1227,9 +1413,9 @@ const DashboardScreen = ({ navigation }) => {
                         </TouchableOpacity> */}
 
                         {/* Display Saral-Pan Table */}
-                        <View style={styles.table}>
-                            <Text style={styles.tableHeader}>ulta-Pan</Text>
-                            {/* {saralPanData.map((item, index) => (
+                        {/* <View style={styles.table}>
+                            <Text style={styles.tableHeader}>ulta-Pan</Text> */}
+                        {/* {saralPanData.map((item, index) => (
                                 <View key={index} style={styles.tableRow}>
                                     <Text style={styles.tableCell}>{item.number}</Text>
                                     <Text style={styles.tableCell}>{item.amount}</Text>
@@ -1244,7 +1430,7 @@ const DashboardScreen = ({ navigation }) => {
                                     </TouchableOpacity>
                                 </View>
                             ))} */}
-                        </View>
+                        {/* </View> */}
                     </View>
                 )}
 
@@ -1274,7 +1460,9 @@ const DashboardScreen = ({ navigation }) => {
                     <Text style={styles.deleteAllButtonText}>Payment</Text>
                 </TouchableOpacity>
             </View>
-            <EntriesList reversedGroupedEntries={data?.reversedGroupedEntries} Delete={handleDelete} handleEdit={handleEdit} />
+            <EntriesList reversedGroupedEntries={data?.reversedGroupedEntries} Delete={handleDelete} handleEdit={handleEdit} userRole={data.role}
+                marketResults={data?.results}
+            />
             <EditEntryModal
                 visible={isEditModalVisible}
                 entry={editingEntry}
@@ -1638,6 +1826,32 @@ const styles = StyleSheet.create({
     addButtonText: {
         color: 'white',
         fontWeight: 'bold',
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '60%',
+        marginTop: 20,
+    },
+    button: {
+        borderWidth: 1,
+        borderColor: 'blue',
+        borderRadius: 5,
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    buttonText: {
+        color: 'blue',
+        fontSize: 16,
+    },
+    selectedButton: {
+        backgroundColor: globalColors.blue,
+        borderColor: globalColors.blue,
+    },
+    selectedButtonText: {
+        color: globalColors.white,
     },
 });
 
