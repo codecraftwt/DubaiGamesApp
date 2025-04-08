@@ -118,7 +118,7 @@ const RegistrationScreen = ({ navigation }) => {
         try {
             // Simulate API call
             console.log("formData", formData)
-            await dispatch(registerUser(formData)).unwrap();
+            await dispatch(registerUser(formData))
 
 
             Toast.show({

@@ -33,7 +33,7 @@ import { deleteSaralUltadel, resetSaralUltadelState } from "../../Redux/Slices/s
 
 
 const DashboardScreen = ({ navigation }) => {
-    const [agentId, setAgentId] = useState("5");
+    const [agentId, setAgentId] = useState(agent?.id);
     const [agentName, setAgentName] = useState("Online user");
     const [market, setMarket] = useState("Kalyan");
     const [date, setDate] = useState(new Date());
@@ -41,6 +41,7 @@ const DashboardScreen = ({ navigation }) => {
     const [numbersList, setNumbersList] = useState([]);
     const [ocj, setOcj] = useState("");
     const [payloadString, setPayloadString] = useState('');
+    const [id, setId] = useState(agent?.id);
 
     const [amount, setAmount] = useState("");
     const [secAmount, setsecAmount] = useState("")
@@ -61,7 +62,7 @@ const DashboardScreen = ({ navigation }) => {
     const { agentInfo } = useSelector((state) => state.autoComplete)
     const { loading: saralUltadelLoading, error: saralUltadelError, success: saralUltadelSuccess } =
         useSelector((state) => state.saralUltadel);
-    const { role } = useSelector((state) => state.auth);
+    const { user, agent } = useSelector((state) => state.auth);
     const { loading, error, success } = useSelector((state) => state.entry);
     const token = useSelector((state) => state.auth.token);
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -112,12 +113,11 @@ const DashboardScreen = ({ navigation }) => {
         "CLOSE": "CLOSE"
     };
     useEffect(() => {
-        setAgentId("");
-        setAgentName("");
+        setAgentId(agent?.id);
+        setAgentName(agent?.name);
     }, []);
 
-
-    const [id, setId] = useState('5')
+    console.log("agent=========>", agent)
 
     const handleSelectByCode = (code) => {
         dispatch(fetchAgentByCode(code));
@@ -128,12 +128,12 @@ const DashboardScreen = ({ navigation }) => {
     };
 
     useEffect(() => {
-        if (agentInfo) {
-            setAgentName(agentInfo.name);
-            setAgentId(agentInfo.agentcode);
-            setId(agentInfo.id);
+        if (agent) {
+            setAgentName(agent?.name);
+            setAgentId(agent?.agentcode);
+            setId(agent?.id);
         }
-    }, [agentInfo]);
+    }, [agent]);
 
     const fetchData = async () => {
         try {
@@ -920,7 +920,7 @@ const DashboardScreen = ({ navigation }) => {
             <Text style={styles.sectionTitle}>Agent Details</Text>
             <View style={styles.formContainer}>
                 {
-                    data?.role !== "online_customer" ? <View style={styles.row}>
+                    user?.role !== "online_customer" ? <View style={styles.row}>
                         <View style={styles.halfWidthInput}>
                             <Text style={styles.label}>AGENT ID</Text>
                             <DynamicDropdown
@@ -1460,7 +1460,7 @@ const DashboardScreen = ({ navigation }) => {
                     <Text style={styles.deleteAllButtonText}>Payment</Text>
                 </TouchableOpacity>
             </View>
-            <EntriesList reversedGroupedEntries={data?.reversedGroupedEntries} Delete={handleDelete} handleEdit={handleEdit} userRole={data.role}
+            <EntriesList reversedGroupedEntries={data?.reversedGroupedEntries} Delete={handleDelete} handleEdit={handleEdit} userRole={data?.role}
                 marketResults={data?.results}
             />
             <EditEntryModal

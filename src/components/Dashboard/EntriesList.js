@@ -13,9 +13,13 @@ const EntriesList = ({
 }) => {
     if (!reversedGroupedEntries) return null;
 
-    // Function to check if results are out for a specific category
+    // Function to check if results are out for specific markets
     const isKalyanResultOut = marketResults?.some(result =>
         result.market === "Kalyan"
+    );
+
+    const isMumbaiResultOut = marketResults?.some(result =>
+        result.market === "Mumbai"
     );
 
     const formatNumbers = (entry, type) => {
@@ -54,10 +58,9 @@ const EntriesList = ({
 
     const renderNormalEntries = (entries) => {
         return entries.map((entry, index) => {
-            // Show edit/delete buttons if:
-            // 1. User is admin OR
-            // 2. Results are not out for this entry type
-            // const showActions = userRole === "admin" || !isResultOut(entry.type);
+            // Determine if results are out based on market
+            const isResultOut = entry.market === "Kalyan" ? isKalyanResultOut :
+                entry.market === "Mumbai" ? isMumbaiResultOut : false;
 
             return (
                 <View
@@ -81,7 +84,7 @@ const EntriesList = ({
                         <Text style={styles.numbers}>{formatNumbers(entry, entry.type)}</Text>
                         <Text style={styles.amount}>₹ {entry.amount}</Text>
                     </View>
-                    {(entry.verified_by === 0 && (userRole === "admin" || !isKalyanResultOut)) && (
+                    {(entry.verified_by === 0 && (userRole === "admin" || !isResultOut)) && (
                         <View style={styles.cardActions}>
                             <TouchableOpacity
                                 style={styles.actionButton}
@@ -114,7 +117,7 @@ const EntriesList = ({
                         const parentKey = JSON.stringify(parentIds);
 
                         if (!childrenGrouped[parentKey]) {
-                            childrenGrouped[parentKey] = { children: [], type: entry.type };
+                            childrenGrouped[parentKey] = { children: [], type: entry.type, market: entry.market };
                         }
                         childrenGrouped[parentKey].children.push(entry);
                     } catch (e) {
@@ -131,12 +134,12 @@ const EntriesList = ({
                 {Object.keys(childrenGrouped).map((parentKey, index) => {
                     const parentIds = JSON.parse(parentKey);
                     const type = childrenGrouped[parentKey].type;
+                    const market = childrenGrouped[parentKey].market;
                     const children = childrenGrouped[parentKey].children;
 
-                    // Show delete button if:
-                    // 1. User is admin OR
-                    // 2. Results are not out for this entry type
-                    // const showActions = userRole === "admin" || !isResultOut(type);
+                    // Determine if results are out based on market
+                    const isResultOut = market === "Kalyan" ? isKalyanResultOut :
+                        market === "Mumbai" ? isMumbaiResultOut : false;
 
                     let parentContent = [];
                     let childContent = [];
@@ -181,14 +184,14 @@ const EntriesList = ({
                         >
                             <View style={styles.cardHeader}>
                                 <TouchableOpacity onPress={() => {/* verify_status would go here */ }}>
-                                    <Text style={styles.cardType}>{type.toUpperCase()}</Text>
+                                    <Text style={styles.cardType}>{type.toUpperCase()} ({market})</Text>
                                 </TouchableOpacity>
                             </View>
                             <View style={styles.panContent}>
                                 {parentContent}
                                 {childContent}
                             </View>
-                            {(parents[parentIds[0]]?.verified_by === 0 && (userRole === "admin" || !isKalyanResultOut)) && (
+                            {(parents[parentIds[0]]?.verified_by === 0 && (userRole === "admin" || !isResultOut)) && (
                                 <View style={styles.cardActions}>
                                     <TouchableOpacity
                                         style={styles.actionButton}
