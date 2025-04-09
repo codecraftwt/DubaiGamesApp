@@ -18,6 +18,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { DubaiGames } from '../../Theme/globalImage';
 import { registerUser, resetRegistration } from '../../Redux/Slices/authSlice';
 import Toast from 'react-native-toast-message';
+import { t } from 'i18next';
 
 const RegistrationScreen = ({ navigation }) => {
     const [formData, setFormData] = useState({
@@ -155,7 +156,7 @@ const RegistrationScreen = ({ navigation }) => {
                     source={DubaiGames}
                 />
 
-                <Text style={styles.title}>Create your account</Text>
+                <Text style={styles.title}>{t('createYourAccount')}</Text>
 
                 {/* Name Input */}
                 <View style={styles.inputWrapper}>
@@ -163,7 +164,7 @@ const RegistrationScreen = ({ navigation }) => {
                         <Icon name="account-outline" size={hp('2.8%')} color="#888" style={styles.icon} />
                         <TextInput
                             style={styles.input}
-                            placeholder="Name"
+                            placeholder={t('name')}
                             placeholderTextColor={globalColors.inputLabel}
                             value={formData.name}
                             onChangeText={(text) => handleChange('name', text)}
@@ -178,7 +179,7 @@ const RegistrationScreen = ({ navigation }) => {
                         <Icon name="email-outline" size={hp('2.8%')} color="#888" style={styles.icon} />
                         <TextInput
                             style={styles.input}
-                            placeholder="Email"
+                            placeholder={t('email')}
                             placeholderTextColor={globalColors.inputLabel}
                             value={formData.email}
                             onChangeText={(text) => handleChange('email', text)}
@@ -194,7 +195,7 @@ const RegistrationScreen = ({ navigation }) => {
                         <Icon name="phone-outline" size={hp('2.8%')} color="#888" style={styles.icon} />
                         <TextInput
                             style={styles.input}
-                            placeholder="Phone Number"
+                            placeholder={t("phoneNumber")}
                             placeholderTextColor={globalColors.inputLabel}
                             value={formData.phone_number}
                             onChangeText={(text) => handleChange('phone_number', text)}
@@ -210,7 +211,7 @@ const RegistrationScreen = ({ navigation }) => {
                         <Icon name="lock-outline" size={hp('2.8%')} color="#888" style={styles.icon} />
                         <TextInput
                             style={styles.input}
-                            placeholder="Password"
+                            placeholder={t("password")}
                             placeholderTextColor={globalColors.inputLabel}
                             value={formData.pass}
                             onChangeText={(text) => handleChange('pass', text)}
@@ -235,7 +236,7 @@ const RegistrationScreen = ({ navigation }) => {
                         <Icon name="lock-check-outline" size={hp('2.8%')} color="#888" style={styles.icon} />
                         <TextInput
                             style={styles.input}
-                            placeholder="Confirm Password"
+                            placeholder={t('confirmPassword')}
                             placeholderTextColor={globalColors.inputLabel}
                             value={formData.confirm_pass}
                             onChangeText={(text) => handleChange('confirm_pass', text)}
@@ -263,7 +264,7 @@ const RegistrationScreen = ({ navigation }) => {
                     {registrationLoading ? (
                         <ActivityIndicator color="#fff" size="small" />
                     ) : (
-                        <Text style={styles.buttonText}>Register</Text>
+                        <Text style={styles.buttonText}>{t("register")}</Text>
                     )}
                 </TouchableOpacity>
 
@@ -272,7 +273,7 @@ const RegistrationScreen = ({ navigation }) => {
                     style={styles.loginLink}
                 >
                     <Text style={styles.loginText}>
-                        Already have an account? <Text style={styles.loginLinkText}>Login</Text>
+                        {t('alreadyHaveAccount')} <Text style={styles.loginLinkText}>Login</Text>
                     </Text>
                 </TouchableOpacity>
             </ScrollView>

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { PropsWithChildren } from 'react';
 import {
   ScrollView,
@@ -23,6 +23,10 @@ import store, { persistor } from './src/Redux/store/store';
 import { PersistGate } from 'redux-persist/integration/react';
 import Toast, { BaseToast } from 'react-native-toast-message';
 import { globalColors } from './src/Theme/globalColors';
+import './src/utils/i18n';
+import { I18nextProvider, useTranslation } from 'react-i18next';
+import i18n from './src/utils/i18n';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -88,12 +92,35 @@ function App(): React.JSX.Element {
     ),
   };
 
+
+  // Load saved language on app start
+  useEffect(() => {
+    const loadLanguage = async () => {
+      try {
+        const savedLanguage = await AsyncStorage.getItem('user-language');
+        console.log("savedLanguage", savedLanguage)
+        if (savedLanguage) {
+          i18n.changeLanguage(savedLanguage);
+        }
+      } catch (error) {
+        console.log('Error loading language:', error);
+      }
+    };
+
+    loadLanguage();
+  }, [i18n]);
+
   return (
+
+
     <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <AppNavigator />
-      </PersistGate>
-      <Toast config={customToastConfig} />
+      <I18nextProvider i18n={i18n}>
+
+        <PersistGate loading={null} persistor={persistor}>
+          <AppNavigator />
+        </PersistGate>
+        <Toast config={customToastConfig} />
+      </I18nextProvider>
     </Provider>
   );
 }

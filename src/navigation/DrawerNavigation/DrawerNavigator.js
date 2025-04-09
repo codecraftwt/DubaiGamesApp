@@ -51,7 +51,7 @@ const MENU_ITEMS = {
     admin: ["Dashboard", "Daily Result", "My Account", "CustomerList"],
     staff: ["Dashboard", "My Account", "Client List", "Daily Result", "Reports"],
     editor: ["Dashboard", "My Account", "Daily Result"],
-    online_customer: ["Dashboard", "My Account"],
+    online_customer: ["Dashboard", "My Account", "CustomerList"],
 
 };
 

@@ -5,9 +5,13 @@ import Header from '../../components/Header/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logoutUser } from '../../Redux/Slices/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import LanguageSelector from '../LanguageSelector/LanguageSelector';
+import { useTranslation } from 'react-i18next';
 
 const SettingsScreen = ({ navigation }) => {
     const dispatch = useDispatch();
+    const { t } = useTranslation();
+
     const user = useSelector((state) => state.auth.user);
     console.log("user======>", user)
     const handleLogout = async () => {
@@ -18,6 +22,8 @@ const SettingsScreen = ({ navigation }) => {
     return (
         <View style={styles.container}>
             {/* <Header /> */}
+            {/* <LanguageSelector /> */}
+
             <Image
                 source={{ uri: 'https://randomuser.me/api/portraits/men/1.jpg' }}
                 style={styles.userImage}
@@ -26,9 +32,9 @@ const SettingsScreen = ({ navigation }) => {
             {/* User Name */}
             <Text style={styles.userName}>{user?.name}</Text>
             <Text style={styles.userName}>{user?.email}</Text>
-
             <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                <Text style={styles.logoutText}>Logout</Text>
+                <Text style={styles.logoutText}>{t("logout"
+                )}</Text>
             </TouchableOpacity>
         </View>
     );

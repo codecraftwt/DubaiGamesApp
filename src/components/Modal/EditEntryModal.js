@@ -1,6 +1,7 @@
 import React from 'react'
 import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { globalColors } from '../../Theme/globalColors';
+import { t } from 'i18next';
 
 const EditEntryModal = ({ visible, entry, onClose, onSave, editNumber, setEditNumber, editAmount, setEditAmount }) => {
     if (!entry) return null;
@@ -111,10 +112,10 @@ const EditEntryModal = ({ visible, entry, onClose, onSave, editNumber, setEditNu
         >
             <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
-                    <Text style={styles.modalTitle}>Edit Entry</Text>
+                    <Text style={styles.modalTitle}>{t('edit_entry')}</Text>
                     <Text style={styles.modalSubtitle}>{entry.type.toUpperCase()}</Text>
 
-                    <Text style={styles.label}>NUMBER</Text>
+                    <Text style={styles.label}>{t('enterNumber')}</Text>
                     <TextInput
                         style={[
                             styles.modalInput,
@@ -131,7 +132,7 @@ const EditEntryModal = ({ visible, entry, onClose, onSave, editNumber, setEditNu
                         </Text>
                     )}
 
-                    <Text style={styles.label}>AMOUNT</Text>
+                    <Text style={styles.label}>{t('enterAmount')}</Text>
                     <TextInput
                         style={styles.modalInput}
                         value={editAmount}
@@ -145,7 +146,7 @@ const EditEntryModal = ({ visible, entry, onClose, onSave, editNumber, setEditNu
                             style={[styles.modalButton, styles.closeButton]}
                             onPress={onClose}
                         >
-                            <Text style={styles.modalButtonText}>Close</Text>
+                            <Text style={styles.modalButtonText}>{t('cancel')}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -157,7 +158,7 @@ const EditEntryModal = ({ visible, entry, onClose, onSave, editNumber, setEditNu
                             onPress={onSave}
                             disabled={!validateNumber(editNumber, entry.type) || !editAmount}
                         >
-                            <Text style={styles.modalButtonText}>Save changes</Text>
+                            <Text style={styles.modalButtonText}>{t("save_changes")}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

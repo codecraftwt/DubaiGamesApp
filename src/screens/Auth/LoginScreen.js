@@ -13,9 +13,14 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 import { loginUser } from '../../Redux/Slices/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { ActivityIndicator } from 'react-native-paper';
+import LanguageSelector from '../LanguageSelector/LanguageSelector';
+import { useTranslation } from 'react-i18next';
+
 
 const LoginScreen = ({ navigation }) => {
     const dispatch = useDispatch();
+    const { t } = useTranslation();
+
     const authState = useSelector((state) => state.auth);
 
     const [username, setUsername] = useState('');
@@ -55,14 +60,14 @@ const LoginScreen = ({ navigation }) => {
                     resizeMode: "contain",
                 }} source={DubaiGames} />
 
-                <Text style={styles.subtitle}>Sign in to continue</Text>
+                <Text style={styles.subtitle}>{t('signInToContinue')}</Text>
 
                 {/* Username Input */}
                 <View style={styles.inputContainer}>
                     <Icon name="account-outline" size={hp('3%')} color="#888" style={styles.icon} />
                     <TextInput
                         style={styles.input}
-                        placeholder="Username"
+                        placeholder={t('username')}
                         placeholderTextColor={globalColors.inputLabel}
                         value={username}
                         onChangeText={setUsername}
@@ -74,7 +79,7 @@ const LoginScreen = ({ navigation }) => {
                     <Icon name="lock-outline" size={hp('3%')} color="#888" style={styles.icon} />
                     <TextInput
                         style={styles.input}
-                        placeholder="Password"
+                        placeholder={t('password')}
                         placeholderTextColor={globalColors.inputLabel}
                         value={password}
                         onChangeText={setPassword}
@@ -110,9 +115,10 @@ const LoginScreen = ({ navigation }) => {
                         <Text style={styles.buttonText}>Login</Text>
                     )}
                 </TouchableOpacity>
+                <LanguageSelector></LanguageSelector>
                 <TouchableOpacity onPress={() => navigation.navigate('Register')}>
                     <Text style={[styles.subtitle, { fontSize: hp('2%'), color: globalColors.black, marginTop: hp('1.5%') }]}>
-                        Create a new account?</Text>
+                        {t('createNewAccount')}</Text>
                 </TouchableOpacity>
 
 
@@ -178,3 +184,6 @@ const styles = StyleSheet.create({
 });
 
 export default LoginScreen;
+
+
+
