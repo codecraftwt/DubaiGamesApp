@@ -46,6 +46,14 @@ export const resources = {
             "success": "Success",
             "registrationSuccessful": "Registration successful!",
 
+
+            // Login validation messages
+            "usernameRequired": "Username is required",
+            "usernameTooShort": "Username must be at least 4 characters",
+            "passwordRequired": "Password is required",
+            "passwordTooShort": "Password must be at least 6 characters",
+            "loginFailed": "Login Failed",
+
             "close": "Close",
             "save_changes": "Save changes",
             "edit_entry": "Edit Entry",
@@ -55,7 +63,8 @@ export const resources = {
             "delete": "Delete",
             "dashboard": "Dashboard",
             "my_account": "My Account",
-            "logout": "Logout"
+            "logout": "Logout",
+
         }
     },
     hi: {
@@ -105,6 +114,13 @@ export const resources = {
             "success": "सफलता",
             "registrationSuccessful": "पंजीकरण सफल!",
 
+            // Login validation messages
+            "usernameRequired": "उपयोगकर्ता नाम आवश्यक है",
+            "usernameTooShort": "उपयोगकर्ता नाम कम से कम 4 अक्षर का होना चाहिए",
+            "passwordRequired": "पासवर्ड आवश्यक है",
+            "passwordTooShort": "पासवर्ड कम से कम 6 अक्षर का होना चाहिए",
+            "loginFailed": "लॉगिन विफल",
+
             "close": "बंद करें",
             "save_changes": "परिवर्तन सहेजें",
             "edit_entry": "प्रविष्टि संपादित करें",
@@ -114,7 +130,7 @@ export const resources = {
             "delete": "हटाएं",
             "dashboard": "डैशबोर्ड",
             "my_account": "मेरा खाता",
-            "logout": "लॉग आउट"
+            "logout": "लॉग आउट",
         }
     },
     mr: {
@@ -163,6 +179,15 @@ export const resources = {
             "passwordsDoNotMatch": "पासवर्ड जुळत नाहीत",
             "success": "यश",
             "registrationSuccessful": "नोंदणी यशस्वी!",
+
+
+            // Login validation messages
+            "usernameRequired": "वापरकर्तानाव आवश्यक आहे",
+            "usernameTooShort": "वापरकर्तानाव किमान 4 वर्णांचे असावे",
+            "passwordRequired": "पासवर्ड आवश्यक आहे",
+            "passwordTooShort": "पासवर्ड किमान 6 वर्णांचे असावे",
+            "loginFailed": "लॉगिन अयशस्वी",
+
 
             "close": "बंद करा",
             "save_changes": "बदल जतन करा",
@@ -222,6 +247,13 @@ export const resources = {
             "passwordsDoNotMatch": "ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ",
             "success": "ಯಶಸ್ಸು",
             "registrationSuccessful": "ನೋಂದಣಿ ಯಶಸ್ವಿಯಾಗಿದೆ!",
+
+            // Login validation messages
+            "usernameRequired": "ಬಳಕೆದಾರ ಹೆಸರು ಅಗತ್ಯವಿದೆ",
+            "usernameTooShort": "ಬಳಕೆದಾರ ಹೆಸರು ಕನಿಷ್ಠ 4 ಅಕ್ಷರಗಳನ್ನು ಹೊಂದಿರಬೇಕು",
+            "passwordRequired": "ಪಾಸ್‌ವರ್ಡ್ ಅಗತ್ಯವಿದೆ",
+            "passwordTooShort": "ಪಾಸ್‌ವರ್ಡ್ ಕನಿಷ್ಠ 6 ಅಕ್ಷರಗಳನ್ನು ಹೊಂದಿರಬೇಕು",
+            "loginFailed": "ಲಾಗಿನ್ ವಿಫಲವಾಗಿದೆ",
 
             "close": "ಮುಚ್ಚಿರಿ",
             "save_changes": "ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಿ",

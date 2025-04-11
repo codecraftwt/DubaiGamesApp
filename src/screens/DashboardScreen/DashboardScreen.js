@@ -1472,6 +1472,22 @@ const DashboardScreen = ({ navigation }) => {
                                 <Text style={styles.deleteAllButtonText}>{t('payment')}</Text>
                             </TouchableOpacity>
                         </View>
+                        {!bothResultsOut && (
+                            <View style={styles.totalContainer}>
+                                <View style={styles.totalItem}>
+                                    <Text style={styles.totalLabel}>Total Amount</Text>
+                                    <Text style={styles.totalValue}>{data?.totalAmount || 0}</Text>
+                                </View>
+                                <View style={styles.totalItem}>
+                                    <Text style={styles.totalLabel}>Open Amount</Text>
+                                    <Text style={styles.totalValue}>{data?.totalOpenAmount || 0}</Text>
+                                </View>
+                                <View style={styles.totalItem}>
+                                    <Text style={styles.totalLabel}>Close Amount</Text>
+                                    <Text style={styles.totalValue}>{data?.totalCloseAmount || 0}</Text>
+                                </View>
+                            </View>
+                        )}
                     </>
                 )}
 
@@ -1647,6 +1663,30 @@ const styles = StyleSheet.create({
         lineHeight: 19,
         fontFamily: 'Poppins-Bold',
         marginLeft: 6,
+    },
+    totalContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 10,
+        padding: 12,
+        backgroundColor: globalColors.white,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#ddd',
+    },
+    totalItem: {
+        alignItems: 'center',
+    },
+    totalLabel: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#555',
+        marginBottom: 5,
+    },
+    totalValue: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: globalColors.darkBlue,
     },
     row: {
         flexDirection: "row",

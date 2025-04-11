@@ -27,16 +27,63 @@ const LoginScreen = ({ navigation }) => {
     const [password, setPassword] = useState('');
     const [code, setCode] = useState('');
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+    const [errors, setErrors] = useState({
+        username: '',
+        password: '',
+        form: ''
+    });
+    const [touched, setTouched] = useState({
+        username: false,
+        password: false
+    });
+    const [submitAttempted, setSubmitAttempted] = useState(false);
+
+    const validateForm = () => {
+        let valid = true;
+        const newErrors = {
+            username: '',
+            password: '',
+            form: ''
+        };
+
+        // Username validation
+        if (!username.trim()) {
+            newErrors.username = t('usernameRequired');
+            valid = false;
+        } else if (username.length < 1) {
+            newErrors.username = t('usernameTooShort');
+            valid = false;
+        }
+
+        // Password validation
+        if (!password.trim()) {
+            newErrors.password = t('passwordRequired');
+            valid = false;
+        } else if (password.length < 8) {
+            newErrors.password = t('passwordTooShort');
+            valid = false;
+        }
+
+        setErrors(newErrors);
+        return valid;
+    };
+
+    const handleBlur = (field) => {
+        setTouched({ ...touched, [field]: true });
+        if (submitAttempted) {
+            validateForm();
+        }
+    };
 
     const handleLogin = async () => {
-        // if (username === 'test' && password === '12345') {
-        //     await AsyncStorage.setItem('userToken', 'dummy-token');
-        //     navigation.navigate("MainApp");
-        // } else {
-        //     Alert.alert('Invalid Credentials', 'Please enter the correct username, password, and code.');
-        // }
-        dispatch(loginUser(username, password, code));
+        setSubmitAttempted(true);
 
+        // Validate form before submission
+        if (!validateForm()) {
+            return;
+        }
+
+        dispatch(loginUser(username, password, code));
     };
 
     useEffect(() => {
@@ -44,6 +91,7 @@ const LoginScreen = ({ navigation }) => {
             navigation.replace('MainApp'); // Navigate after login success
         } else if (authState.error) {
             Alert.alert('Login Failed', authState.error);
+            // setErrors({ ...errors, form: authState.error });
         }
     }, [authState.isAuthenticated, authState.error, navigation]);
 
@@ -53,7 +101,6 @@ const LoginScreen = ({ navigation }) => {
             style={styles.container}
         >
             <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-
                 <Image style={{
                     width: wp('90%'),
                     height: hp('24%'),
@@ -62,28 +109,54 @@ const LoginScreen = ({ navigation }) => {
 
                 <Text style={styles.subtitle}>{t('signInToContinue')}</Text>
 
+                {/* Form error message */}
+                {errors.form && (
+                    <View style={styles.errorContainer}>
+                        <Text style={styles.errorText}>{errors.form}</Text>
+                    </View>
+                )}
+
                 {/* Username Input */}
-                <View style={styles.inputContainer}>
+                <View style={[
+                    styles.inputContainer,
+                    (submitAttempted && errors.username) ? styles.inputError : null
+                ]}>
                     <Icon name="account-outline" size={hp('3%')} color="#888" style={styles.icon} />
                     <TextInput
                         style={styles.input}
                         placeholder={t('username')}
                         placeholderTextColor={globalColors.inputLabel}
                         value={username}
-                        onChangeText={setUsername}
+                        onChangeText={(text) => {
+                            setUsername(text);
+                            if (submitAttempted) validateForm();
+                        }}
+                        onBlur={() => handleBlur('username')}
+                        autoCapitalize="none"
                     />
                 </View>
+                {(submitAttempted && errors.username) && (
+                    <Text style={styles.fieldError}>{errors.username}</Text>
+                )}
 
                 {/* Password Input */}
-                <View style={styles.inputContainer}>
+                <View style={[
+                    styles.inputContainer,
+                    (submitAttempted && errors.password) ? styles.inputError : null
+                ]}>
                     <Icon name="lock-outline" size={hp('3%')} color="#888" style={styles.icon} />
                     <TextInput
                         style={styles.input}
                         placeholder={t('password')}
                         placeholderTextColor={globalColors.inputLabel}
                         value={password}
-                        onChangeText={setPassword}
+                        onChangeText={(text) => {
+                            setPassword(text);
+                            if (submitAttempted) validateForm();
+                        }}
+                        onBlur={() => handleBlur('password')}
                         secureTextEntry={!isPasswordVisible}
+                        autoCapitalize="none"
                     />
                     <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
                         <Icon
@@ -93,22 +166,16 @@ const LoginScreen = ({ navigation }) => {
                         />
                     </TouchableOpacity>
                 </View>
+                {(submitAttempted && errors.password) && (
+                    <Text style={styles.fieldError}>{errors.password}</Text>
+                )}
 
-                {/* Code Input */}
-                {/* <View style={styles.inputContainer}>
-                    <Icon name="key-outline" size={hp('3%')} color="#888" style={styles.icon} />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Enter Code"
-                        placeholderTextColor={globalColors.inputLabel}
-                        value={code}
-                        onChangeText={setCode}
-                        keyboardType="numeric"
-                    />
-                </View> */}
-
-                {/* Login Button */}
-                <TouchableOpacity style={styles.button} onPress={handleLogin}>
+                {/* Login Button - Always visible now */}
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={handleLogin}
+                    disabled={authState.loading}
+                >
                     {authState.loading ? (
                         <ActivityIndicator size="small" color="#fff" />
                     ) : (
@@ -157,6 +224,34 @@ const styles = StyleSheet.create({
         marginBottom: hp('2%'),
         borderRadius: 5,
 
+    },
+    errorContainer: {
+        backgroundColor: '#FFEBEE',
+        padding: 12,
+        borderRadius: 8,
+        marginBottom: 16,
+        borderLeftWidth: 4,
+        borderLeftColor: globalColors.error,
+        width: '100%',
+    },
+    errorText: {
+        color: globalColors.error,
+        fontSize: hp('1.8%'),
+        fontFamily: 'Poppins-Medium',
+        textAlign: 'left',
+    },
+    fieldError: {
+        color: globalColors.error,
+        fontSize: hp('1.5%'),
+        marginTop: -10,
+        marginBottom: 12,
+        alignSelf: 'flex-start',
+        fontFamily: 'Poppins-Regular',
+        paddingLeft: 8,
+    },
+    inputError: {
+        borderColor: globalColors.error,
+        backgroundColor: '#FFF5F5',
     },
     icon: {
         marginRight: wp('3%'),

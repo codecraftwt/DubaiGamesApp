@@ -12,63 +12,121 @@ import {
     ActivityIndicator,
     KeyboardAvoidingView,
     Platform,
-    ScrollView
+    ScrollView,
+    RefreshControl
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {
+    fetchOnlineCustomers,
+    createOnlineCustomer,
+    updateOnlineCustomer,
+    deleteOnlineCustomer,
+    clearCurrentCustomer,
+    resetCustomerStatus,
+    fetchOnlineCustomerById
+} from '../../Redux/Slices/onlineCustomersSlice';
 
 const CustomerList = () => {
-    // const dispatch = useDispatch();
-    // const { customers, loading } = useSelector((state) => state.customers);
+    const dispatch = useDispatch();
+    const {
+        customers,
+        currentCustomer,
+        status,
+        error
+    } = useSelector((state) => state.onlineCustomers);
+
+    console.log("Customers ------>", customers)
+
+    console.log("currentCustomer ------------->", currentCustomer)
+
     const [modalVisible, setModalVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [filteredCustomers, setFilteredCustomers] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [entriesPerPage] = useState(10);
+    const [editCustomer, setEditCustomer] = useState("");
+    const [refreshing, setRefreshing] = useState(false);
 
     const [formData, setFormData] = useState({
-        id: null,
         name: '',
         email: '',
-        phone_number: '',
-        pass: '',
-        code: ''
+        phone: '',
+        password: '',
+        password_confirmation: ''
     });
 
-    // useEffect(() => {
-    //     dispatch(fetchCustomers());
-    // }, [dispatch]);
+    useEffect(() => {
+        dispatch(fetchOnlineCustomers());
+    }, [dispatch]);
 
-    // useEffect(() => {
-    //     if (searchQuery) {
-    //         const filtered = customers.filter(customer =>
-    //             customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    //             customer.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    //             customer.code.includes(searchQuery)
-    //         );
-    //         setFilteredCustomers(filtered);
-    //     } else {
-    //         setFilteredCustomers(customers);
-    //     }
-    // }, [searchQuery, customers]);
+    useEffect(() => {
+        if (status === 'failed' && error) {
+            Alert.alert('Error', error);
+            dispatch(resetCustomerStatus());
+        }
+    }, [status, error]);
+
+    useEffect(() => {
+        if (currentCustomer) {
+            setFormData({
+                name: currentCustomer.name || '',
+                email: currentCustomer.email || '',
+                phone: currentCustomer.phone || '',
+                password: '',
+                password_confirmation: ''
+            });
+        }
+    }, [currentCustomer]);
+
+    useEffect(() => {
+        if (searchQuery) {
+            const filtered = customers.filter(customer =>
+                customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                customer.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                customer.phone.includes(searchQuery)
+            );
+            setFilteredCustomers(filtered);
+        } else {
+            setFilteredCustomers(customers);
+        }
+    }, [searchQuery, customers]);
+
+    const onRefresh = () => {
+        setRefreshing(true);
+        dispatch(fetchOnlineCustomers())
+            .then(() => setRefreshing(false))
+            .catch(() => setRefreshing(false));
+    };
 
     const handleAddCustomer = () => {
+        dispatch(clearCurrentCustomer());
         setFormData({
-            id: null,
             name: '',
             email: '',
-            phone_number: '',
-            pass: '',
-            code: ''
+            phone: '',
+            password: '',
+            password_confirmation: ''
         });
         setModalVisible(true);
     };
 
     const handleEditCustomer = (customer) => {
-        setFormData({ ...customer });
+        dispatch(fetchOnlineCustomerById(customer.id));
         setModalVisible(true);
     };
+
+    // const handleEditCustomer = (customer) => {
+    //     setFormData({
+    //         name: customer.name || '',
+    //         email: customer.email || '',
+    //         phone: customer.phone || '',
+    //         password: '',
+    //         password_confirmation: ''
+    //     });
+    //     setModalVisible(true);
+    // };
 
     const handleDeleteCustomer = (id) => {
         Alert.alert(
@@ -78,7 +136,7 @@ const CustomerList = () => {
                 { text: 'Cancel', style: 'cancel' },
                 {
                     text: 'Delete',
-                    // onPress: () => dispatch(deleteCustomer(id)),
+                    onPress: () => dispatch(deleteOnlineCustomer(id)),
                     style: 'destructive'
                 }
             ]
@@ -89,6 +147,8 @@ const CustomerList = () => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const phoneRegex = /^\d{10}$/;
 
+        console.log("Phone number ------>", formData?.phone)
+
         if (!formData.name.trim()) {
             Alert.alert('Error', 'Name is required');
             return false;
@@ -97,12 +157,16 @@ const CustomerList = () => {
             Alert.alert('Error', 'Invalid email address');
             return false;
         }
-        if (!phoneRegex.test(formData.phone_number)) {
-            Alert.alert('Error', 'Invalid phone number');
+        if (!phoneRegex.test(formData.phone)) {
+            Alert.alert('Error', 'Invalid phone number (10 digits required)');
             return false;
         }
-        if (formData.pass.length < 6) {
-            Alert.alert('Error', 'Password must be at least 6 characters');
+        if (formData.password.length < 8) {
+            Alert.alert('Error', 'Password must be at least 8 characters');
+            return false;
+        }
+        if (formData.password !== formData.password_confirmation) {
+            Alert.alert('Error', 'Passwords do not match');
             return false;
         }
         return true;
@@ -111,15 +175,30 @@ const CustomerList = () => {
     const handleSaveCustomer = () => {
         if (!validateForm()) return;
 
-        if (formData.id) {
-            // dispatch(updateCustomer(formData));
+        if (currentCustomer) {
+            // Update existing customer
+            console.log("Updating the user...........")
+            dispatch(updateOnlineCustomer({
+                id: currentCustomer.id,
+                customerData: {
+                    name: formData.name,
+                    email: formData.email,
+                    phone: formData.phone,
+                    ...(formData.password ? {
+                        password: formData.password,
+                        password_confirmation: formData.password_confirmation
+                    } : {})
+                }
+            }));
         } else {
-            const newCustomer = {
-                ...formData,
-                id: Date.now(),
-                code: Math.random().toString(36).substr(2, 6).toUpperCase()
-            };
-            // dispatch(addCustomer(newCustomer));
+            // Create new customer
+            dispatch(createOnlineCustomer({
+                name: formData.name,
+                email: formData.email,
+                phone: formData.phone,
+                password: formData.password,
+                password_confirmation: formData.password_confirmation
+            }));
         }
         setModalVisible(false);
     };
@@ -159,7 +238,7 @@ const CustomerList = () => {
                 <Text style={styles.emailText}>{item.email}</Text>
             </View>
             <View style={[styles.tableCell, styles.phoneCell]}>
-                <Text style={styles.phoneText}>{item.phone_number}</Text>
+                <Text style={styles.phoneText}>{item.phone}</Text>
             </View>
             {/* <View style={[styles.tableCell, styles.codeCell]}>
                 <Text style={styles.codeText}>{item.code}</Text>
@@ -209,25 +288,33 @@ const CustomerList = () => {
                         </TouchableOpacity>
                     </View>
 
-                    {/* {loading ? (
+                    {status === 'loading' ? (
                         <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />
-                    ) : ( */}
-                    <ScrollView horizontal>
-                        <View>
-                            {renderTableHeader()}
-                            <FlatList
-                                data={filteredCustomers}
-                                renderItem={renderCustomerItem}
-                                keyExtractor={(item) => item.id.toString()}
-                                ListEmptyComponent={
-                                    <View style={styles.emptyContainer}>
-                                        <Text style={styles.emptyText}>No customers found</Text>
-                                    </View>
-                                }
-                            />
-                        </View>
-                    </ScrollView>
-                    {/* )} */}
+                    ) : (
+                        <ScrollView horizontal>
+                            <View>
+                                {renderTableHeader()}
+                                <FlatList
+                                    data={filteredCustomers}
+                                    renderItem={renderCustomerItem}
+                                    keyExtractor={(item) => item?.id?.toString()}
+                                    ListEmptyComponent={
+                                        <View style={styles.emptyContainer}>
+                                            <Text style={styles.emptyText}>No customers found</Text>
+                                        </View>
+                                    }
+                                    refreshControl={
+                                        <RefreshControl
+                                            refreshing={refreshing}
+                                            onRefresh={onRefresh}
+                                            colors={['#007AFF']}
+                                            tintColor="#007AFF"
+                                        />
+                                    }
+                                />
+                            </View>
+                        </ScrollView>
+                    )}
                 </View>
             </View>
 
@@ -244,7 +331,7 @@ const CustomerList = () => {
                     <View style={styles.modalContainer}>
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>
-                                {formData.id ? 'Edit Customer' : 'Add Customer'}
+                                {currentCustomer ? 'Edit Customer' : 'Add Customer'}
                             </Text>
                             <TouchableOpacity
                                 style={styles.closeButton}
@@ -281,8 +368,8 @@ const CustomerList = () => {
                                 <Text style={styles.formLabel}>Phone Number</Text>
                                 <TextInput
                                     style={styles.formInput}
-                                    value={formData.phone_number}
-                                    onChangeText={(text) => setFormData({ ...formData, phone_number: text })}
+                                    value={formData.phone}
+                                    onChangeText={(text) => setFormData({ ...formData, phone: text })}
                                     placeholder="Enter phone number"
                                     keyboardType="phone-pad"
                                     maxLength={10}
@@ -293,8 +380,19 @@ const CustomerList = () => {
                                 <Text style={styles.formLabel}>Password</Text>
                                 <TextInput
                                     style={styles.formInput}
-                                    value={formData.pass}
-                                    onChangeText={(text) => setFormData({ ...formData, pass: text })}
+                                    value={formData.password}
+                                    onChangeText={(text) => setFormData({ ...formData, password: text })}
+                                    placeholder="Enter password"
+                                    secureTextEntry
+                                />
+                            </View>
+
+                            <View style={styles.formGroup}>
+                                <Text style={styles.formLabel}>Confirm Password</Text>
+                                <TextInput
+                                    style={styles.formInput}
+                                    value={formData.password_confirmation}
+                                    onChangeText={(text) => setFormData({ ...formData, password_confirmation: text })}
                                     placeholder="Enter password"
                                     secureTextEntry
                                 />
@@ -331,6 +429,7 @@ const styles = StyleSheet.create({
     content: {
         flex: 1,
         padding: 16,
+        marginBottom: 120,
     },
     title: {
         fontSize: 24,
@@ -344,6 +443,7 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         borderWidth: 1,
         borderColor: '#e0e0e0',
+        paddingBottom: 10,
     },
     cardHeader: {
         flexDirection: 'row',

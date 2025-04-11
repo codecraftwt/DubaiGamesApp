@@ -8,12 +8,10 @@ const languageDetector = {
     async: true,
     detect: async (callback) => {
         try {
-            // Get stored language from AsyncStorage
             const storedLanguage = await AsyncStorage.getItem('user-language');
             if (storedLanguage) {
                 return callback(storedLanguage);
             } else {
-                // Default language is English
                 return callback('en');
             }
         } catch (error) {
@@ -24,7 +22,6 @@ const languageDetector = {
     init: () => { },
     cacheUserLanguage: async (language) => {
         try {
-            // Store selected language in AsyncStorage
             await AsyncStorage.setItem('user-language', language);
             const savedLanguage = await AsyncStorage.getItem('user-language');
             console.log('Loaded language:', savedLanguage);

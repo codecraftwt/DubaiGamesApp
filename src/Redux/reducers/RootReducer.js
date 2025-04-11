@@ -10,6 +10,7 @@ import afterOpenReducer from "../Slices/afterOpenSlice"
 import staffListReducer from "../Slices/staffSlice"
 import panNumberReducer from "../Slices/panNumberSlice"
 import saralUltadelReducer from "../Slices/saralUltadelSlice"
+import onlineCustomersReducer from "../Slices/onlineCustomersSlice";
 // import galleryReducer from '../Slices/gallerySlice';
 // import webSocketReducer from '../Slices/webSocketSlice';
 // import websiteReducer from '../Slices/websiteSlice';
@@ -25,7 +26,8 @@ const rootReducer = combineReducers({
     afterOpen: afterOpenReducer,
     staff: staffListReducer,
     panNumbers: panNumberReducer,
-    saralUltadel: saralUltadelReducer
+    saralUltadel: saralUltadelReducer,
+    onlineCustomers: onlineCustomersReducer,
     // gallery: galleryReducer,
     // webSocket: webSocketReducer,
     // webSite: websiteReducer,

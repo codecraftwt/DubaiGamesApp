@@ -37,7 +37,7 @@ const ALL_MENU_ITEMS = [
     { name: "Agent List", component: AgentList, icon: "users" },
     { name: "Client List", component: StaffListScreen, icon: "user" },
     { name: "My Account", component: SettingsScreen, icon: "user" },
-    { name: "CustomerList", component: CustomerList, icon: "user" },
+    { name: "Customer List", component: CustomerList, icon: "user" },
     { name: "Reports", component: null, icon: "file-text", isDropdown: true },  // Dropdown Item
 ];
 
@@ -48,10 +48,10 @@ const ALL_MENU_ITEMS = [
 // };
 
 const MENU_ITEMS = {
-    admin: ["Dashboard", "Daily Result", "My Account", "CustomerList"],
+    admin: ["Dashboard", "Daily Result", "My Account", "Customer List"],
     staff: ["Dashboard", "My Account", "Client List", "Daily Result", "Reports"],
     editor: ["Dashboard", "My Account", "Daily Result"],
-    online_customer: ["Dashboard", "My Account", "CustomerList"],
+    online_customer: ["Dashboard", "My Account", "Customer List"],
 
 };
 
@@ -206,7 +206,7 @@ const DrawerNavigator = () => {
 
             />
             <Drawer.Screen name="ResultPage" component={ResultPage} />
-            <Drawer.Screen name="CustomerList" component={CustomerList} />
+            <Drawer.Screen name="Customer List" component={CustomerList} />
             {/* ResultPage */}
         </Drawer.Navigator>
     );
