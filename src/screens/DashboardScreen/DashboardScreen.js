@@ -31,11 +31,13 @@ import { fetchAgentByCode, fetchAgentByName } from "../../Redux/Slices/autoCompl
 import EditEntryModal from "../../components/Modal/EditEntryModal";
 import { deleteSaralUltadel, resetSaralUltadelState } from "../../Redux/Slices/saralUltadelSlice";
 import { t } from "i18next";
+import MarketCountdown from "./MarketCountdown";
+import { fetchCountdowns } from "../../Redux/Slices/countdownSlice";
 
 
 const DashboardScreen = ({ navigation }) => {
     const [agentId, setAgentId] = useState(agent?.id);
-    const [agentName, setAgentName] = useState("Online user");
+    const [agentName, setAgentName] = useState(agent?.role);
     const [market, setMarket] = useState("Kalyan");
     const [date, setDate] = useState(new Date());
     const [number, setNumber] = useState("");
@@ -79,6 +81,7 @@ const DashboardScreen = ({ navigation }) => {
     const [ultaPanGunuleAmount, setUltaPanGunuleAmount] = useState("");
     const [ultaPanEntries, setUltaPanEntries] = useState([]);
     const [ultaGunuleEntries, setUltaGunuleEntries] = useState([]);
+    const [isMarketOpen, setIsMarketOpen] = useState(false);
     const formatDate = (date) => {
         return date.toISOString().split("T")[0]; // 
     };
@@ -119,6 +122,14 @@ const DashboardScreen = ({ navigation }) => {
     }, []);
 
     console.log("agent=========>", agent)
+
+    const { marketsTime } = useSelector((state) => state.countdown);
+
+    console.log("marketsTime", marketsTime)
+    useEffect(() => {
+        dispatch(fetchCountdowns());
+    }, [dispatch]);
+
 
     const handleSelectByCode = (code) => {
         dispatch(fetchAgentByCode(code));
@@ -928,7 +939,7 @@ const DashboardScreen = ({ navigation }) => {
             <Text style={styles.sectionTitle}>{t('agentDetails')}</Text>
             <View style={styles.formContainer}>
                 {
-                    user?.role !== "online_customer" ? <View style={styles.row}>
+                    user?.role !== "online_customer" && user?.role !== "agent" ? <View style={styles.row}>
                         <View style={styles.halfWidthInput}>
                             <Text style={styles.label}>AGENT ID</Text>
                             <DynamicDropdown
@@ -1447,7 +1458,7 @@ const DashboardScreen = ({ navigation }) => {
                 </>
                 )}
 
-
+                {/* isMarketOpen && */}
                 {!bothResultsOut && (
                     <>
                         <FlatList
@@ -1495,7 +1506,7 @@ const DashboardScreen = ({ navigation }) => {
 
             </View>
 
-
+            <MarketCountdown marketData={marketsTime} selectedMarket={market} isMarketOpen={isMarketOpen} setIsMarketOpen={setIsMarketOpen} />
             <EntriesList reversedGroupedEntries={data?.reversedGroupedEntries} Delete={handleDelete} handleEdit={handleEdit} userRole={data?.role}
                 marketResults={data?.results}
             />

@@ -52,6 +52,8 @@ const MENU_ITEMS = {
     staff: ["Dashboard", "My Account", "Client List", "Daily Result", "Reports"],
     editor: ["Dashboard", "My Account", "Daily Result"],
     online_customer: ["Dashboard", "My Account", "Customer List"],
+    agent: ["Dashboard", "My Account", "Customer List"],
+
 
 };
 

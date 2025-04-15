@@ -15,9 +15,10 @@ export const createOnlineCustomer = createAsyncThunk(
     async (customerData, { getState }) => {
         const { token } = getState().auth;
         console.log("Customer Data --------->", customerData)
+
         try {
             const response = await axios.post(
-                `${API_BASE_URL}/register`,
+                `${API_BASE_URL}/online_customer/store`,
                 customerData,
                 {
                     headers: {
@@ -25,6 +26,7 @@ export const createOnlineCustomer = createAsyncThunk(
                     },
                 }
             );
+            console.log("response.data", response.data)
             return response.data;
         } catch (error) {
             console.error("Error creating customer", error);
@@ -147,10 +149,12 @@ const onlineCustomersSlice = createSlice({
             .addCase(createOnlineCustomer.pending, (state) => {
                 state.status = 'loading';
             })
+
             .addCase(createOnlineCustomer.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                // state.customers.push(action.payload.data);
+                state.customers.push(action.payload.online_customer);
             })
+
             .addCase(createOnlineCustomer.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
