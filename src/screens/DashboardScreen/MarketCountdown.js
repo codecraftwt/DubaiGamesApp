@@ -23,41 +23,39 @@ const MarketCountdown = ({ marketData, selectedMarket, isMarketOpen, setIsMarket
         m.market.toLowerCase() === selectedMarket.toLowerCase()
       );
 
-      if (market) {
-        setCurrentMarket(market);
+      if (market && market.start_time && market.end_time) {
+  setCurrentMarket(market);
 
-        const now = new Date();
-        const currentHours = now.getHours();
-        const currentMinutes = now.getMinutes();
-        const currentSeconds = now.getSeconds();
+  const now = new Date();
+  const currentHours = now.getHours();
+  const currentMinutes = now.getMinutes();
+  const currentSeconds = now.getSeconds();
 
-        // Convert current time to seconds since midnight for easier comparison
-        const currentTimeInSeconds = currentHours * 3600 + currentMinutes * 60 + currentSeconds;
+  const currentTimeInSeconds = currentHours * 3600 + currentMinutes * 60 + currentSeconds;
 
-        const [startHour, startMinute] = market.start_time.split(':').map(Number);
-        const [endHour, endMinute] = market.end_time.split(':').map(Number);
+  const [startHour, startMinute] = market.start_time.split(':').map(Number);
+  const [endHour, endMinute] = market.end_time.split(':').map(Number);
 
-        const startTimeInSeconds = startHour * 3600 + startMinute * 60;
-        const endTimeInSeconds = endHour * 3600 + endMinute * 60;
+  const startTimeInSeconds = startHour * 3600 + startMinute * 60;
+  const endTimeInSeconds = endHour * 3600 + endMinute * 60;
 
-        if (currentTimeInSeconds >= startTimeInSeconds && currentTimeInSeconds <= endTimeInSeconds) {
-          // Market is open
-          setIsMarketOpen(true);
+  if (currentTimeInSeconds >= startTimeInSeconds && currentTimeInSeconds <= endTimeInSeconds) {
+    setIsMarketOpen(true);
 
-          // Calculate remaining time
-          const remainingSeconds = endTimeInSeconds - currentTimeInSeconds;
-          const hours = Math.floor(remainingSeconds / 3600);
-          const minutes = Math.floor((remainingSeconds % 3600) / 60);
-          const seconds = remainingSeconds % 60;
+    const remainingSeconds = endTimeInSeconds - currentTimeInSeconds;
+    const hours = Math.floor(remainingSeconds / 3600);
+    const minutes = Math.floor((remainingSeconds % 3600) / 60);
+    const seconds = remainingSeconds % 60;
 
-          setTimeLeft({
-            hours: hours.toString().padStart(2, '0'),
-            minutes: minutes.toString().padStart(2, '0'),
-            seconds: seconds.toString().padStart(2, '0')
-          });
-          return;
-        }
-      }
+    setTimeLeft({
+      hours: hours.toString().padStart(2, '0'),
+      minutes: minutes.toString().padStart(2, '0'),
+      seconds: seconds.toString().padStart(2, '0')
+    });
+    return;
+  }
+}
+
 
       // If market is not open
       setIsMarketOpen(false);

@@ -27,6 +27,7 @@ import BusinessReport from "../../screens/PaymentMethods/BusinessReport";
 import { globalColors } from "../../Theme/globalColors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomerList from "../../screens/Customer/CustomerList";
+import MyWallet from "../../screens/MyWallet/MyWallet";
 
 const Drawer = createDrawerNavigator();
 
@@ -38,7 +39,8 @@ const ALL_MENU_ITEMS = [
     { name: "Client List", component: StaffListScreen, icon: "user" },
     { name: "My Account", component: SettingsScreen, icon: "user" },
     { name: "Customer List", component: CustomerList, icon: "user" },
-    { name: "Reports", component: null, icon: "file-text", isDropdown: true },  // Dropdown Item
+    { name: "My Wallet", component: MyWallet, icon: "credit-card"},
+    { name: "Reports", component: null, icon: "file-text", isDropdown: true },
 ];
 
 // const MENU_ITEMS = {
@@ -51,8 +53,8 @@ const MENU_ITEMS = {
     admin: ["Dashboard", "Daily Result", "My Account", "Customer List"],
     staff: ["Dashboard", "My Account", "Client List", "Daily Result", "Reports"],
     editor: ["Dashboard", "My Account", "Daily Result"],
-    online_customer: ["Dashboard", "My Account", "Customer List"],
-    agent: ["Dashboard", "My Account", "Customer List"],
+    online_customer: ["Dashboard", "My Account", "Customer List", "My Wallet"],
+    agent: ["Dashboard", "My Account", "Customer List","My Wallet"],
 
 
 };
@@ -209,6 +211,7 @@ const DrawerNavigator = () => {
             />
             <Drawer.Screen name="ResultPage" component={ResultPage} />
             <Drawer.Screen name="Customer List" component={CustomerList} />
+            <Drawer.Screen name="My Wallet" component={MyWallet} />
             {/* ResultPage */}
         </Drawer.Navigator>
     );

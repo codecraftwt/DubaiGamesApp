@@ -23,6 +23,7 @@ import PaymentLedger from '../../screens/PaymentMethods/PaymentLedger';
 import DashboardScreen from '../../screens/DashboardScreen/DashboardScreen';
 import RegistrationForm from '../../screens/Auth/RegistrationForm';
 import CustomerList from '../../screens/Customer/CustomerList';
+import MyWallet from '../../screens/MyWallet/MyWallet';
 
 
 
@@ -54,6 +55,7 @@ const StackNavigator = () => (
         <Stack.Screen name="PaymentLedger" component={PaymentLedger} />
         <Stack.Screen name="Register" component={RegistrationForm} />
         <Stack.Screen name="CustomerList" component={CustomerList} />
+        <Stack.Screen name="MyWallet" component={MyWallet} />
 
 
 
