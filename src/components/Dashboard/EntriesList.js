@@ -29,6 +29,9 @@ const EntriesList = ({
             if (type === 'running_pan' || type === 'beerich' || type === 'farak' || type === 'cycle' || type === 'chokada') {
                 const numbers = JSON.parse(entry.entry_number).join(', ');
                 return numbers;
+            } else if (type === 'jodi') {
+                const numbers = JSON.parse(entry.number).join(', ');
+                return numbers;
             }
             else if (type === 'openpan' || type === 'openpan_dp' || type === 'openpan_sp' || type === 'openpan_tp') {
                 const numbersArray = JSON.parse(entry.entry_number);
