@@ -124,7 +124,7 @@ const LoginScreen = ({ navigation }) => {
                     <Icon name="account-outline" size={hp('3%')} color="#888" style={styles.icon} />
                     <TextInput
                         style={styles.input}
-                        placeholder={t('username')}
+                        placeholder={t('Email or Mobile')} 
                         placeholderTextColor={globalColors.inputLabel}
                         value={username}
                         onChangeText={(text) => {

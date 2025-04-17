@@ -33,6 +33,7 @@ import { deleteSaralUltadel, resetSaralUltadelState } from "../../Redux/Slices/s
 import { t } from "i18next";
 import MarketCountdown from "./MarketCountdown";
 import { fetchCountdowns } from "../../Redux/Slices/countdownSlice";
+import { isTimeExceeded } from "../../utils/marketTime";
 
 
 const DashboardScreen = ({ navigation }) => {
@@ -82,6 +83,7 @@ const DashboardScreen = ({ navigation }) => {
     const [ultaPanEntries, setUltaPanEntries] = useState([]);
     const [ultaGunuleEntries, setUltaGunuleEntries] = useState([]);
     const [isMarketOpen, setIsMarketOpen] = useState(false);
+    const [currentTime, setCurrentTime] = useState("");
     const formatDate = (date) => {
         return date.toISOString().split("T")[0]; // 
     };
@@ -159,6 +161,27 @@ const DashboardScreen = ({ navigation }) => {
     };
 
     useEffect(() => {
+        const fetchCurrentTime = async () => {
+            try {
+                const response = await axios.get('https://timeapi.io/api/time/current/zone?timeZone=Asia%2FKolkata');
+                const { hour, minute } = response.data;
+                // Format as "HH:MM"
+                setCurrentTime(`${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`);
+            } catch (error) {
+                console.error("Error fetching current time:", error);
+                // Fallback to device time
+                const now = new Date();
+                setCurrentTime(`${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`);
+            }
+        };
+    
+        fetchCurrentTime();
+        // Update time every minute
+        const interval = setInterval(fetchCurrentTime, 60000);
+        return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
 
         fetchData();
     }, [agentName, date, market, id]);
@@ -171,37 +194,94 @@ const DashboardScreen = ({ navigation }) => {
         }
     }, [saralUltadelSuccess]);
 
-
-    const getFilteredCategories = useCallback((results, userRole) => {
-        if (!results || !results.length || userRole === "admin") {
+    const getFilteredCategories = useCallback((results, userRole, marketTimes, currentTime, selectedMarket) => {
+        if (userRole === "admin") {
             return { categories: categories, bothResultsOut: false };
         }
-        const hasOpenPan = results.some(entry => entry.type === "open-pan");
-        const hasClosePan = results.some(entry => entry.type === "close-pan");
+    
+        // Get market times for the selected market
+        const marketTimeData = marketTimes?.filter(time => time.market.toLowerCase() === selectedMarket.toLowerCase());
+        
+        // Check if current time exceeds open/close times
+        const openTimeExceeded = marketTimeData?.some(time => 
+            time.type === "open" && isTimeExceeded(time.end_time, currentTime)
+        );
+        console.log("openTimeExceeded ------------->", openTimeExceeded)
+        
+        const closeTimeExceeded = marketTimeData?.some(time => 
+            time.type === "close" && isTimeExceeded(time.end_time, currentTime)
+        );
+        console.log("closeTimeExceeded ------------->", closeTimeExceeded)
+    
+        const hasOpenPan = results?.some(entry => entry.type === "open-pan");
+        const hasClosePan = results?.some(entry => entry.type === "close-pan");
 
+        console.log("Result has open pan --->", hasOpenPan);
+        console.log("Result has close pan --->", hasClosePan);
+    
+        // Case 1: Both open and close results are declared
         if (hasOpenPan && hasClosePan) {
             return { categories: [], bothResultsOut: true };
-        } else if (hasOpenPan) {
+        } 
+        // Case 2: Only open results are declared
+        else if (hasOpenPan) {
             return {
                 categories: categories.filter(cat =>
-                    cat === "CLOSE" || cat === "CLOSEPAN"
-                ), bothResultsOut: false
+                    (cat === "CLOSE" || cat === "CLOSEPAN") && !closeTimeExceeded
+                ), 
+                bothResultsOut: false
             };
-        } else if (hasClosePan) {
+        } 
+        // Case 3: Only close results are declared
+        else if (hasClosePan) {
             return {
                 categories: categories.filter(cat =>
-                    cat !== "CLOSE" && cat !== "CLOSEPAN"
-                ), bothResultsOut: false
+                    (cat !== "CLOSE" && cat !== "CLOSEPAN") && !openTimeExceeded
+                ), 
+                bothResultsOut: false
             };
         }
+        // Case 4: No results declared yet - apply time-based filtering
+        else {
 
-        return { categories: categories, bothResultsOut: false };
+            console.log("If both results are not declared we are checking time ..")
+           
+            const filtered = categories.filter(cat => {
+                if (openTimeExceeded && (
+                    cat === "OPEN" || 
+                    cat === "JODI" || 
+                    cat === "CHOKADA" || 
+                    cat === "CYCLE" || 
+                    cat === "CUT" || 
+                    cat === "RUNNING_PAN" || 
+                    cat === "SARAL_PAN" || 
+                    cat === "ULTA PAN" || 
+                    cat === "BEERICH" || 
+                    cat === "FARAK" || 
+                    cat === "OPENPAN"
+                )) return false;  
+            
+                // Hide "CLOSE" and "CLOSEPAN" if closeTimeExceeded is true
+                if (closeTimeExceeded && (cat === "CLOSE" || cat === "CLOSEPAN")) return false;
+            
+                // Include all other categories
+                return true;
+            });
+            
+    
+            return { categories: filtered, bothResultsOut: false };
+        }
     }, []);
-
 
     console.log("GGGGGGGGGGGG", data?.role)
 
-    const { categories: filteredCategories, bothResultsOut } = getFilteredCategories(data?.results, data?.role);
+    const { categories: filteredCategories, bothResultsOut } = getFilteredCategories(
+        data?.results, 
+        data?.role, 
+        marketsTime, 
+        currentTime, 
+        market
+    );
 
 
     useEffect(() => {

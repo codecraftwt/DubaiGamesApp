@@ -54,3 +54,16 @@ const formatTime = (milliseconds) => {
         return `${seconds}s`;
     }
 };
+
+// Function for check time is exceed or not
+export const isTimeExceeded = (endTime, currentTime) => {
+  if (!endTime) return false;
+
+  const [endHours, endMinutes] = endTime.split(':').map(Number);
+  const [currentHours, currentMinutes] = currentTime.split(':').map(Number);
+
+  if (currentHours > endHours) return true;
+  if (currentHours === endHours && currentMinutes > endMinutes) return true;
+
+  return false;
+};

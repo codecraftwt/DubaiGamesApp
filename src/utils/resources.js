@@ -4,6 +4,7 @@ export const resources = {
             // Login Screen
             "signInToContinue": "Sign in to continue",
             "username": "Username",
+           " Email or Mobile": "Email or Mobile",
             "password": "Password",
             "login": "Login",
             "createNewAccount": "Create a new account?",
@@ -72,6 +73,7 @@ export const resources = {
             // Login Screen
             "signInToContinue": "जारी रखने के लिए साइन इन करें",
             "username": "उपयोगकर्ता नाम",
+            "Email or Mobile": "ईमेल या मोबाइल", 
             "password": "पासवर्ड",
             "login": "लॉगिन",
             "createNewAccount": "नया खाता बनाएं?",
@@ -138,6 +140,7 @@ export const resources = {
             // Login Screen
             "signInToContinue": "सुरू ठेवण्यासाठी साइन इन करा",
             "username": "वापरकर्तानाव",
+            "Email or Mobile": "ईमेल किंवा मोबाइल",
             "password": "पासवर्ड",
             "login": "लॉगिन",
             "createNewAccount": "नवीन खाते तयार करा?",
@@ -206,6 +209,7 @@ export const resources = {
             // Login Screen
             "signInToContinue": "ಮುಂದುವರಿಯಲು ಸೈನ್ ಇನ್ ಮಾಡಿ",
             "username": "ಬಳಕೆದಾರ ಹೆಸರು",
+            "Email or Mobile": "ಇಮೇಲ್ ಅಥವಾ ಮೊಬೈಲ್", 
             "password": "ಪಾಸ್‌ವರ್ಡ್",
             "login": "ಲಾಗಿನ್",
             "createNewAccount": "ಹೊಸ ಖಾತೆಯನ್ನು ರಚಿಸಿ?",

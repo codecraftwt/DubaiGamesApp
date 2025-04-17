@@ -12,6 +12,7 @@ import panNumberReducer from "../Slices/panNumberSlice"
 import saralUltadelReducer from "../Slices/saralUltadelSlice"
 import onlineCustomersReducer from "../Slices/onlineCustomersSlice";
 import countdownSlice from "../Slices/countdownSlice"
+import walletReducer from '../Slices/walletSlice';
 // import galleryReducer from '../Slices/gallerySlice';
 // import webSocketReducer from '../Slices/webSocketSlice';
 // import websiteReducer from '../Slices/websiteSlice';
@@ -29,7 +30,8 @@ const rootReducer = combineReducers({
     panNumbers: panNumberReducer,
     saralUltadel: saralUltadelReducer,
     onlineCustomers: onlineCustomersReducer,
-    countdown: countdownSlice
+    countdown: countdownSlice,
+    wallet: walletReducer,
     // gallery: galleryReducer,
     // webSocket: webSocketReducer,
     // webSite: websiteReducer,

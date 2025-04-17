@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -9,66 +9,45 @@ import {
   TextInput,
   Button,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {globalColors} from '../../Theme/globalColors';
+import {useDispatch, useSelector} from 'react-redux';
+import {
+  addToWallet,
+  withdrawFromWallet,
+  setWalletBalance,
+} from '../../Redux/Slices/walletSlice';
 
 const MyWallet = () => {
-  const [balance, setBalance] = useState(7409332);
+  const dispatch = useDispatch();
+  const {balance, loading} = useSelector(state => state.wallet);
+  const {user, wallet_balance} = useSelector(state => state.auth);
   const [modalVisible, setModalVisible] = useState(false);
-  const [topUpAmount, setTopUpAmount] = useState('');
-  const [transactions, setTransactions] = useState([
-    {
-      id: '1',
-      title: 'Angga Big Park',
-      time: '10 hours',
-      amount: '$49,509',
-      date: '12 January 2025',
-      icon: 'globe-outline',
-      color: '#5567FF',
-    },
-    {
-      id: '2',
-      title: 'Top Up',
-      time: '',
-      amount: '$43,129,509',
-      date: '12 January 2024',
-      icon: 'arrow-up-circle-outline',
-      color: '#32D74B',
-    },
-    {
-      id: '3',
-      title: 'Angga Big Park',
-      time: '10 hours',
-      amount: '$49,509',
-      date: '12 January 2024',
-      icon: 'globe-outline',
-      color: '#5567FF',
-    },
-  ]);
+  const [amount, setAmount] = useState('');
+  const [transactionType, setTransactionType] = useState('credit'); // 'credit' or 'debit'
+  const [transactions, setTransactions] = useState([]);
 
-  const handleTopUp = () => {
-    const amountToAdd = parseFloat(topUpAmount);
-    if (!isNaN(amountToAdd) && amountToAdd > 0) {
-      const newBalance = balance + amountToAdd;
-      setBalance(newBalance);
-      const newTransaction = {
-        id: Date.now().toString(),
-        title: 'Top Up',
-        time: '',
-        amount: `$${amountToAdd.toLocaleString()}`,
-        date: new Date().toLocaleDateString('en-US', {
-          day: '2-digit',
-          month: 'long',
-          year: 'numeric',
-        }),
-        icon: 'arrow-up-circle-outline',
-        color: '#32D74B',
-      };
-      setTransactions([newTransaction, ...transactions]);
+  console.log('wallet_balance --------->', wallet_balance);
 
+  useEffect(() => {
+    // Set initial wallet balance from user data
+    if (wallet_balance) {
+      dispatch(setWalletBalance(wallet_balance));
+    }
+  }, [user, wallet_balance]);
+
+  const handleTransaction = () => {
+    const amountToProcess = parseFloat(amount);
+    if (!isNaN(amountToProcess) && amountToProcess > 0) {
+      if (transactionType === 'credit') {
+        dispatch(addToWallet({amount: amountToProcess}));
+      } else {
+        dispatch(withdrawFromWallet({amount: amountToProcess}));
+      }
       setModalVisible(false);
-      setTopUpAmount('');
+      setAmount('');
     } else {
       Alert.alert('Invalid amount', 'Please enter a valid number.');
     }
@@ -99,9 +78,9 @@ const MyWallet = () => {
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        <Text style={styles.balance}>${balance.toLocaleString()}</Text>
-        <Text style={styles.name}>Angga Risky</Text>
-        <Text style={styles.cardNumber}>2208 1996 4900</Text>
+        <Text style={styles.balance}>{balance.toLocaleString()} Rs</Text>
+        <Text style={styles.name}>{user?.name || 'User'}</Text>
+        <Text style={styles.cardNumber}>{user?.phone || ''}</Text>
         <Icon
           name="wallet-outline"
           size={24}
@@ -110,9 +89,21 @@ const MyWallet = () => {
         />
 
         <TouchableOpacity
-          onPress={() => setModalVisible(true)}
+          onPress={() => {
+            setTransactionType('credit');
+            setModalVisible(true);
+          }}
           style={{position: 'absolute', top: 20, right: 20}}>
           <Icon name="add-circle-outline" size={28} color="#fff" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {
+            setTransactionType('debit');
+            setModalVisible(true);
+          }}
+          style={{position: 'absolute', top: 20, right: 60}}>
+          <Icon name="remove-circle-outline" size={28} color="#fff" />
         </TouchableOpacity>
       </View>
 
@@ -123,13 +114,17 @@ const MyWallet = () => {
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={transactions}
-        keyExtractor={item => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-      />
+      {loading ? (
+        <ActivityIndicator size="large" color={globalColors.primary} />
+      ) : (
+        <FlatList
+          data={transactions}
+          keyExtractor={item => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
 
       <Modal
         animationType="slide"
@@ -144,15 +139,22 @@ const MyWallet = () => {
             activeOpacity={1}
             onPress={() => {}}
             style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Add Balance</Text>
+            <Text style={styles.modalTitle}>
+              {transactionType === 'credit'
+                ? 'Add Balance'
+                : 'Withdraw Balance'}
+            </Text>
             <TextInput
               placeholder="Enter amount"
               keyboardType="numeric"
-              value={topUpAmount}
-              onChangeText={setTopUpAmount}
+              value={amount}
+              onChangeText={setAmount}
               style={styles.input}
             />
-            <Button title="Add" onPress={handleTopUp} />
+            <Button
+              title={transactionType === 'credit' ? 'Add' : 'Withdraw'}
+              onPress={handleTransaction}
+            />
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
