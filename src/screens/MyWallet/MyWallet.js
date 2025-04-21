@@ -9,7 +9,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import {globalColors} from '../../Theme/globalColors';
 import {useDispatch, useSelector} from 'react-redux';
-import {setWalletBalance} from '../../Redux/Slices/walletSlice';
+import {getWalletHistory, setWalletBalance} from '../../Redux/Slices/walletSlice';
 
 const MyWallet = ({navigation}) => {
   const dispatch = useDispatch();
@@ -21,6 +21,11 @@ const MyWallet = ({navigation}) => {
       dispatch(setWalletBalance(wallet_balance));
     }
   }, [user, wallet_balance]);
+
+
+  useEffect(() => {
+    dispatch(getWalletHistory());
+  }, [dispatch]); 
 
   return (
     <ScrollView style={styles.container}>

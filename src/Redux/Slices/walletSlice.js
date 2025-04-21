@@ -53,10 +53,29 @@ export const withdrawFromWallet = createAsyncThunk(
   },
 );
 
+// Async thunk to fetch wallet history
+export const getWalletHistory = createAsyncThunk(
+  'wallet/getWalletHistory',
+  async (_, {rejectWithValue, getState}) => {
+    try {
+      const {token} = getState().auth;
+      const response = await axios.get(`${API_BASE_URL}/wallet-history`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Something went wrong');
+    }
+  },
+);
+
 const walletSlice = createSlice({
   name: 'wallet',
   initialState: {
     balance: 0,
+    history: [],
     loading: false,
     error: null,
     success: null,
@@ -122,6 +141,21 @@ const walletSlice = createSlice({
           text1: 'Error',
           text2: action.payload || 'Failed to withdraw money from wallet',
         });
+      })
+
+      .addCase(getWalletHistory.pending, state => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getWalletHistory.fulfilled, (state, action) => {
+        state.loading = false;
+        state.history = action.payload.history || []; // fallback if history not returned
+        console.log('Action payload successs ------->', action.payload);
+      })
+      .addCase(getWalletHistory.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        console.log('Action payload error ------->', action.payload);
       });
   },
 });

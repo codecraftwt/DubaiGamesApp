@@ -1,4 +1,6 @@
 // utils/marketTime.js
+import { parse, format } from 'date-fns';
+
 export const getMarketTimeStatus = (marketData, selectedMarket) => {
     if (!marketData || marketData.length === 0) return null;
 
@@ -66,4 +68,10 @@ export const isTimeExceeded = (endTime, currentTime) => {
   if (currentHours === endHours && currentMinutes > endMinutes) return true;
 
   return false;
+};
+
+
+export const convertTo12HourFormat = (timeStr) => {
+    const parsedTime = parse(timeStr, 'HH:mm', new Date());
+    return format(parsedTime, 'h:mm a').toLowerCase();
 };

@@ -140,6 +140,8 @@ const DashboardScreen = ({navigation}) => {
   const {marketsTime} = useSelector(state => state.countdown);
 
   console.log('marketsTime', marketsTime);
+
+  console.log('currentTime ----------------------->', currentTime);
   useEffect(() => {
     dispatch(fetchCountdowns());
   }, [dispatch]);
@@ -185,7 +187,6 @@ const DashboardScreen = ({navigation}) => {
           'https://timeapi.io/api/time/current/zone?timeZone=Asia%2FKolkata',
         );
         const {hour, minute} = response.data;
-        // Format as "HH:MM"
         setCurrentTime(
           `${hour.toString().padStart(2, '0')}:${minute
             .toString()
@@ -1750,12 +1751,6 @@ const DashboardScreen = ({navigation}) => {
         )}
       </View>
 
-      <MarketCountdown
-        marketData={marketsTime}
-        selectedMarket={market}
-        isMarketOpen={isMarketOpen}
-        setIsMarketOpen={setIsMarketOpen}
-      />
       <EntriesList
         reversedGroupedEntries={data?.reversedGroupedEntries}
         Delete={handleDelete}
@@ -1774,6 +1769,14 @@ const DashboardScreen = ({navigation}) => {
             <Text style={styles.payButtonText}>Pay Now</Text>
           </TouchableOpacity>
         </View>
+      )}
+
+      {!bothResultsOut && (
+        <MarketCountdown
+          marketData={marketsTime}
+          selectedMarket={market}
+          currentTime={currentTime}
+        />
       )}
 
       <Modal
@@ -1983,13 +1986,13 @@ const styles = StyleSheet.create({
   },
   totalLabel: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: 'Poppins-Bold',
     color: '#555',
     marginBottom: 5,
   },
   totalValue: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
     color: globalColors.darkBlue,
   },
   row: {
@@ -2223,7 +2226,7 @@ const styles = StyleSheet.create({
     // top: 0,
     backgroundColor: '#fff',
     padding: 18,
-    marginBottom: 45,
+    marginBottom: 15,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -2232,7 +2235,7 @@ const styles = StyleSheet.create({
   },
   totalAmount: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
   },
   payButton: {
     backgroundColor: '#0066FF',
@@ -2242,7 +2245,7 @@ const styles = StyleSheet.create({
   },
   payButtonText: {
     color: '#fff',
-    fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
   },
   modalContainer: {
     flex: 1,
