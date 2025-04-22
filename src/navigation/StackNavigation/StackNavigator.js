@@ -26,6 +26,7 @@ import CustomerList from '../../screens/Customer/CustomerList';
 import MyWallet from '../../screens/MyWallet/MyWallet';
 import AddBalanceScreen from '../../screens/MyWallet/AddBalanceScreen';
 import WithdrawBalanceScreen from '../../screens/MyWallet/WithdrawBalanceScreen';
+import ResultScreen from '../../screens/ResultScreen/ResultScreen';
 
 const Stack = createStackNavigator();
 
@@ -58,6 +59,10 @@ const StackNavigator = () => (
     <Stack.Screen name="MyWallet" component={MyWallet} />
     <Stack.Screen name="AddBalance" component={AddBalanceScreen} />
     <Stack.Screen name="WithdrawBalance" component={WithdrawBalanceScreen} />
+    <Stack.Screen
+      name="Result"
+      component={ResultScreen}
+    />
   </Stack.Navigator>
 );
 

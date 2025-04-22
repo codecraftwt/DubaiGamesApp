@@ -149,7 +149,7 @@ const walletSlice = createSlice({
       })
       .addCase(getWalletHistory.fulfilled, (state, action) => {
         state.loading = false;
-        state.history = action.payload.history || []; // fallback if history not returned
+        state.history = (action.payload.transaction_history || []).reverse();
         console.log('Action payload successs ------->', action.payload);
       })
       .addCase(getWalletHistory.rejected, (state, action) => {
