@@ -1,5 +1,5 @@
 import React from 'react';
-import {createStackNavigator} from '@react-navigation/stack';
+import { createStackNavigator } from '@react-navigation/stack';
 import SplashScreen from '../../screens/Splash/SplashScreen';
 import LoginScreen from '../../screens/Auth/LoginScreen';
 import TabNavigator from '../TabNavigation/TabNavigator';
@@ -27,11 +27,12 @@ import MyWallet from '../../screens/MyWallet/MyWallet';
 import AddBalanceScreen from '../../screens/MyWallet/AddBalanceScreen';
 import WithdrawBalanceScreen from '../../screens/MyWallet/WithdrawBalanceScreen';
 import ResultScreen from '../../screens/ResultScreen/ResultScreen';
+import BetterLuckScreen from '../../screens/ResultScreen/BetterLuckScreen';
 
 const Stack = createStackNavigator();
 
 const StackNavigator = () => (
-  <Stack.Navigator screenOptions={{headerShown: false}}>
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="Splash" component={SplashScreen} />
     <Stack.Screen name="Login" component={LoginScreen} />
     <Stack.Screen name="AgentList" component={AgentList} />
@@ -62,6 +63,10 @@ const StackNavigator = () => (
     <Stack.Screen
       name="Result"
       component={ResultScreen}
+    />
+    <Stack.Screen
+      name="BetterLuck"
+      component={BetterLuckScreen}
     />
   </Stack.Navigator>
 );

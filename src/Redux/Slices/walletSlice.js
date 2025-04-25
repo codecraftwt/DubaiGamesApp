@@ -1,14 +1,14 @@
-import {createSlice, createAsyncThunk} from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import {API_BASE_URL} from '../../utils/Api';
+import { API_BASE_URL } from '../../utils/Api';
 import Toast from 'react-native-toast-message';
 
 // Async thunk to add money to wallet
 export const addToWallet = createAsyncThunk(
   'wallet/addToWallet',
-  async ({amount}, {rejectWithValue, getState}) => {
+  async ({ amount }, { rejectWithValue, getState }) => {
     try {
-      const {token} = getState().auth;
+      const { token } = getState().auth;
       const response = await axios.post(
         `${API_BASE_URL}/wallet_management`,
         {
@@ -31,9 +31,9 @@ export const addToWallet = createAsyncThunk(
 // Async thunk to withdraw money from wallet
 export const withdrawFromWallet = createAsyncThunk(
   'wallet/withdrawFromWallet',
-  async ({amount}, {rejectWithValue, getState}) => {
+  async ({ amount }, { rejectWithValue, getState }) => {
     try {
-      const {token} = getState().auth;
+      const { token } = getState().auth;
       const response = await axios.post(
         `${API_BASE_URL}/wallet_management`,
         {
@@ -56,14 +56,15 @@ export const withdrawFromWallet = createAsyncThunk(
 // Async thunk to fetch wallet history
 export const getWalletHistory = createAsyncThunk(
   'wallet/getWalletHistory',
-  async (_, {rejectWithValue, getState}) => {
+  async (_, { rejectWithValue, getState }) => {
     try {
-      const {token} = getState().auth;
+      const { token } = getState().auth;
       const response = await axios.get(`${API_BASE_URL}/wallet-history`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
+      console.log("response data0000000000000000000", response.data)
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || 'Something went wrong');
@@ -150,6 +151,7 @@ const walletSlice = createSlice({
       .addCase(getWalletHistory.fulfilled, (state, action) => {
         state.loading = false;
         state.history = (action.payload.transaction_history || []).reverse();
+        state.balance = action.payload.wallet_balance?.net_amount || 0;
         console.log('Action payload successs ------->', action.payload);
       })
       .addCase(getWalletHistory.rejected, (state, action) => {
@@ -160,5 +162,5 @@ const walletSlice = createSlice({
   },
 });
 
-export const {setWalletBalance, clearWalletState} = walletSlice.actions;
+export const { setWalletBalance, clearWalletState } = walletSlice.actions;
 export default walletSlice.reducer;

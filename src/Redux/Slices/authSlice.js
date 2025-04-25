@@ -1,8 +1,8 @@
-import {createSlice} from '@reduxjs/toolkit';
-import {fakeLoginApi} from '../../api/authApi';
+import { createSlice } from '@reduxjs/toolkit';
+import { fakeLoginApi } from '../../api/authApi';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {API_BASE_URL} from '../../utils/Api';
+import { API_BASE_URL } from '../../utils/Api';
 import Toast from 'react-native-toast-message';
 
 const initialState = {
@@ -85,7 +85,7 @@ export const loginUser = (username, password, code) => async dispatch => {
       code: code,
     });
 
-    const {user, token, agent, wallet_balance} = response.data;
+    const { user, token, agent, wallet_balance } = response.data;
     console.log('Login api', response.data);
     await AsyncStorage.setItem('authToken', token);
     await AsyncStorage.setItem('userData', JSON.stringify(response.data.user));
@@ -95,7 +95,7 @@ export const loginUser = (username, password, code) => async dispatch => {
       JSON.stringify(wallet_balance),
     ); // Store wallet balance
 
-    dispatch(loginSuccess({user, token, agent, wallet_balance}));
+    dispatch(loginSuccess({ user, token, agent, wallet_balance }));
     Toast.show({
       type: 'success',
       text1: response?.data?.message,
@@ -126,7 +126,7 @@ export const logoutUser = () => async (dispatch, getState) => {
       `${API_BASE_URL}/logout`,
       {},
       {
-        headers: {Authorization: `Bearer ${token}`},
+        headers: { Authorization: `Bearer ${token}` },
       },
     );
     console.log('Logged out successfully');

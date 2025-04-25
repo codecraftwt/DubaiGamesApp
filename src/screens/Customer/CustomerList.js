@@ -29,6 +29,7 @@ import {
     fetchOnlineCustomerById
 } from '../../Redux/Slices/onlineCustomersSlice';
 import { globalColors } from '../../Theme/globalColors';
+import { useTranslation } from 'react-i18next';
 
 const CustomerCard = ({ customer, onEdit, onDelete }) => {
     const [expanded, setExpanded] = useState(false);
@@ -102,6 +103,7 @@ const CustomerCard = ({ customer, onEdit, onDelete }) => {
 };
 
 const CustomerList = () => {
+    const { t } = useTranslation();
     const dispatch = useDispatch();
     const {
         customers,
@@ -188,12 +190,12 @@ const CustomerList = () => {
 
     const handleDeleteCustomer = (id) => {
         Alert.alert(
-            'Delete Customer',
-            'Are you sure you want to delete this customer?',
+            t('deleteCustomer'),
+            t('deleteCustomerConfirm'),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: t('cancel'), style: 'cancel' },
                 {
-                    text: 'Delete',
+                    text: t('delete'),
                     onPress: () => {
                         dispatch(deleteOnlineCustomer(id));
                         dispatch(fetchOnlineCustomers());
@@ -209,25 +211,25 @@ const CustomerList = () => {
         const phoneRegex = /^\d{10}$/;
 
         if (!formData.name.trim()) {
-            Alert.alert('Error', 'Name is required');
+            Alert.alert(t('error'), t('nameRequired'));
             return false;
         }
         if (!emailRegex.test(formData.email)) {
-            Alert.alert('Error', 'Invalid email address');
+            Alert.alert(t('error'), t('invalidEmail'));
             return false;
         }
         if (!phoneRegex.test(formData.phone)) {
-            Alert.alert('Error', 'Invalid phone number (10 digits required)');
+            Alert.alert(t('error'), t('invalidPhone'));
             return false;
         }
 
         if (!currentCustomer) {
             if (formData.password.length < 8) {
-                Alert.alert('Error', 'Password must be at least 8 characters');
+                Alert.alert(t('error'), t('passwordLength'));
                 return false;
             }
             if (formData.password !== formData.password_confirmation) {
-                Alert.alert('Error', 'Passwords do not match');
+                Alert.alert(t('error'), t('passwordsDoNotMatch'));
                 return false;
             }
         }
@@ -252,7 +254,7 @@ const CustomerList = () => {
                         } : {})
                     }
                 })).unwrap();
-                Alert.alert('Success', 'Customer updated successfully');
+                Alert.alert(t('success'), t('customerUpdated'));
             } else {
                 await dispatch(createOnlineCustomer({
                     name: formData.name,
@@ -261,20 +263,20 @@ const CustomerList = () => {
                     password: formData.password,
                     password_confirmation: formData.password_confirmation
                 })).unwrap();
-                Alert.alert('Success', 'Customer created successfully');
+                Alert.alert(t('success'), t('customerCreated'));
             }
 
             setModalVisible(false);
             dispatch(fetchOnlineCustomers());
         } catch (error) {
-            Alert.alert('Error', error.message || 'An error occurred');
+            Alert.alert(t('error'), error.message || 'An error occurred');
         }
     };
 
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.content}>
-                <Text style={styles.title}>Customers</Text>
+                <Text style={styles.title}>{t('customers')}</Text>
 
                 <View style={styles.card}>
                     <View style={styles.cardHeader}>
@@ -284,7 +286,7 @@ const CustomerList = () => {
                                 style={styles.searchInput}
                                 value={searchQuery}
                                 onChangeText={setSearchQuery}
-                                placeholder="Search customers..."
+                                placeholder={t('searchCustomers')}
                             />
                         </View>
 
@@ -293,7 +295,7 @@ const CustomerList = () => {
                             onPress={handleAddCustomer}
                         >
                             <FontAwesome name="plus" size={20} color="#fff" />
-                            <Text style={styles.addButtonText}>Add Customer</Text>
+                            <Text style={styles.addButtonText}>{t('addCustomer')}</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -313,7 +315,7 @@ const CustomerList = () => {
                             contentContainerStyle={styles.listContainer}
                             ListEmptyComponent={
                                 <View style={styles.emptyContainer}>
-                                    <Text style={styles.emptyText}>No customers found</Text>
+                                    <Text style={styles.emptyText}>{t('noCustomersFound')}</Text>
                                 </View>
                             }
                             refreshControl={
@@ -342,7 +344,7 @@ const CustomerList = () => {
                     <View style={styles.modalContainer}>
                         <View style={styles.modalHeader}>
                             <Text style={styles.modalTitle}>
-                                {currentCustomer ? 'Edit Customer' : 'Add Customer'}
+                                {currentCustomer ? t('editCustomer') : t('addCustomer')}
                             </Text>
                             <TouchableOpacity
                                 style={styles.closeButton}
@@ -354,34 +356,34 @@ const CustomerList = () => {
 
                         <ScrollView style={styles.modalBody}>
                             <View style={styles.formGroup}>
-                                <Text style={styles.formLabel}>Name</Text>
+                                <Text style={styles.formLabel}>{t('name')}</Text>
                                 <TextInput
                                     style={styles.formInput}
                                     value={formData.name}
                                     onChangeText={(text) => setFormData({ ...formData, name: text })}
-                                    placeholder="Enter name"
+                                    placeholder={t('enterName')}
                                 />
                             </View>
 
                             <View style={styles.formGroup}>
-                                <Text style={styles.formLabel}>Email</Text>
+                                <Text style={styles.formLabel}>{t('email')}</Text>
                                 <TextInput
                                     style={styles.formInput}
                                     value={formData.email}
                                     onChangeText={(text) => setFormData({ ...formData, email: text })}
-                                    placeholder="Enter email"
+                                    placeholder={t('enterEmail')}
                                     keyboardType="email-address"
                                     autoCapitalize="none"
                                 />
                             </View>
 
                             <View style={styles.formGroup}>
-                                <Text style={styles.formLabel}>Phone Number</Text>
+                                <Text style={styles.formLabel}>{t('phoneNumber')}</Text>
                                 <TextInput
                                     style={styles.formInput}
                                     value={formData.phone}
                                     onChangeText={(text) => setFormData({ ...formData, phone: text })}
-                                    placeholder="Enter phone number"
+                                    placeholder={t('enterPhone')}
                                     keyboardType="phone-pad"
                                     maxLength={10}
                                 />
@@ -391,26 +393,26 @@ const CustomerList = () => {
                                 <>
                                     <View style={styles.formGroup}>
                                         <Text style={styles.formLabel}>
-                                            Password {currentCustomer && '(Optional)'}
+                                            {t('password')} {currentCustomer && t('optional')}
                                         </Text>
                                         <TextInput
                                             style={styles.formInput}
                                             value={formData.password}
                                             onChangeText={(text) => setFormData({ ...formData, password: text })}
-                                            placeholder="Enter password"
+                                            placeholder={t('enterPassword')}
                                             secureTextEntry
                                         />
                                     </View>
 
                                     <View style={styles.formGroup}>
                                         <Text style={styles.formLabel}>
-                                            Confirm Password {currentCustomer && '(Optional)'}
+                                            {t('confirmPassword')} {currentCustomer && t('optional')}
                                         </Text>
                                         <TextInput
                                             style={styles.formInput}
                                             value={formData.password_confirmation}
                                             onChangeText={(text) => setFormData({ ...formData, password_confirmation: text })}
-                                            placeholder="Confirm password"
+                                            placeholder={t('confirmPasswordPlaceholder')}
                                             secureTextEntry
                                         />
                                     </View>
@@ -423,14 +425,14 @@ const CustomerList = () => {
                                 style={styles.saveButton}
                                 onPress={handleSaveCustomer}
                             >
-                                <Text style={styles.saveButtonText}>Save</Text>
+                                <Text style={styles.saveButtonText}>{t('save')}</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
                                 style={styles.cancelButton}
                                 onPress={() => setModalVisible(false)}
                             >
-                                <Text style={styles.cancelButtonText}>Cancel</Text>
+                                <Text style={styles.cancelButtonText}>{t('cancel')}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

@@ -1,15 +1,20 @@
-import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet} from 'react-native';
-import {globalColors} from '../../Theme/globalColors';
-import {convertTo12HourFormat} from '../../utils/marketTime';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
+import { globalColors } from '../../Theme/globalColors';
+import { convertTo12HourFormat } from '../../utils/marketTime';
+import LinearGradient from 'react-native-linear-gradient';
+import { useTranslation } from 'react-i18next';
 
-const MarketCountdown = ({marketData, selectedMarket, currentTime}) => {
+const MarketCountdown = ({ marketData, selectedMarket, currentTime }) => {
+  const { t } = useTranslation();
   const [timers, setTimers] = useState([]);
   const [currentTimeWithSeconds, setCurrentTimeWithSeconds] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!currentTime) return;
 
+    setIsLoading(true);
     // Initialize with current time and seconds
     const now = new Date();
     const seconds = now.getSeconds();
@@ -30,8 +35,12 @@ const MarketCountdown = ({marketData, selectedMarket, currentTime}) => {
   }, [currentTime]);
 
   useEffect(() => {
-    if (!marketData || !selectedMarket || !currentTimeWithSeconds) return;
+    if (!marketData || !selectedMarket || !currentTimeWithSeconds) {
+      setIsLoading(true);
+      return;
+    }
 
+    setIsLoading(false);
     // Filter market times for the selected market
     const marketTimes = marketData.filter(
       time => time.market.toLowerCase() === selectedMarket.toLowerCase(),
@@ -89,142 +98,155 @@ const MarketCountdown = ({marketData, selectedMarket, currentTime}) => {
     setTimers(timerObjects);
   }, [marketData, selectedMarket, currentTimeWithSeconds]);
 
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="small" color={globalColors.blue} />
+      </View>
+    );
+  }
+
   if (!timers.length) return null;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Market Times</Text>
-      {timers.map((timer, index) => (
-        <View key={index} style={styles.timerContainer}>
-          <Text style={styles.timerType}>
-            {timer.type === 'open' ? 'Open Market' : 'Close Market'}
-          </Text>
-          {timer.isClosed ? (
-            <View style={styles.closedContainer}>
-              <Text style={styles.closedText}>Market Closed</Text>
-              <Text style={styles.nextDayText}>Will open tomorrow</Text>
-            </View>
-          ) : (
-            <>
-              <View style={styles.timeContainer}>
-                <View style={styles.timeBox}>
-                  <Text style={styles.timeValue}>
-                    {timer.timeLeft.hours.toString().padStart(2, '0')}
-                  </Text>
-                  <Text style={styles.timeLabel}>Hours</Text>
-                </View>
-                <Text style={styles.colon}>:</Text>
-                <View style={styles.timeBox}>
-                  <Text style={styles.timeValue}>
-                    {timer.timeLeft.minutes.toString().padStart(2, '0')}
-                  </Text>
-                  <Text style={styles.timeLabel}>Minutes</Text>
-                </View>
-                <Text style={styles.colon}>:</Text>
-                <View style={styles.timeBox}>
-                  <Text style={styles.timeValue}>
-                    {timer.timeLeft.seconds.toString().padStart(2, '0')}
-                  </Text>
-                  <Text style={styles.timeLabel}>Seconds</Text>
+      <View style={styles.timersRow}>
+        {timers.map((timer, index) => (
+          <LinearGradient
+            key={index}
+            colors={timer.type === 'open' ? ['#2193b0', '#6dd5ed'] : ['#FF416C', '#FF4B2B']}
+            style={[styles.timerCard, index === 0 ? styles.rightBorder : null]}
+          >
+            <View style={styles.contentContainer}>
+              <View style={styles.marketInfoContainer}>
+                <Text style={styles.marketType}>
+                  {timer.type === 'open' ? t('openMarket') : t('closeMarket')}
+                </Text>
+                <View style={styles.timeContainer}>
+                  {timer.isClosed ? (
+                    <Text style={styles.closedText}>{t('marketClosed')}</Text>
+                  ) : (
+                    <View style={styles.timeRow}>
+                      <View style={styles.timeBlock}>
+                        <Text style={styles.timeValue}>
+                          {timer.timeLeft.hours.toString().padStart(2, '0')}
+                        </Text>
+                        <Text style={styles.timeLabel}>{t('hours')}</Text>
+                      </View>
+                      <Text style={styles.timeSeparator}>:</Text>
+                      <View style={styles.timeBlock}>
+                        <Text style={styles.timeValue}>
+                          {timer.timeLeft.minutes.toString().padStart(2, '0')}
+                        </Text>
+                        <Text style={styles.timeLabel}>{t('minutes')}</Text>
+                      </View>
+                      <Text style={styles.timeSeparator}>:</Text>
+                      <View style={styles.timeBlock}>
+                        <Text style={styles.timeValue}>
+                          {timer.timeLeft.seconds.toString().padStart(2, '0')}
+                        </Text>
+                        <Text style={styles.timeLabel}>{t('seconds')}</Text>
+                      </View>
+                    </View>
+                  )}
                 </View>
               </View>
-              <Text style={styles.endTime}>
-                Ends at: {convertTo12HourFormat(timer.endTime)}
-              </Text>
-            </>
-          )}
-        </View>
-      ))}
+
+            </View>
+          </LinearGradient>
+        ))}
+      </View>
     </View>
   );
 };
 
+const { width } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: globalColors.white,
-    padding: 16,
+    marginVertical: 4,
+    marginHorizontal: 8,
+  },
+  loadingContainer: {
+    height: 80,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  timersRow: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  timerCard: {
+    flex: 1,
     borderRadius: 10,
-    // borderWidth: 1,
-    // borderColor: '#ddd',
-    marginBlock: 10,
-    marginBottom: 40,
-    marginHorizontal: 10,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    overflow: 'hidden',
   },
-  title: {
-    fontSize: 18,
+  contentContainer: {
+    padding: 8,
+  },
+  marketInfoContainer: {
+    alignItems: 'center',
+  },
+  marketType: {
+    fontSize: 10,
     fontFamily: 'Poppins-Bold',
-    color: globalColors.darkBlue,
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  timerContainer: {
-    marginBottom: 15,
-    padding: 10,
-    backgroundColor: globalColors.LightWhite,
-    borderRadius: 8,
-  },
-  timerType: {
-    fontSize: 14,
-    fontWeight: '600',
-    fontFamily: 'Poppins-Bold',
-    // alignSelf: 'center',
-    color: globalColors.darkBlue,
-    marginBottom: 8,
+    color: '#FFFFFF',
+    marginBottom: 2,
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
   },
   timeContainer: {
+    marginVertical: 2,
+  },
+  timeRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 1,
   },
-  timeBox: {
+  timeBlock: {
     alignItems: 'center',
-    marginHorizontal: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 4,
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    minWidth: 24,
   },
   timeValue: {
-    fontSize: 24,
+    fontSize: 12,
     fontFamily: 'Poppins-Bold',
-    color: globalColors.primary,
+    color: '#FFFFFF',
   },
   timeLabel: {
+    fontSize: 6,
+    fontFamily: 'Poppins-Medium',
+    color: 'rgba(255, 255, 255, 0.8)',
+    letterSpacing: 0.3,
+  },
+  timeSeparator: {
     fontSize: 12,
-    color: globalColors.grey,
-    fontFamily: 'Poppins-Medium',
-  },
-  colon: {
-    fontSize: 24,
     fontFamily: 'Poppins-Bold',
-    color: globalColors.primary,
-    marginHorizontal: 8,
-    marginBottom: 20,
+    color: '#FFFFFF',
+    marginHorizontal: 1,
   },
-  endTime: {
-    fontSize: 14,
+  endTimeText: {
+    fontSize: 8,
     fontFamily: 'Poppins-Medium',
-    color: globalColors.grey,
-    marginTop: 8,
+    color: 'rgba(255, 255, 255, 0.9)',
     textAlign: 'center',
-  },
-  closedContainer: {
-    alignItems: 'center',
-    padding: 10,
+    marginTop: 2,
   },
   closedText: {
-    fontSize: 18,
+    fontSize: 10,
     fontFamily: 'Poppins-Bold',
-    color: 'red',
-    marginBottom: 5,
-  },
-  nextDayText: {
-    fontSize: 14,
-    fontFamily: 'Poppins-Medium',
-    color: globalColors.grey,
+    color: '#FFFFFF',
     textAlign: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 5,
   },
 });
+
 
 export default MarketCountdown;

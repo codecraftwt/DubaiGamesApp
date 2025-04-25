@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -14,8 +14,8 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Header from '../../components/Header/Header';
-import {globalColors} from '../../Theme/globalColors';
-import {format} from 'date-fns';
+import { globalColors } from '../../Theme/globalColors';
+import { format } from 'date-fns';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {
   widthPercentageToDP as wp,
@@ -23,12 +23,12 @@ import {
 } from 'react-native-responsive-screen';
 import axios from 'axios';
 import DynamicDropdown from '../DynamicDropdown';
-import {Dropdown} from 'react-native-element-dropdown';
-import {useDispatch, useSelector} from 'react-redux';
+import { Dropdown } from 'react-native-element-dropdown';
+import { useDispatch, useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {API_BASE_URL} from '../../utils/Api';
-import {deleteEntryData, fetchMarketData} from '../../Redux/Slices/marketSlice';
-import {submitEntry} from '../../Redux/Slices/entrySlice';
+import { API_BASE_URL } from '../../utils/Api';
+import { deleteEntryData, fetchMarketData } from '../../Redux/Slices/marketSlice';
+import { submitEntry } from '../../Redux/Slices/entrySlice';
 import EntriesList from '../../components/Dashboard/EntriesList';
 import {
   fetchAgentByCode,
@@ -39,14 +39,14 @@ import {
   deleteSaralUltadel,
   resetSaralUltadelState,
 } from '../../Redux/Slices/saralUltadelSlice';
-import {t} from 'i18next';
+import { t } from 'i18next';
 import MarketCountdown from './MarketCountdown';
-import {fetchCountdowns} from '../../Redux/Slices/countdownSlice';
-import {isTimeExceeded} from '../../utils/marketTime';
-import {useNavigation} from '@react-navigation/native';
-import {withdrawFromWallet} from '../../Redux/Slices/walletSlice';
+import { fetchCountdowns } from '../../Redux/Slices/countdownSlice';
+import { isTimeExceeded } from '../../utils/marketTime';
+import { useNavigation } from '@react-navigation/native';
+import { getWalletHistory, setWalletBalance, withdrawFromWallet } from '../../Redux/Slices/walletSlice';
 
-const DashboardScreen = ({navigation}) => {
+const DashboardScreen = ({ navigation }) => {
   const [agentId, setAgentId] = useState(agent?.id);
   const [agentName, setAgentName] = useState(agent?.role);
   const [market, setMarket] = useState('Kalyan');
@@ -72,15 +72,15 @@ const DashboardScreen = ({navigation}) => {
 
   const dispatch = useDispatch();
 
-  const {data, status} = useSelector(state => state.market);
-  const {agentInfo} = useSelector(state => state.autoComplete);
+  const { data, status } = useSelector(state => state.market);
+  const { agentInfo } = useSelector(state => state.autoComplete);
   const {
     loading: saralUltadelLoading,
     error: saralUltadelError,
     success: saralUltadelSuccess,
   } = useSelector(state => state.saralUltadel);
-  const {user, agent} = useSelector(state => state.auth);
-  const {loading, error, success} = useSelector(state => state.entry);
+  const { user, agent } = useSelector(state => state.auth);
+  const { loading, error, success } = useSelector(state => state.entry);
   const token = useSelector(state => state.auth.token);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [editingEntry, setEditingEntry] = useState(null);
@@ -136,8 +136,8 @@ const DashboardScreen = ({navigation}) => {
   }, []);
 
   console.log('agent=========>', agent);
-
-  const {marketsTime} = useSelector(state => state.countdown);
+  console.log("agent=========>", agent?.id)
+  const { marketsTime } = useSelector(state => state.countdown);
 
   console.log('marketsTime', marketsTime);
 
@@ -186,7 +186,7 @@ const DashboardScreen = ({navigation}) => {
         const response = await axios.get(
           'https://timeapi.io/api/time/current/zone?timeZone=Asia%2FKolkata',
         );
-        const {hour, minute} = response.data;
+        const { hour, minute } = response.data;
         setCurrentTime(
           `${hour.toString().padStart(2, '0')}:${minute
             .toString()
@@ -212,6 +212,11 @@ const DashboardScreen = ({navigation}) => {
   }, []);
 
   useEffect(() => {
+    // Fetch countdowns immediately when component mounts
+    dispatch(fetchCountdowns());
+  }, [dispatch]);
+
+  useEffect(() => {
     fetchData();
   }, [agentName, date, market, id]);
 
@@ -226,7 +231,7 @@ const DashboardScreen = ({navigation}) => {
   const getFilteredCategories = useCallback(
     (results, userRole, marketTimes, currentTime, selectedMarket) => {
       if (userRole === 'admin') {
-        return {categories: categories, bothResultsOut: false};
+        return { categories: categories, bothResultsOut: false };
       }
 
       // Get market times for the selected market
@@ -255,7 +260,7 @@ const DashboardScreen = ({navigation}) => {
 
       // Case 1: Both open and close results are declared
       if (hasOpenPan && hasClosePan) {
-        return {categories: [], bothResultsOut: true};
+        return { categories: [], bothResultsOut: true };
       }
       // Case 2: Only open results are declared
       else if (hasOpenPan) {
@@ -305,7 +310,7 @@ const DashboardScreen = ({navigation}) => {
           return true;
         });
 
-        return {categories: filtered, bothResultsOut: false};
+        return { categories: filtered, bothResultsOut: false };
       }
     },
     [],
@@ -313,7 +318,7 @@ const DashboardScreen = ({navigation}) => {
 
   console.log('GGGGGGGGGGGG', data?.role);
 
-  const {categories: filteredCategories, bothResultsOut} =
+  const { categories: filteredCategories, bothResultsOut } =
     getFilteredCategories(
       data?.results,
       data?.role,
@@ -498,10 +503,15 @@ const DashboardScreen = ({navigation}) => {
 
   const handleSubmit = async () => {
     if (!validateNumber(number, selectedCategory, selectedButton)) {
-      alert(`Invalid number format for ${selectedCategory} category`);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: `Invalid number format for ${selectedCategory} category`,
+        position: 'top',
+      });
       return;
     }
-
+    console.log("111111111111111111111111111111111111111111111")
     if (
       (selectedCategory === 'CYCLE' || selectedCategory === 'RUNNING_PAN') &&
       !validateNumber(anotherNumber, selectedCategory)
@@ -526,6 +536,7 @@ const DashboardScreen = ({navigation}) => {
       selectedCategory === 'FARAK' ||
       selectedCategory === 'CLOSE'
     ) {
+      console.log("@222222222222222222222222222222222222222222", id)
       payload = {
         agent_id: id.toString(),
         agent_type: '1',
@@ -543,6 +554,7 @@ const DashboardScreen = ({navigation}) => {
         type: selectedCategory.toLowerCase(),
         panType: 'undefined',
       };
+      console.log("sssssssssssssssss", payload)
     } else if (
       selectedCategory === 'CYCLE' ||
       selectedCategory === 'RUNNING_PAN'
@@ -693,10 +705,19 @@ const DashboardScreen = ({navigation}) => {
       console.error('Payload is empty, check your conditions and variables.');
     } else {
       try {
-        const response = await dispatch(submitEntry({payload, token}));
+        const response = await dispatch(submitEntry({ payload, token }));
         if (submitEntry?.fulfilled?.match(response)) {
-          resetFormStates();
-          fetchData();
+          if (response.payload.success) {
+            // Update wallet balance from the response
+            if (response.payload.wallet_balance) {
+              dispatch(setWalletBalance(response.payload.wallet_balance));
+            }
+            // Refresh wallet history
+            dispatch(getWalletHistory());
+
+            resetFormStates();
+            fetchData();
+          }
         } else {
           console.error('submitEntry failed:', response);
         }
@@ -773,7 +794,7 @@ const DashboardScreen = ({navigation}) => {
               // Check if the id is a stringified array (for saral/ulta pan)
               if (typeof id === 'string' && id.startsWith('[')) {
                 const ids = JSON.parse(id);
-                await dispatch(deleteSaralUltadel({ids, token}));
+                await dispatch(deleteSaralUltadel({ ids, token }));
               } else {
                 // Regular entry deletion
                 await dispatch(deleteEntryData(id));
@@ -787,7 +808,7 @@ const DashboardScreen = ({navigation}) => {
           style: 'destructive',
         },
       ],
-      {cancelable: true},
+      { cancelable: true },
     );
   };
 
@@ -1035,7 +1056,7 @@ const DashboardScreen = ({navigation}) => {
     setSelectedButton(null);
   }, [selectedCategory]);
 
-  const ButtonGroup = ({onSelect}) => {
+  const ButtonGroup = ({ onSelect }) => {
     return (
       <View style={styles.buttonContainer}>
         <TouchableOpacity
@@ -1118,7 +1139,7 @@ const DashboardScreen = ({navigation}) => {
   const handlePaymentConfirm = async () => {
     try {
       const totalAmount = calculateTotalAmount();
-      await dispatch(withdrawFromWallet({amount: totalAmount}));
+      await dispatch(withdrawFromWallet({ amount: totalAmount }));
       // Here you would typically make an API call to update the payment status of the selected entries
       setSelectedEntries([]);
       setShowPaymentModal(false);
@@ -1130,6 +1151,13 @@ const DashboardScreen = ({navigation}) => {
 
   return (
     <ScrollView style={styles.container}>
+      {marketsTime && currentTime && (
+        <MarketCountdown
+          marketData={marketsTime}
+          selectedMarket={market}
+          currentTime={currentTime}
+        />
+      )}
       <Text style={styles.sectionTitle}>{t('agentDetails')}</Text>
       <View style={styles.formContainer}>
         {user?.role !== 'online_customer' && user?.role !== 'agent' ? (
@@ -1164,8 +1192,8 @@ const DashboardScreen = ({navigation}) => {
             <Text style={styles.label}>{t('market')}</Text>
             <Dropdown
               data={[
-                {label: 'Kalyan', value: 'Kalyan'},
-                {label: 'Mumbai', value: 'Mumbai'},
+                { label: 'Kalyan', value: 'Kalyan' },
+                { label: 'Mumbai', value: 'Mumbai' },
               ]}
               value={market}
               labelField="label"
@@ -1206,7 +1234,7 @@ const DashboardScreen = ({navigation}) => {
           numColumns={3}
           showsVerticalScrollIndicator={false}
           keyExtractor={item => item}
-          renderItem={({item, index}) => (
+          renderItem={({ item, index }) => (
             <TouchableOpacity
               style={[
                 styles.radioButton,
@@ -1234,72 +1262,72 @@ const DashboardScreen = ({navigation}) => {
           <>
             {(selectedCategory === 'CYCLE' ||
               selectedCategory === 'RUNNING_PAN') && (
-              <>
-                <View style={styles.row}>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>{t('enterNumber')}</Text>
-                    <TextInput
-                      style={[
-                        styles.input,
-                        !validateNumber(number, selectedCategory) &&
+                <>
+                  <View style={styles.row}>
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.label}>{t('enterNumber')}</Text>
+                      <TextInput
+                        style={[
+                          styles.input,
+                          !validateNumber(number, selectedCategory) &&
                           number.length > 0 &&
                           styles.invalidInput,
-                      ]}
-                      placeholder="Enter Number"
-                      value={number}
-                      keyboardType="numeric"
-                      onChangeText={text =>
-                        handleNumberChange(text, setNumber, selectedCategory)
-                      }
-                    />
-                    {!validateNumber(number, selectedCategory) &&
-                      number.length > 0 && (
-                        <Text style={styles.errorText}>
-                          {getValidationMessage(selectedCategory)}
-                        </Text>
-                      )}
-                  </View>
+                        ]}
+                        placeholder="Enter Number"
+                        value={number}
+                        keyboardType="numeric"
+                        onChangeText={text =>
+                          handleNumberChange(text, setNumber, selectedCategory)
+                        }
+                      />
+                      {!validateNumber(number, selectedCategory) &&
+                        number.length > 0 && (
+                          <Text style={styles.errorText}>
+                            {getValidationMessage(selectedCategory)}
+                          </Text>
+                        )}
+                    </View>
 
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>{t('anotherNumber')}</Text>
-                    <TextInput
-                      style={[
-                        styles.input,
-                        !validateNumber(anotherNumber, selectedCategory) &&
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.label}>{t('anotherNumber')}</Text>
+                      <TextInput
+                        style={[
+                          styles.input,
+                          !validateNumber(anotherNumber, selectedCategory) &&
                           anotherNumber.length > 0 &&
                           styles.invalidInput,
-                      ]}
-                      placeholder="Enter Another No"
-                      value={anotherNumber}
-                      keyboardType="numeric"
-                      onChangeText={text =>
-                        handleNumberChangeAnother(
-                          text,
-                          setAnotherNumber,
-                          selectedCategory,
-                        )
-                      }
-                    />
-                    {!validateNumber(anotherNumber, selectedCategory) &&
-                      anotherNumber.length > 0 && (
-                        <Text style={styles.errorText}>
-                          {getValidationMessage(selectedCategory)}
-                        </Text>
-                      )}
+                        ]}
+                        placeholder="Enter Another No"
+                        value={anotherNumber}
+                        keyboardType="numeric"
+                        onChangeText={text =>
+                          handleNumberChangeAnother(
+                            text,
+                            setAnotherNumber,
+                            selectedCategory,
+                          )
+                        }
+                      />
+                      {!validateNumber(anotherNumber, selectedCategory) &&
+                        anotherNumber.length > 0 && (
+                          <Text style={styles.errorText}>
+                            {getValidationMessage(selectedCategory)}
+                          </Text>
+                        )}
+                    </View>
                   </View>
-                </View>
-                <View style={styles.inputGroup}>
-                  <Text style={styles.label}>{t('enterAmount')}</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Enter Amount"
-                    keyboardType="numeric"
-                    value={amount}
-                    onChangeText={setAmount}
-                  />
-                </View>
-              </>
-            )}
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.label}>{t('enterAmount')}</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Enter Amount"
+                      keyboardType="numeric"
+                      value={amount}
+                      onChangeText={setAmount}
+                    />
+                  </View>
+                </>
+              )}
 
             {selectedCategory === 'CUT' && (
               <>
@@ -1310,8 +1338,8 @@ const DashboardScreen = ({navigation}) => {
                       style={[
                         styles.input,
                         !validateNumber(number, selectedCategory) &&
-                          number.length > 0 &&
-                          styles.invalidInput,
+                        number.length > 0 &&
+                        styles.invalidInput,
                       ]}
                       placeholder="Enter Number"
                       keyboardType="numeric"
@@ -1367,15 +1395,15 @@ const DashboardScreen = ({navigation}) => {
                         style={[
                           styles.input,
                           !validateNumber(number, selectedCategory) &&
-                            number.length > 0 &&
-                            styles.invalidInput,
+                          number.length > 0 &&
+                          styles.invalidInput,
                         ]}
                         keyboardType="numeric"
                         placeholder="Enter Number"
                         value={number}
                         onChangeText={handleNumberChange2}
                         maxLength={getMaxLength(selectedCategory)}
-                        // onBlur={handleAddNumber
+                      // onBlur={handleAddNumber
                       />
                       {errorMessage ? (
                         <Text style={styles.errorText}>{errorMessage}</Text>
@@ -1398,59 +1426,59 @@ const DashboardScreen = ({navigation}) => {
 
             {(selectedCategory === 'OPENPAN' ||
               selectedCategory === 'CLOSEPAN') && (
-              <>
-                <ButtonGroup onSelect={type => setSelectedButton(type)} />
-                <View style={styles.row}>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>{t('enterNumber')}</Text>
-                    <TextInput
-                      style={[
-                        styles.input,
-                        !validateNumber(
-                          number,
-                          selectedCategory,
-                          selectedButton,
-                        ) &&
+                <>
+                  <ButtonGroup onSelect={type => setSelectedButton(type)} />
+                  <View style={styles.row}>
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.label}>{t('enterNumber')}</Text>
+                      <TextInput
+                        style={[
+                          styles.input,
+                          !validateNumber(
+                            number,
+                            selectedCategory,
+                            selectedButton,
+                          ) &&
                           number.length > 0 &&
                           styles.invalidInput,
-                      ]}
-                      keyboardType="numeric"
-                      placeholder="Enter Number"
-                      value={number}
-                      onChangeText={handleNumberChange2}
-                      maxLength={getMaxLength(selectedCategory, selectedButton)}
+                        ]}
+                        keyboardType="numeric"
+                        placeholder="Enter Number"
+                        value={number}
+                        onChangeText={handleNumberChange2}
+                        maxLength={getMaxLength(selectedCategory, selectedButton)}
                       // onBlur={handleAddNumber
-                    />
-                    {errorMessage ? (
-                      <Text style={styles.errorText}>{errorMessage}</Text>
-                    ) : null}
-                    {!validateNumber(
-                      number,
-                      selectedCategory,
-                      selectedButton,
-                    ) &&
-                      number.length > 0 && (
-                        <Text style={styles.errorText}>
-                          {selectedButton
-                            ? 'Please enter exactly 1 digit'
-                            : 'Please enter exactly 3 digits'}
-                        </Text>
-                      )}
-                  </View>
+                      />
+                      {errorMessage ? (
+                        <Text style={styles.errorText}>{errorMessage}</Text>
+                      ) : null}
+                      {!validateNumber(
+                        number,
+                        selectedCategory,
+                        selectedButton,
+                      ) &&
+                        number.length > 0 && (
+                          <Text style={styles.errorText}>
+                            {selectedButton
+                              ? 'Please enter exactly 1 digit'
+                              : 'Please enter exactly 3 digits'}
+                          </Text>
+                        )}
+                    </View>
 
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>{t('enterAmount')}</Text>
-                    <TextInput
-                      style={styles.input}
-                      keyboardType="numeric"
-                      placeholder="Enter Amount"
-                      value={amount}
-                      onChangeText={setAmount}
-                    />
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.label}>{t('enterAmount')}</Text>
+                      <TextInput
+                        style={styles.input}
+                        keyboardType="numeric"
+                        placeholder="Enter Amount"
+                        value={amount}
+                        onChangeText={setAmount}
+                      />
+                    </View>
                   </View>
-                </View>
-              </>
-            )}
+                </>
+              )}
 
             {/* vlidation remains */}
             {selectedCategory === 'SARAL_PAN' && (
@@ -1703,7 +1731,7 @@ const DashboardScreen = ({navigation}) => {
               data={numbersList}
               keyExtractor={(item, index) => index.toString()}
               horizontal
-              renderItem={({item}) => (
+              renderItem={({ item }) => (
                 <View style={styles.numberContainer}>
                   <Text style={styles.numberText}>{item}</Text>
                   <TouchableOpacity onPress={() => handleRemoveNumber(item)}>
@@ -1718,12 +1746,11 @@ const DashboardScreen = ({navigation}) => {
                 onPress={handleSubmit}>
                 <Text style={styles.submitButtonText}>{t('submit')}</Text>
               </TouchableOpacity>
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={styles.deleteAllButton}
                 onPress={handlePayment}>
-                {/* <Icon name="payment" size={16} color="white" /> */}
                 <Text style={styles.deleteAllButtonText}>{t('payment')}</Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
             {!bothResultsOut && (
               <View style={styles.totalContainer}>
@@ -1771,13 +1798,7 @@ const DashboardScreen = ({navigation}) => {
         </View>
       )}
 
-      {!bothResultsOut && (
-        <MarketCountdown
-          marketData={marketsTime}
-          selectedMarket={market}
-          currentTime={currentTime}
-        />
-      )}
+
 
       <Modal
         visible={showPaymentModal}
@@ -1821,7 +1842,7 @@ const DashboardScreen = ({navigation}) => {
   );
 };
 
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   numberContainer: {
@@ -2011,7 +2032,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     shadowColor: '#000',
     shadowOpacity: 0.1,
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     elevation: 3,
   },
   resultTitle: {
@@ -2043,7 +2064,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     shadowColor: '#000',
     shadowOpacity: 0.1,
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     elevation: 3,
   },
   cardTitle: {
@@ -2097,7 +2118,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     shadowColor: '#000',
     shadowOpacity: 0.1,
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     elevation: 3,
   },
   cardText: {

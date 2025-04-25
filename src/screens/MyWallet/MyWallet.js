@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,27 +9,23 @@ import {
   RefreshControl,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {globalColors} from '../../Theme/globalColors';
-import {useDispatch, useSelector} from 'react-redux';
+import { globalColors } from '../../Theme/globalColors';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   getWalletHistory,
-  setWalletBalance,
 } from '../../Redux/Slices/walletSlice';
-import {format} from 'date-fns';
+import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 
-const MyWallet = ({navigation}) => {
+const MyWallet = ({ navigation }) => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
-  const {balance, history} = useSelector(state => state.wallet);
-  const {user, wallet_balance} = useSelector(state => state.auth);
+  const { balance, history } = useSelector(state => state.wallet);
+  const { user } = useSelector(state => state.auth);
   const [refreshing, setRefreshing] = useState(false);
 
   console.log('History ------>', history);
-
-  useEffect(() => {
-    if (wallet_balance) {
-      dispatch(setWalletBalance(wallet_balance));
-    }
-  }, [user, wallet_balance]);
+  console.log("balance", balance)
 
   useEffect(() => {
     dispatch(getWalletHistory());
@@ -74,9 +70,9 @@ const MyWallet = ({navigation}) => {
         </View>
 
         <View style={styles.transactionsHeader}>
-          <Text style={styles.latestText}>Latest Transactions</Text>
+          <Text style={styles.latestText}>{t('latestTransactions')}</Text>
           <TouchableOpacity>
-            <Text style={styles.viewAll}>View All</Text>
+            <Text style={styles.viewAll}>{t('viewAll')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -107,8 +103,8 @@ const MyWallet = ({navigation}) => {
               <View style={styles.transactionDetails}>
                 <Text style={styles.transactionType}>
                   {transaction.transaction_type === 'credit'
-                    ? 'Money Added'
-                    : 'Money Withdrawn'}
+                    ? t('moneyAdded')
+                    : t('moneyWithdrawn')}
                 </Text>
                 <Text style={styles.transactionDate}>
                   {formatDate(transaction.created_at)}
@@ -217,7 +213,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 10,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,

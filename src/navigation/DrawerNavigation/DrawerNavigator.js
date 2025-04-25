@@ -1,14 +1,14 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   createDrawerNavigator,
   DrawerContentScrollView,
   DrawerItem,
   DrawerItemList,
 } from '@react-navigation/drawer';
-import {View, TouchableOpacity, Text, StyleSheet, Image} from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Image } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import {NavigationContainer, useNavigation} from '@react-navigation/native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import DashboardScreen from '../../screens/DashboardScreen/DashboardScreen';
 import SettingsScreen from '../../screens/Setting/Settings';
 import AgentList from '../../screens/Agent/AgentList';
@@ -25,28 +25,30 @@ import VerifyReport from '../../screens/ReportsOfWeek/VerifyReport';
 import Advance from '../../screens/Advance/Advance';
 import EntryDelete from '../../screens/EntryDelete/EntryDelete';
 import AddPayment from '../../screens/AddPayment/AddPayment';
-import {DubaiGames, DubaiGameslogo} from '../../Theme/globalImage';
+import { DubaiGames, DubaiGameslogo } from '../../Theme/globalImage';
 import PaymentReport from '../../screens/PaymentMethods/PaymentReport';
 import OldPaymentReport from '../../screens/PaymentMethods/OldPaymentReport';
 import BusinessReport from '../../screens/PaymentMethods/BusinessReport';
-import {globalColors} from '../../Theme/globalColors';
+import { globalColors } from '../../Theme/globalColors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomerList from '../../screens/Customer/CustomerList';
 import MyWallet from '../../screens/MyWallet/MyWallet';
+import BetterLuckScreen from '../../screens/ResultScreen/BetterLuckScreen';
 
 const Drawer = createDrawerNavigator();
 
 const ALL_MENU_ITEMS = [
-  {name: 'Dashboard', component: DashboardScreen, icon: 'home'},
-  {name: 'Daily Result', component: DailyResult, icon: 'clipboard'},
-  {name: 'ResultPage', component: ResultPage, icon: 'clipboard'},
-  {name: 'Result', component: ResultScreen, icon: 'award'},
-  {name: 'Agent List', component: AgentList, icon: 'users'},
-  {name: 'Client List', component: StaffListScreen, icon: 'user'},
-  {name: 'My Account', component: SettingsScreen, icon: 'user'},
-  {name: 'Customer List', component: CustomerList, icon: 'user'},
-  {name: 'My Wallet', component: MyWallet, icon: 'credit-card'},
-  {name: 'Reports', component: null, icon: 'file-text', isDropdown: true},
+  { name: 'Dashboard', component: DashboardScreen, icon: 'home' },
+  { name: 'Daily Result', component: DailyResult, icon: 'clipboard' },
+  { name: 'ResultPage', component: ResultPage, icon: 'clipboard' },
+  { name: 'Result', component: ResultScreen, icon: 'award' },
+  { name: 'BetterLuck', component: BetterLuckScreen, icon: 'frown' },
+  { name: 'Agent List', component: AgentList, icon: 'users' },
+  { name: 'Client List', component: StaffListScreen, icon: 'user' },
+  { name: 'My Account', component: SettingsScreen, icon: 'user' },
+  { name: 'Customer List', component: CustomerList, icon: 'user' },
+  { name: 'My Wallet', component: MyWallet, icon: 'credit-card' },
+  { name: 'Reports', component: null, icon: 'file-text', isDropdown: true },
 ];
 
 // const MENU_ITEMS = {
@@ -56,7 +58,9 @@ const ALL_MENU_ITEMS = [
 // };
 
 const MENU_ITEMS = {
-  admin: ['Dashboard', 'Daily Result', 'My Account', 'Customer List', 'Result'],
+  admin: ['Dashboard', 'Daily Result', 'My Account', 'Customer List', 'Result',
+    'BetterLuck'
+  ],
   staff: [
     'Dashboard',
     'My Account',
@@ -64,6 +68,7 @@ const MENU_ITEMS = {
     'Daily Result',
     'Reports',
     'Result',
+    'BetterLuck'
   ],
   editor: ['Dashboard', 'My Account', 'Daily Result', 'Result'],
   online_customer: [
@@ -72,8 +77,9 @@ const MENU_ITEMS = {
     'Customer List',
     'My Wallet',
     'Result',
+    'BetterLuck'
   ],
-  agent: ['Dashboard', 'My Account', 'Customer List', 'My Wallet', 'Result'],
+  agent: ['Dashboard', 'My Account', 'Customer List', 'My Wallet', 'Result', 'BetterLuck'],
 };
 
 const CustomDrawerContent = props => {
@@ -99,7 +105,7 @@ const CustomDrawerContent = props => {
   return (
     <DrawerContentScrollView
       {...props}
-      style={{backgroundColor: globalColors.LightWhite}}>
+      style={{ backgroundColor: globalColors.LightWhite }}>
       <View style={styles.drawerHeader}>
         <Image source={DubaiGameslogo} style={styles.drawerLogo} />
         <Text style={styles.drawerTitle}>Dubai Game</Text>
@@ -114,7 +120,7 @@ const CustomDrawerContent = props => {
               <View key={index}>
                 <DrawerItem
                   label="Reports"
-                  icon={({focused}) => (
+                  icon={({ focused }) => (
                     <Feather
                       name={item.icon}
                       size={22}
@@ -141,15 +147,15 @@ const CustomDrawerContent = props => {
                 {dropdownOpen && (
                   <View style={styles.dropdownItems}>
                     {[
-                      {name: 'Weekly Report', route: 'WeeklyReport'},
-                      {name: 'Verify Report', route: 'VerifyReport'},
-                      {name: 'Add Payment Report', route: 'AddPaymentReport'},
-                      {name: 'Add Button Report', route: 'AddButtonReport'},
+                      { name: 'Weekly Report', route: 'WeeklyReport' },
+                      { name: 'Verify Report', route: 'VerifyReport' },
+                      { name: 'Add Payment Report', route: 'AddPaymentReport' },
+                      { name: 'Add Button Report', route: 'AddButtonReport' },
                     ].map((subItem, idx) => (
                       <DrawerItem
                         key={idx}
                         label={subItem.name}
-                        icon={({focused}) => (
+                        icon={({ focused }) => (
                           <Feather
                             name="file-text"
                             size={22}
@@ -164,14 +170,14 @@ const CustomDrawerContent = props => {
                         style={{
                           backgroundColor:
                             props.state.routes[props.state.index].name ===
-                            subItem.route
+                              subItem.route
                               ? globalColors.Charcoal
                               : 'transparent',
                         }}
                         labelStyle={{
                           color:
                             props.state.routes[props.state.index].name ===
-                            subItem.route
+                              subItem.route
                               ? globalColors.white
                               : 'black',
                         }}
@@ -188,7 +194,7 @@ const CustomDrawerContent = props => {
             <DrawerItem
               key={index}
               label={item.name}
-              icon={({focused}) => (
+              icon={({ focused }) => (
                 <Feather
                   name={item.icon}
                   size={22}
@@ -234,7 +240,7 @@ const DrawerNavigator = () => {
   const CustomHeaderTitle = () => {
     return (
       <View style={styles.logoContainer}>
-        <Image source={DubaiGameslogo} style={{height: 28, width: 40}}></Image>
+        <Image source={DubaiGameslogo} style={{ height: 28, width: 40 }}></Image>
         <Text style={styles.logoText}>Dubai Game </Text>
       </View>
     );
@@ -252,7 +258,7 @@ const DrawerNavigator = () => {
         // drawerActiveTintColor: globalColors.Magnolia,
         // drawerActiveBackgroundColor: "red",
 
-        drawerLabelStyle: ({focused}) => ({
+        drawerLabelStyle: ({ focused }) => ({
           fontFamily: 'Poppins-Medium',
           fontSize: 16,
         }),
@@ -260,6 +266,7 @@ const DrawerNavigator = () => {
       <Drawer.Screen name="Dashboard" component={DashboardScreen} />
       <Drawer.Screen name="Daily Result" component={DailyResult} />
       <Drawer.Screen name="Result" component={ResultScreen} />
+      <Drawer.Screen name="BetterLuck" component={BetterLuckScreen} />
       <Drawer.Screen name="Agent List" component={AgentList} />
       <Drawer.Screen name="Client List" component={StaffListScreen} />
       <Drawer.Screen name="My Account" component={SettingsScreen} />

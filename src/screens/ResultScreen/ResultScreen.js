@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect} from 'react';
+import React, { useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -17,12 +17,14 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {globalColors} from '../../Theme/globalColors';
-import {useFocusEffect} from '@react-navigation/native';
+import { globalColors } from '../../Theme/globalColors';
+import { useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
-const ResultScreen = ({navigation, route}) => {
+const ResultScreen = ({ navigation, route }) => {
+  const { t } = useTranslation();
   const scale = useSharedValue(0);
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(50);
@@ -40,10 +42,10 @@ const ResultScreen = ({navigation, route}) => {
         stiffness: 100,
       });
       opacity.value = withSequence(
-        withDelay(500, withTiming(1, {duration: 1000})),
+        withDelay(500, withTiming(1, { duration: 1000 })),
       );
       translateY.value = withSequence(
-        withDelay(1000, withSpring(0, {damping: 10, stiffness: 100})),
+        withDelay(1000, withSpring(0, { damping: 10, stiffness: 100 })),
       );
 
       return () => {
@@ -57,14 +59,14 @@ const ResultScreen = ({navigation, route}) => {
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      transform: [{scale: scale.value}],
+      transform: [{ scale: scale.value }],
     };
   });
 
   const contentStyle = useAnimatedStyle(() => {
     return {
       opacity: opacity.value,
-      transform: [{translateY: translateY.value}],
+      transform: [{ translateY: translateY.value }],
     };
   });
 
@@ -81,8 +83,8 @@ const ResultScreen = ({navigation, route}) => {
       </Animated.View>
 
       <Animated.View style={[styles.contentContainer, contentStyle]}>
-        <Text style={styles.congratsText}>Congratulations!</Text>
-        <Text style={styles.winText}>You Won</Text>
+        <Text style={styles.congratsText}>{t('congratulations')}</Text>
+        <Text style={styles.winText}>{t('youWon')}</Text>
         <Text style={styles.amountText}>₹{route.params?.amount || '0'}</Text>
 
         <View style={styles.detailsContainer}>
@@ -114,7 +116,7 @@ const ResultScreen = ({navigation, route}) => {
         <TouchableOpacity
           style={styles.button}
           onPress={() => navigation.goBack()}>
-          <Text style={styles.buttonText}>Continue</Text>
+          <Text style={styles.buttonText}>{t('continue')}</Text>
         </TouchableOpacity>
       </Animated.View>
     </View>
