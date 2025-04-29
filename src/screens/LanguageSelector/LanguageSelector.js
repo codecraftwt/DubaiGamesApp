@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     buttonContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        width: widthPercentageToDP('80%')
+        width: widthPercentageToDP('90%')
     },
     button: {
         flex: 1,

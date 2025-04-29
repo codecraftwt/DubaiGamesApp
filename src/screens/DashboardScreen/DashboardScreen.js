@@ -39,7 +39,7 @@ import {
   deleteSaralUltadel,
   resetSaralUltadelState,
 } from '../../Redux/Slices/saralUltadelSlice';
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 import MarketCountdown from './MarketCountdown';
 import { fetchCountdowns } from '../../Redux/Slices/countdownSlice';
 import { isTimeExceeded } from '../../utils/marketTime';
@@ -47,6 +47,7 @@ import { useNavigation } from '@react-navigation/native';
 import { getWalletHistory, setWalletBalance, withdrawFromWallet } from '../../Redux/Slices/walletSlice';
 
 const DashboardScreen = ({ navigation }) => {
+  const { t, i18n } = useTranslation();
   const [agentId, setAgentId] = useState(agent?.id);
   const [agentName, setAgentName] = useState(agent?.role);
   const [market, setMarket] = useState('Kalyan');
@@ -239,14 +240,18 @@ const DashboardScreen = ({ navigation }) => {
         time => time.market.toLowerCase() === selectedMarket.toLowerCase(),
       );
 
-      // Check if current time exceeds open/close times
-      const openTimeExceeded = marketTimeData?.some(
+      // Check if selected date is today
+      const today = new Date();
+      const isToday = formatDate(date) === formatDate(today);
+
+      // Check if current time exceeds open/close times (only if it's today)
+      const openTimeExceeded = isToday && marketTimeData?.some(
         time =>
           time.type === 'open' && isTimeExceeded(time.end_time, currentTime),
       );
       console.log('openTimeExceeded ------------->', openTimeExceeded);
 
-      const closeTimeExceeded = marketTimeData?.some(
+      const closeTimeExceeded = isToday && marketTimeData?.some(
         time =>
           time.type === 'close' && isTimeExceeded(time.end_time, currentTime),
       );
@@ -281,9 +286,14 @@ const DashboardScreen = ({ navigation }) => {
           bothResultsOut: false,
         };
       }
-      // Case 4: No results declared yet - apply time-based filtering
+      // Case 4: No results declared yet - apply time-based filtering only if it's today
       else {
         console.log('If both results are not declared we are checking time ..');
+
+        // If it's not today, show all categories
+        if (!isToday) {
+          return { categories: categories, bothResultsOut: false };
+        }
 
         const filtered = categories.filter(cat => {
           if (
@@ -313,7 +323,7 @@ const DashboardScreen = ({ navigation }) => {
         return { categories: filtered, bothResultsOut: false };
       }
     },
-    [],
+    [date], // Add date to dependencies
   );
 
   console.log('GGGGGGGGGGGG', data?.role);
@@ -1156,6 +1166,7 @@ const DashboardScreen = ({ navigation }) => {
           marketData={marketsTime}
           selectedMarket={market}
           currentTime={currentTime}
+          selectedDate={date}
         />
       )}
       <Text style={styles.sectionTitle}>{t('agentDetails')}</Text>

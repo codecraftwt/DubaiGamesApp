@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
 import { globalColors } from '../../Theme/globalColors';
-import { convertTo12HourFormat } from '../../utils/marketTime';
-import LinearGradient from 'react-native-linear-gradient';
 import { useTranslation } from 'react-i18next';
+import LinearGradient from 'react-native-linear-gradient';
+import { format } from 'date-fns';
 
-const MarketCountdown = ({ marketData, selectedMarket, currentTime }) => {
+const MarketCountdown = ({ marketData, selectedMarket, currentTime, selectedDate }) => {
   const { t } = useTranslation();
   const [timers, setTimers] = useState([]);
   const [currentTimeWithSeconds, setCurrentTimeWithSeconds] = useState('');
@@ -15,14 +15,12 @@ const MarketCountdown = ({ marketData, selectedMarket, currentTime }) => {
     if (!currentTime) return;
 
     setIsLoading(true);
-    // Initialize with current time and seconds
     const now = new Date();
     const seconds = now.getSeconds();
     setCurrentTimeWithSeconds(
       `${currentTime}:${seconds.toString().padStart(2, '0')}`,
     );
 
-    // Update seconds every second
     const interval = setInterval(() => {
       const now = new Date();
       const seconds = now.getSeconds();
@@ -41,32 +39,39 @@ const MarketCountdown = ({ marketData, selectedMarket, currentTime }) => {
     }
 
     setIsLoading(false);
-    // Filter market times for the selected market
     const marketTimes = marketData.filter(
       time => time.market.toLowerCase() === selectedMarket.toLowerCase(),
     );
 
-    // Calculate time differences and create timer objects
+    // Check if selected date is today
+    const today = new Date();
+    const isToday = format(selectedDate, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd');
+
     const timerObjects = marketTimes
       .map(time => {
         const [hours, minutes] = time.end_time.split(':').map(Number);
         const [currentHours, currentMinutes, currentSeconds] =
           currentTimeWithSeconds.split(':').map(Number);
 
-        // Convert to total seconds for more precise calculation
-        const endTimeInSeconds = hours * 3600 + minutes * 60;
-        const currentTimeInSeconds =
-          currentHours * 3600 + currentMinutes * 60 + currentSeconds;
+        let timeDiffInSeconds;
+        let isMarketClosed;
 
-        // Calculate time difference
-        let timeDiffInSeconds = endTimeInSeconds - currentTimeInSeconds;
+        if (isToday) {
+          // For today, calculate time difference from current time
+          const endTimeInSeconds = hours * 3600 + minutes * 60;
+          const currentTimeInSeconds =
+            currentHours * 3600 + currentMinutes * 60 + currentSeconds;
+          timeDiffInSeconds = endTimeInSeconds - currentTimeInSeconds;
+          isMarketClosed = timeDiffInSeconds < 0 && currentHours < 24;
+        } else {
+          // For future dates, calculate time difference from start of day
+          const endTimeInSeconds = hours * 3600 + minutes * 60;
+          timeDiffInSeconds = endTimeInSeconds;
+          isMarketClosed = false;
+        }
 
-        // Check if market is closed for today
-        const isMarketClosed = timeDiffInSeconds < 0 && currentHours < 24;
-
-        // Handle case where end time is on the next day
         if (timeDiffInSeconds < 0) {
-          timeDiffInSeconds += 24 * 3600; // Add 24 hours in seconds
+          timeDiffInSeconds += 24 * 3600;
         }
 
         const hoursLeft = Math.floor(timeDiffInSeconds / 3600);
@@ -82,11 +87,11 @@ const MarketCountdown = ({ marketData, selectedMarket, currentTime }) => {
           },
           endTime: time.end_time,
           isClosed: isMarketClosed,
+          isFutureDate: !isToday,
         };
       })
-      .filter(timer => timer !== null); // Remove null timers (exceeded ones)
+      .filter(timer => timer !== null);
 
-    // Sort timers by time left in ascending order
     timerObjects.sort((a, b) => {
       const aTotalSeconds =
         a.timeLeft.hours * 3600 + a.timeLeft.minutes * 60 + a.timeLeft.seconds;
@@ -96,7 +101,7 @@ const MarketCountdown = ({ marketData, selectedMarket, currentTime }) => {
     });
 
     setTimers(timerObjects);
-  }, [marketData, selectedMarket, currentTimeWithSeconds]);
+  }, [marketData, selectedMarket, currentTimeWithSeconds, selectedDate]);
 
   if (isLoading) {
     return (
@@ -118,40 +123,42 @@ const MarketCountdown = ({ marketData, selectedMarket, currentTime }) => {
             style={[styles.timerCard, index === 0 ? styles.rightBorder : null]}
           >
             <View style={styles.contentContainer}>
-              <View style={styles.marketInfoContainer}>
-                <Text style={styles.marketType}>
-                  {timer.type === 'open' ? t('openMarket') : t('closeMarket')}
-                </Text>
-                <View style={styles.timeContainer}>
-                  {timer.isClosed ? (
-                    <Text style={styles.closedText}>{t('marketClosed')}</Text>
-                  ) : (
-                    <View style={styles.timeRow}>
-                      <View style={styles.timeBlock}>
-                        <Text style={styles.timeValue}>
-                          {timer.timeLeft.hours.toString().padStart(2, '0')}
-                        </Text>
-                        <Text style={styles.timeLabel}>{t('hours')}</Text>
-                      </View>
-                      <Text style={styles.timeSeparator}>:</Text>
-                      <View style={styles.timeBlock}>
-                        <Text style={styles.timeValue}>
-                          {timer.timeLeft.minutes.toString().padStart(2, '0')}
-                        </Text>
-                        <Text style={styles.timeLabel}>{t('minutes')}</Text>
-                      </View>
-                      <Text style={styles.timeSeparator}>:</Text>
-                      <View style={styles.timeBlock}>
-                        <Text style={styles.timeValue}>
-                          {timer.timeLeft.seconds.toString().padStart(2, '0')}
-                        </Text>
-                        <Text style={styles.timeLabel}>{t('seconds')}</Text>
-                      </View>
+              <Text style={styles.marketType}>
+                {timer.type === 'open' ? t('openMarket') : t('closeMarket')}
+              </Text>
+              <View style={styles.timeContainer}>
+                {timer.isClosed ? (
+                  <Text style={styles.closedText}>{t('marketClosed')}</Text>
+                ) : (
+                  <View style={styles.timeRow}>
+                    <View style={styles.timeBlock}>
+                      <Text style={styles.timeValue}>
+                        {timer.timeLeft.hours.toString().padStart(2, '0')}
+                      </Text>
+                      <Text style={styles.timeLabel}>{t('hours')}</Text>
                     </View>
-                  )}
-                </View>
+                    <Text style={styles.timeSeparator}>:</Text>
+                    <View style={styles.timeBlock}>
+                      <Text style={styles.timeValue}>
+                        {timer.timeLeft.minutes.toString().padStart(2, '0')}
+                      </Text>
+                      <Text style={styles.timeLabel}>{t('minutes')}</Text>
+                    </View>
+                    <Text style={styles.timeSeparator}>:</Text>
+                    <View style={styles.timeBlock}>
+                      <Text style={styles.timeValue}>
+                        {timer.timeLeft.seconds.toString().padStart(2, '0')}
+                      </Text>
+                      <Text style={styles.timeLabel}>{t('seconds')}</Text>
+                    </View>
+                  </View>
+                )}
               </View>
-
+              {timer.isFutureDate && (
+                <Text style={styles.futureDateText}>
+                  {format(selectedDate, 'dd MMM yyyy')}
+                </Text>
+              )}
             </View>
           </LinearGradient>
         ))}
@@ -168,27 +175,24 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
   loadingContainer: {
-    height: 80,
+    height: 60,
     justifyContent: 'center',
     alignItems: 'center',
   },
   timersRow: {
     flexDirection: 'row',
-    gap: 6,
+    gap: 4,
   },
   timerCard: {
     flex: 1,
-    borderRadius: 10,
+    borderRadius: 8,
     overflow: 'hidden',
   },
   contentContainer: {
-    padding: 8,
-  },
-  marketInfoContainer: {
-    alignItems: 'center',
+    padding: 6,
   },
   marketType: {
-    fontSize: 10,
+    fontSize: 8,
     fontFamily: 'Poppins-Bold',
     color: '#FFFFFF',
     marginBottom: 2,
@@ -202,7 +206,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 1,
+    gap: 2,
   },
   timeBlock: {
     alignItems: 'center',
@@ -210,43 +214,42 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     paddingHorizontal: 4,
     paddingVertical: 1,
-    minWidth: 24,
+    minWidth: 22,
   },
   timeValue: {
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: 'Poppins-Bold',
     color: '#FFFFFF',
   },
   timeLabel: {
-    fontSize: 6,
+    fontSize: 5,
     fontFamily: 'Poppins-Medium',
     color: 'rgba(255, 255, 255, 0.8)',
     letterSpacing: 0.3,
   },
   timeSeparator: {
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: 'Poppins-Bold',
     color: '#FFFFFF',
-    marginHorizontal: 1,
+    marginHorizontal: 2,
   },
-  endTimeText: {
+  closedText: {
     fontSize: 8,
+    fontFamily: 'Poppins-Bold',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  futureDateText: {
+    fontSize: 6,
     fontFamily: 'Poppins-Medium',
     color: 'rgba(255, 255, 255, 0.9)',
     textAlign: 'center',
     marginTop: 2,
   },
-  closedText: {
-    fontSize: 10,
-    fontFamily: 'Poppins-Bold',
-    color: '#FFFFFF',
-    textAlign: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 5,
-  },
 });
-
 
 export default MarketCountdown;

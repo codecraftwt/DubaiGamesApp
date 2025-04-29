@@ -1,73 +1,337 @@
-import React, { use } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, ScrollView, Modal } from 'react-native';
 import { globalColors } from '../../Theme/globalColors';
-import Header from '../../components/Header/Header';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { logoutUser } from '../../Redux/Slices/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
-import LanguageSelector from '../LanguageSelector/LanguageSelector';
 import { useTranslation } from 'react-i18next';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SettingsScreen = ({ navigation }) => {
     const dispatch = useDispatch();
-    const { t } = useTranslation();
-
+    const { t, i18n } = useTranslation();
     const user = useSelector((state) => state.auth.user);
-    console.log("user======>", user)
+    const [showLanguageModal, setShowLanguageModal] = useState(false);
+
     const handleLogout = async () => {
-        await dispatch(logoutUser());
-        navigation.replace('Login');
+        Alert.alert(
+            t('confirmLogout'),
+            t('confirmLogoutMessage'),
+            [
+                {
+                    text: t('cancel'),
+                    style: 'cancel',
+                },
+                {
+                    text: t('logout'),
+                    onPress: async () => {
+                        await dispatch(logoutUser());
+                        navigation.replace('Login');
+                    },
+                    style: 'destructive',
+                },
+            ],
+            { cancelable: true }
+        );
     };
 
+    const changeLanguage = async (lng) => {
+        try {
+            await i18n.changeLanguage(lng);
+            await AsyncStorage.setItem('user-language', lng);
+            setShowLanguageModal(false);
+            Alert.alert(
+                t('success'),
+                t('languageChanged'),
+                [
+                    {
+                        text: t('ok'),
+                    }
+                ],
+                { cancelable: false }
+            );
+        } catch (error) {
+            Alert.alert(t('error'), t('languageChangeFailed'));
+        }
+    };
+
+    const settingsOptions = [
+        // {
+        //     id: 1,
+        //     title: t('profile'),
+        //     icon: 'person-outline',
+        //     onPress: () => navigation.navigate('Profile'),
+        // },
+        {
+            id: 2,
+            title: t('language'),
+            icon: 'language-outline',
+            onPress: () => setShowLanguageModal(true),
+        },
+        // {
+        //     id: 3,
+        //     title: t('notifications'),
+        //     icon: 'notifications-outline',
+        //     onPress: () => navigation.navigate('Notifications'),
+        // },
+        // {
+        //     id: 4,
+        //     title: t('privacy'),
+        //     icon: 'shield-outline',
+        //     onPress: () => navigation.navigate('Privacy'),
+        // },
+        // {
+        //     id: 5,
+        //     title: t('help'),
+        //     icon: 'help-circle-outline',
+        //     onPress: () => navigation.navigate('Help'),
+        // },
+    ];
+
+    const languages = [
+        { code: 'en', name: 'English' },
+        { code: 'hi', name: 'हिंदी' },
+        { code: 'mr', name: 'मराठी' },
+        { code: 'kn', name: 'ಕನ್ನಡ' },
+    ];
+
     return (
-        <View style={styles.container}>
-            {/* <Header /> */}
-            {/* <LanguageSelector /> */}
+        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+            {/* Profile Section */}
+            <View style={styles.profileSection}>
+                <View style={styles.profileImageContainer}>
+                    <Image
+                        source={{ uri: 'https://randomuser.me/api/portraits/men/1.jpg' }}
+                        style={styles.userImage}
+                    />
+                    <TouchableOpacity style={styles.editIcon}>
+                        <Icon name="camera-outline" size={20} color={globalColors.white} />
+                    </TouchableOpacity>
+                </View>
+                <Text style={styles.userName}>{user?.name}</Text>
+                <Text style={styles.userEmail}>{user?.email}</Text>
+            </View>
 
-            <Image
-                source={{ uri: 'https://randomuser.me/api/portraits/men/1.jpg' }}
-                style={styles.userImage}
-            />
+            {/* Settings Options */}
+            <View style={styles.settingsSection}>
+                {settingsOptions.map((option) => (
+                    <TouchableOpacity
+                        key={option.id}
+                        style={styles.optionItem}
+                        onPress={option.onPress}>
+                        <View style={styles.optionLeft}>
+                            <Icon name={option.icon} size={24} color={globalColors.darkBlue} />
+                            <Text style={styles.optionText}>{option.title}</Text>
+                        </View>
+                        <Icon name="chevron-forward" size={20} color={globalColors.grey} />
+                    </TouchableOpacity>
+                ))}
+            </View>
 
-            {/* User Name */}
-            <Text style={styles.userName}>{user?.name}</Text>
-            <Text style={styles.userName}>{user?.email}</Text>
+            {/* Logout Button */}
             <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                <Text style={styles.logoutText}>{t("logout"
-                )}</Text>
+                <Icon name="log-out-outline" size={24} color={globalColors.white} />
+                <Text style={styles.logoutText}>{t('logout')}</Text>
             </TouchableOpacity>
-        </View>
+
+            {/* Language Selection Modal */}
+            <Modal
+                visible={showLanguageModal}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => setShowLanguageModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>{t('selectLanguage')}</Text>
+                            <TouchableOpacity onPress={() => setShowLanguageModal(false)}>
+                                <Icon name="close" size={24} color={globalColors.darkBlue} />
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.languageList}>
+                            {languages.map((lang) => (
+                                <TouchableOpacity
+                                    key={lang.code}
+                                    style={[
+                                        styles.languageItem,
+                                        i18n.language === lang.code && styles.activeLanguageItem
+                                    ]}
+                                    onPress={() => changeLanguage(lang.code)}
+                                >
+                                    <Text style={[
+                                        styles.languageText,
+                                        i18n.language === lang.code && styles.activeLanguageText
+                                    ]}>
+                                        {lang.name}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+        </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
+        backgroundColor: globalColors.LightWhite,
+    },
+    profileSection: {
         alignItems: 'center',
+        paddingVertical: 30,
         backgroundColor: globalColors.white,
-
+        marginBottom: 20,
+        borderBottomLeftRadius: 20,
+        borderBottomRightRadius: 20,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 3,
+    },
+    profileImageContainer: {
+        position: 'relative',
+        marginBottom: 15,
     },
     userImage: {
-        width: 120,
-        height: 120,
-        borderRadius: 60,
-        marginBottom: 20,
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        borderWidth: 3,
+        borderColor: globalColors.blue,
+    },
+    editIcon: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        backgroundColor: globalColors.blue,
+        width: 30,
+        height: 30,
+        borderRadius: 15,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: globalColors.white,
     },
     userName: {
-        fontSize: 20,
+        fontSize: 22,
         fontFamily: 'Poppins-Bold',
-        marginBottom: 10,
+        color: globalColors.darkBlue,
+        marginBottom: 5,
+    },
+    userEmail: {
+        fontSize: 14,
+        fontFamily: 'Poppins-Medium',
+        color: globalColors.grey,
+    },
+    settingsSection: {
+        backgroundColor: globalColors.white,
+        borderRadius: 15,
+        marginHorizontal: 20,
+        marginBottom: 20,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    optionItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: 15,
+        paddingHorizontal: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: globalColors.borderColor,
+    },
+    optionLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    optionText: {
+        fontSize: 16,
+        fontFamily: 'Poppins-Medium',
+        color: globalColors.darkBlue,
+        marginLeft: 15,
     },
     logoutButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
         backgroundColor: globalColors.vividred,
-        paddingVertical: 12,
-        paddingHorizontal: 30,
-        borderRadius: 8,
+        paddingVertical: 15,
+        marginHorizontal: 20,
+        borderRadius: 10,
+        marginBottom: 30,
     },
     logoutText: {
         color: globalColors.white,
+        fontSize: 16,
+        fontFamily: 'Poppins-Bold',
+        marginLeft: 10,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        backgroundColor: globalColors.white,
+        borderRadius: 15,
+        width: '90%',
+        padding: 20,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    modalTitle: {
         fontSize: 18,
+        fontFamily: 'Poppins-Bold',
+        color: globalColors.darkBlue,
+    },
+    languageList: {
+        gap: 10,
+    },
+    languageItem: {
+        padding: 15,
+        borderRadius: 10,
+        backgroundColor: globalColors.LightWhite,
+        borderWidth: 1,
+        borderColor: globalColors.borderColor,
+    },
+    activeLanguageItem: {
+        backgroundColor: globalColors.blue,
+        borderColor: globalColors.blue,
+    },
+    languageText: {
+        fontSize: 16,
+        fontFamily: 'Poppins-Medium',
+        color: globalColors.darkBlue,
+    },
+    activeLanguageText: {
+        color: globalColors.white,
         fontFamily: 'Poppins-Bold',
     },
 });
