@@ -47,7 +47,7 @@ import { useNavigation } from '@react-navigation/native';
 import { getWalletHistory, setWalletBalance, withdrawFromWallet } from '../../Redux/Slices/walletSlice';
 
 const DashboardScreen = ({ navigation }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [agentId, setAgentId] = useState(agent?.id);
   const [agentName, setAgentName] = useState(agent?.role);
   const [market, setMarket] = useState('Kalyan');
@@ -516,7 +516,7 @@ const DashboardScreen = ({ navigation }) => {
       Toast.show({
         type: 'error',
         text1: 'Error',
-        text2: `Invalid number format for ${selectedCategory} category`,
+        text2: t('invalidNumber', { category: selectedCategory }),
         position: 'top',
       });
       return;
@@ -752,7 +752,7 @@ const DashboardScreen = ({ navigation }) => {
       setSaralPanNumber('');
       setSaralPanAmount('');
     } else {
-      Alert.alert('Error', 'Please enter both number and amount');
+      Alert.alert('Error', t('pleaseEnterBoth'));
     }
   };
 
@@ -1140,7 +1140,7 @@ const DashboardScreen = ({ navigation }) => {
 
   const handlePayment = () => {
     if (selectedEntries.length === 0) {
-      Alert.alert('Error', 'Please select at least one entry to pay');
+      Alert.alert('Error', t('selectAtLeastOne'));
       return;
     }
     setShowPaymentModal(true);
@@ -1174,29 +1174,26 @@ const DashboardScreen = ({ navigation }) => {
         {user?.role !== 'online_customer' && user?.role !== 'agent' ? (
           <View style={styles.row}>
             <View style={styles.halfWidthInput}>
-              <Text style={styles.label}>AGENT ID</Text>
+              <Text style={styles.label}>{t('agentId')}</Text>
               <DynamicDropdown
                 onSelect={handleSelectByCode}
-                placeholder="Agent Code"
+                placeholder={t('agentId')}
                 searchType="code"
                 value={agentId}
                 setAgentId={setAgentId}
               />
             </View>
             <View style={styles.halfWidthInput}>
-              <Text style={styles.label}>AGENT NAME</Text>
-
+              <Text style={styles.label}>{t('agentName')}</Text>
               <DynamicDropdown
                 onSelect={handleSelectByName}
-                placeholder="Agent Name"
+                placeholder={t('agentName')}
                 searchType="name"
                 value={agentName}
               />
             </View>
           </View>
-        ) : (
-          ''
-        )}
+        ) : null}
 
         <View style={styles.row}>
           <View style={styles.halfWidthInput}>
@@ -1496,10 +1493,10 @@ const DashboardScreen = ({ navigation }) => {
               <View>
                 <View style={styles.row}>
                   <View style={styles.inputGroup}>
-                    <Text style={styles.label}>SARALPAN NUMBER</Text>
+                    <Text style={styles.label}>{t('saralPanNumber')}</Text>
                     <TextInput
                       style={styles.input}
-                      placeholder="Enter Saral-Pan No"
+                      placeholder={t('saralPanNumber')}
                       value={saralPanNumber}
                       onChangeText={setSaralPanNumber}
                       keyboardType="numeric"
@@ -1507,30 +1504,26 @@ const DashboardScreen = ({ navigation }) => {
                   </View>
 
                   <View style={styles.inputGroup}>
-                    <Text style={styles.label}>{t('enterAmount')}</Text>
+                    <Text style={styles.label}>{t('amount')}</Text>
                     <TextInput
                       style={styles.input}
-                      placeholder="Enter Amount"
+                      placeholder={t('enterAmount')}
                       value={saralPanAmount}
                       onChangeText={setSaralPanAmount}
                       keyboardType="numeric"
                     />
                   </View>
-                  <TouchableOpacity
-                    style={styles.addButton}
-                    onPress={handleAddSaralPan}>
+                  <TouchableOpacity style={styles.addButton} onPress={handleAddSaralPan}>
                     <Text style={styles.addButtonText}>+</Text>
                   </TouchableOpacity>
                 </View>
 
-                {/* Display Saral-Pan Table */}
-
-                {saralPanEntries.length !== 0 ? (
+                {saralPanEntries.length > 0 && (
                   <View style={styles.table}>
                     <View style={styles.tableHeader}>
-                      <Text style={styles.tableHeaderText}>Number</Text>
-                      <Text style={styles.tableHeaderText}>Amount</Text>
-                      <Text style={styles.tableHeaderText}>Action</Text>
+                      <Text style={styles.tableHeaderText}>{t('number')}</Text>
+                      <Text style={styles.tableHeaderText}>{t('amount')}</Text>
+                      <Text style={styles.tableHeaderText}>{t('action')}</Text>
                     </View>
                     {saralPanEntries.map((entry, index) => (
                       <View key={`saral-${index}`} style={styles.tableRow}>
@@ -1544,16 +1537,14 @@ const DashboardScreen = ({ navigation }) => {
                       </View>
                     ))}
                   </View>
-                ) : (
-                  ''
                 )}
 
                 <View style={styles.row}>
                   <View style={styles.inputGroup}>
-                    <Text style={styles.label}>GUNULE</Text>
+                    <Text style={styles.label}>{t('gunule')}</Text>
                     <TextInput
                       style={styles.input}
-                      placeholder="Enter Gunule"
+                      placeholder={t('enterGunule')}
                       value={saralPanGunule}
                       onChangeText={setsaralPanGunule}
                       keyboardType="numeric"
@@ -1563,7 +1554,7 @@ const DashboardScreen = ({ navigation }) => {
                     <Text style={styles.label}>{t('enterAmount')}</Text>
                     <TextInput
                       style={styles.input}
-                      placeholder="Enter Amount"
+                      placeholder={t('enterAmount')}
                       value={saralPanGunuleAmount}
                       onChangeText={setsaralPanGunuleAmount}
                       keyboardType="numeric"
@@ -1706,30 +1697,6 @@ const DashboardScreen = ({ navigation }) => {
                     ))}
                   </View>
                 )}
-
-                {/* <TouchableOpacity style={styles.addButton} onPress={handleAddSaralPan}>
-                            <Text style={styles.addButtonText}>Add Saral-Pan</Text>
-                        </TouchableOpacity> */}
-
-                {/* Display Saral-Pan Table */}
-                {/* <View style={styles.table}>
-                            <Text style={styles.tableHeader}>ulta-Pan</Text> */}
-                {/* {saralPanData.map((item, index) => (
-                                <View key={index} style={styles.tableRow}>
-                                    <Text style={styles.tableCell}>{item.number}</Text>
-                                    <Text style={styles.tableCell}>{item.amount}</Text>
-                                    <TouchableOpacity
-                                        style={styles.deleteButton}
-                                        onPress={() => {
-                                            const updatedData = saralPanData.filter((_, i) => i !== index);
-                                            setSaralPanData(updatedData);
-                                        }}
-                                    >
-                                        <Icon name="trash" size={18} color="red" />
-                                    </TouchableOpacity>
-                                </View>
-                            ))} */}
-                {/* </View> */}
               </View>
             )}
           </>
@@ -1766,19 +1733,19 @@ const DashboardScreen = ({ navigation }) => {
             {!bothResultsOut && (
               <View style={styles.totalContainer}>
                 <View style={styles.totalItem}>
-                  <Text style={styles.totalLabel}>Total Amount</Text>
+                  <Text style={styles.totalLabel}>{t('totalAmount')}</Text>
                   <Text style={styles.totalValue}>
                     {data?.totalAmount || 0}
                   </Text>
                 </View>
                 <View style={styles.totalItem}>
-                  <Text style={styles.totalLabel}>Open Amount</Text>
+                  <Text style={styles.totalLabel}>{t('openAmount')}</Text>
                   <Text style={styles.totalValue}>
                     {data?.totalOpenAmount || 0}
                   </Text>
                 </View>
                 <View style={styles.totalItem}>
-                  <Text style={styles.totalLabel}>Close Amount</Text>
+                  <Text style={styles.totalLabel}>{t('closeAmount')}</Text>
                   <Text style={styles.totalValue}>
                     {data?.totalCloseAmount || 0}
                   </Text>
@@ -1801,15 +1768,13 @@ const DashboardScreen = ({ navigation }) => {
       {selectedEntries?.length > 0 && (
         <View style={styles.paymentContainer}>
           <Text style={styles.totalAmount}>
-            Total Amount: ₹{calculateTotalAmount()}
+            {t('totalAmount')}: ₹{calculateTotalAmount()}
           </Text>
           <TouchableOpacity style={styles.payButton} onPress={handlePayment}>
-            <Text style={styles.payButtonText}>Pay Now</Text>
+            <Text style={styles.payButtonText}>{t('payNow')}</Text>
           </TouchableOpacity>
         </View>
       )}
-
-
 
       <Modal
         visible={showPaymentModal}
@@ -1818,21 +1783,23 @@ const DashboardScreen = ({ navigation }) => {
         onRequestClose={() => setShowPaymentModal(false)}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Confirm Payment</Text>
+            <Text style={styles.modalTitle}>{t('confirmPayment')}</Text>
             <Text style={styles.modalText}>
-              You are about to pay ₹{calculateTotalAmount()} for{' '}
-              {selectedEntries.length} entries.
+              {t('paymentMessage', {
+                amount: calculateTotalAmount(),
+                count: selectedEntries.length,
+              })}
             </Text>
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => setShowPaymentModal(false)}>
-                <Text style={styles.modalButtonText}>Cancel</Text>
+                <Text style={styles.modalButtonText}>{t('cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, styles.confirmButton]}
                 onPress={handlePaymentConfirm}>
-                <Text style={styles.modalButtonText}>Confirm</Text>
+                <Text style={styles.modalButtonText}>{t('submit')}</Text>
               </TouchableOpacity>
             </View>
           </View>

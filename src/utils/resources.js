@@ -20,16 +20,18 @@ export const resources = {
 
             // Dashboard Screen
             "agentDetails": "Agent Details",
-            "agentId": "AGENT ID",
-            "agentName": "AGENT NAME",
-            "market": "MARKET",
-            "date": "DATE",
+            "agentId": "Agent ID",
+            "agentName": "Agent Name",
+            "market": "Market",
+            "date": "Date",
             "selectCategory": "Select Category",
-            "enterNumber": "ENTER NUMBER",
-            "enterAmount": "ENTER AMOUNT",
-            "anotherNumber": "ANOTHER NUMBER",
-            "amountSecond": "AMOUNT SECOND",
-            "submit": "SUBMIT",
+            "single": "Single",
+            "jodi": "Jodi",
+            "enterNumber": "Enter Number",
+            "enterAmount": "Enter Amount",
+            "anotherNumber": "Another Number",
+            "amountSecond": "Amount Second",
+            "submit": "Submit",
             "payment": "Payment",
 
             // Explore Screen
@@ -63,8 +65,9 @@ export const resources = {
             "cancel": "Cancel",
             "delete": "Delete",
             "dashboard": "Dashboard",
-            "my_account": "My Account",
+            "myaccount": "My Account",
             "logout": "Logout",
+            "setting": "Settings",
 
             // Market Countdown
             "openMarket": "Open Market",
@@ -85,7 +88,7 @@ export const resources = {
             // Result Screen
             "congratulations": "Congratulations!",
             "youWon": "You Won",
-            "betterLuck": "Better Luck",
+            "betterluck": "Better Luck",
             "nextTime": "Next Time!",
 
             // Customer List
@@ -119,6 +122,41 @@ export const resources = {
             "passwordLength": "Password must be at least 8 characters",
             "passwordsDoNotMatch": "Passwords do not match",
 
+            "selectLanguage": "Select Language",
+            "reports": "Reports",
+            "weeklyReport": "Weekly Report",
+            "verifyReport": "Verify Report",
+            "addPaymentReport": "Add Payment Report",
+            "addButtonReport": "Add Button Report",
+            "dailyResult": "Daily Result",
+            "result": "Result",
+            "agentList": "Agent List",
+            "clientList": "Client List",
+            "customerlist": "Customer List",
+            "mywallet": "My Wallet",
+
+            // Dashboard Screen Additional Translations
+            "enterGunule": "Enter Gunule",
+            "saralPanNumber": "Saral Pan Number",
+            "ultaPanNumber": "Ulta Pan Number",
+            "addSaralPan": "Add Saral-Pan",
+            "addGunule": "Add Gunule",
+            "number": "Number",
+            "amount": "Amount",
+            "action": "Action",
+            "gunule": "Gunule",
+            "totalAmount": "Total Amount",
+            "openAmount": "Open Amount",
+            "closeAmount": "Close Amount",
+            "payNow": "Pay Now",
+            "confirmPayment": "Confirm Payment",
+            "paymentMessage": "You are about to pay ₹{amount} for {count} entries.",
+            "selectAtLeastOne": "Please select at least one entry to pay",
+            "confirmDelete": "Are you sure you want to delete this entry?",
+            "invalidNumber": "Invalid number format for {category} category",
+            "pleaseEnterBoth": "Please enter both number and amount",
+            "addNumber": "Add Number",
+            "removeNumber": "Remove Number"
         }
     },
     hi: {
@@ -144,9 +182,11 @@ export const resources = {
             "agentDetails": "एजेंट विवरण",
             "agentId": "एजेंट आईडी",
             "agentName": "एजेंट का नाम",
-            "market": "बाज़ार",
+            "market": "बाजार",
             "date": "तारीख",
             "selectCategory": "श्रेणी चुनें",
+            "single": "सिंगल",
+            "jodi": "जोड़ी",
             "enterNumber": "नंबर दर्ज करें",
             "enterAmount": "राशि दर्ज करें",
             "anotherNumber": "अन्य नंबर",
@@ -184,8 +224,9 @@ export const resources = {
             "cancel": "रद्द करें",
             "delete": "हटाएं",
             "dashboard": "डैशबोर्ड",
-            "my_account": "मेरा खाता",
+            "myaccount": "मेरा खाता",
             "logout": "लॉग आउट",
+            "setting": "सेटिंग्स",
 
             // Market Countdown
             "openMarket": "खुला बाजार",
@@ -206,7 +247,7 @@ export const resources = {
             // Result Screen
             "congratulations": "बधाई हो!",
             "youWon": "आप जीते",
-            "betterLuck": "बेहतर किस्मत",
+            "betterluck": "बेहतर किस्मत",
             "nextTime": "अगली बार!",
 
             // Customer List
@@ -240,6 +281,41 @@ export const resources = {
             "passwordLength": "पासवर्ड कम से कम 8 अक्षर का होना चाहिए",
             "passwordsDoNotMatch": "पासवर्ड मेल नहीं खाते",
 
+            "selectLanguage": "भाषा चुनें",
+            "reports": "रिपोर्ट्स",
+            "weeklyReport": "साप्ताहिक रिपोर्ट",
+            "verifyReport": "सत्यापन रिपोर्ट",
+            "addPaymentReport": "भुगतान रिपोर्ट जोड़ें",
+            "addButtonReport": "बटन रिपोर्ट जोड़ें",
+            "dailyResult": "दैनिक परिणाम",
+            "result": "परिणाम",
+            "agentList": "एजेंट सूची",
+            "clientList": "क्लाइंट सूची",
+            "customerlist": "ग्राहक सूची",
+            "mywallet": "मेरा वॉलेट",
+
+            // Dashboard Screen Additional Translations
+            "enterGunule": "गुनुले दर्ज करें",
+            "saralPanNumber": "सरल पैन नंबर",
+            "ultaPanNumber": "उल्टा पैन नंबर",
+            "addSaralPan": "सरल-पैन जोड़ें",
+            "addGunule": "गुनुले जोड़ें",
+            "number": "नंबर",
+            "amount": "राशि",
+            "action": "कार्रवाई",
+            "gunule": "गुनुले",
+            "totalAmount": "कुल राशि",
+            "openAmount": "खुली राशि",
+            "closeAmount": "बंद राशि",
+            "payNow": "अभी भुगतान करें",
+            "confirmPayment": "भुगतान की पुष्टि करें",
+            "paymentMessage": "आप {count} प्रविष्टियों के लिए ₹{amount} का भुगतान करने वाले हैं।",
+            "selectAtLeastOne": "कृपया भुगतान करने के लिए कम से कम एक प्रविष्टि चुनें",
+            "confirmDelete": "क्या आप वाकई इस प्रविष्टि को हटाना चाहते हैं?",
+            "invalidNumber": "{category} श्रेणी के लिए अमान्य नंबर प्रारूप",
+            "pleaseEnterBoth": "कृपया नंबर और राशि दोनों दर्ज करें",
+            "addNumber": "नंबर जोड़ें",
+            "removeNumber": "नंबर हटाएं"
         }
     },
     mr: {
@@ -268,6 +344,8 @@ export const resources = {
             "market": "बाजार",
             "date": "तारीख",
             "selectCategory": "श्रेणी निवडा",
+            "single": "सिंगल",
+            "jodi": "जोडी",
             "enterNumber": "नंबर प्रविष्ट करा",
             "enterAmount": "रक्कम प्रविष्ट करा",
             "anotherNumber": "दुसरा नंबर",
@@ -290,14 +368,12 @@ export const resources = {
             "success": "यश",
             "registrationSuccessful": "नोंदणी यशस्वी!",
 
-
             // Login validation messages
             "usernameRequired": "वापरकर्तानाव आवश्यक आहे",
             "usernameTooShort": "वापरकर्तानाव किमान 4 वर्णांचे असावे",
             "passwordRequired": "पासवर्ड आवश्यक आहे",
             "passwordTooShort": "पासवर्ड किमान 6 वर्णांचे असावे",
             "loginFailed": "लॉगिन अयशस्वी",
-
 
             "close": "बंद करा",
             "save_changes": "बदल जतन करा",
@@ -307,8 +383,9 @@ export const resources = {
             "cancel": "रद्द करा",
             "delete": "हटवा",
             "dashboard": "डॅशबोर्ड",
-            "my_account": "माझे खाते",
+            "myaccount": "माझे खाते",
             "logout": "बाहेर पडा",
+            "setting": "सेटिंग्ज",
 
             // Market Countdown
             "openMarket": "उघडा बाजार",
@@ -329,7 +406,7 @@ export const resources = {
             // Result Screen
             "congratulations": "अभिनंदन!",
             "youWon": "तुम्ही जिंकलात",
-            "betterLuck": "चांगली किस्मत",
+            "betterluck": "चांगली किस्मत",
             "nextTime": "पुढील वेळी!",
 
             // Customer List
@@ -339,7 +416,7 @@ export const resources = {
             "editCustomer": "ग्राहक संपादित करा",
             "deleteCustomer": "ग्राहक हटवा",
             "deleteCustomerConfirm": "आपण हा ग्राहक हटवू इच्छिता याची खात्री आहे?",
-            "cancel": "रद्द करा",
+            "cancel": "रद्द करें",
             "delete": "हटवा",
             "save": "जतन करा",
             "name": "नाव",
@@ -363,6 +440,41 @@ export const resources = {
             "passwordLength": "पासवर्ड किमान 8 वर्णांचा असावा",
             "passwordsDoNotMatch": "पासवर्ड जुळत नाहीत",
 
+            "selectLanguage": "भाषा निवडा",
+            "reports": "अहवाल",
+            "weeklyReport": "साप्ताहिक अहवाल",
+            "verifyReport": "पडताळ अहवाल",
+            "addPaymentReport": "पेमेंट अहवाल जोडा",
+            "addButtonReport": "बटण अहवाल जोडा",
+            "dailyResult": "दैनिक निकाल",
+            "result": "निकाल",
+            "agentList": "एजंट यादी",
+            "clientList": "क्लायंट यादी",
+            "customerlist": "ग्राहक यादी",
+            "mywallet": "माझे वॉलेट",
+
+            // Dashboard Screen Additional Translations
+            "enterGunule": "गुनुले प्रविष्ट करा",
+            "saralPanNumber": "सरळ पॅन क्रमांक",
+            "ultaPanNumber": "उलटा पॅन क्रमांक",
+            "addSaralPan": "सरळ-पॅन जोडा",
+            "addGunule": "गुनुले जोडा",
+            "number": "क्रमांक",
+            "amount": "रक्कम",
+            "action": "कृती",
+            "gunule": "गुनुले",
+            "totalAmount": "एकूण रक्कम",
+            "openAmount": "खुली रक्कम",
+            "closeAmount": "बंद रक्कम",
+            "payNow": "आता पैसे द्या",
+            "confirmPayment": "पेमेंट पुष्टी करा",
+            "paymentMessage": "तुम्ही {count} नोंदींसाठी ₹{amount} चे पेमेंट करणार आहात.",
+            "selectAtLeastOne": "कृपया पेमेंट करण्यासाठी किमान एक नोंद निवडा",
+            "confirmDelete": "तुम्हाला खात्री आहे की तुम्ही ही नोंद हटवू इच्छिता?",
+            "invalidNumber": "{category} श्रेणीसाठी अवैध क्रमांक स्वरूप",
+            "pleaseEnterBoth": "कृपया क्रमांक आणि रक्कम दोन्ही प्रविष्ट करा",
+            "addNumber": "क्रमांक जोडा",
+            "removeNumber": "क्रमांक काढा"
         }
     },
     kn: {
@@ -391,6 +503,8 @@ export const resources = {
             "market": "ಮಾರುಕಟ್ಟೆ",
             "date": "ದಿನಾಂಕ",
             "selectCategory": "ವರ್ಗವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+            "single": "ಸಿಂಗಲ್",
+            "jodi": "ಜೋಡಿ",
             "enterNumber": "ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ",
             "enterAmount": "ಮೊತ್ತವನ್ನು ನಮೂದಿಸಿ",
             "anotherNumber": "ಮತ್ತೊಂದು ಸಂಖ್ಯೆ",
@@ -428,8 +542,9 @@ export const resources = {
             "cancel": "ರದ್ದುಮಾಡಿ",
             "delete": "ಅಳಿಸಿ",
             "dashboard": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
-            "my_account": "ನನ್ನ ಖಾತೆ",
+            "myaccount": "ನನ್ನ ಖಾತೆ",
             "logout": "ಲಾಗ್ ಔಟ್",
+            "setting": "ಸೆಟ್ಟಿಂಗ್ಸ್",
 
             // Market Countdown
             "openMarket": "ತೆರೆದ ಮಾರುಕಟ್ಟೆ",
@@ -450,7 +565,7 @@ export const resources = {
             // Result Screen
             "congratulations": "ಅಭಿನಂದನೆಗಳು!",
             "youWon": "ನೀವು ಗೆದ್ದಿದ್ದೀರಿ",
-            "betterLuck": "ಉತ್ತಮ ಅದೃಷ್ಟ",
+            "betterluck": "ಉತ್ತಮ ಅದೃಷ್ಟ",
             "nextTime": "ಮುಂದಿನ ಬಾರಿ!",
 
             // Customer List
@@ -484,6 +599,41 @@ export const resources = {
             "passwordLength": "ಪಾಸ್‌ವರ್ಡ್ ಕನಿಷ್ಠ 8 ಅಕ್ಷರಗಳನ್ನು ಹೊಂದಿರಬೇಕು",
             "passwordsDoNotMatch": "ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ",
 
+            "selectLanguage": "ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+            "reports": "ವರದಿಗಳು",
+            "weeklyReport": "ಸಾಪ್ತಾಹಿಕ ವರದಿ",
+            "verifyReport": "ಪರಿಶೀಲನೆ ವರದಿ",
+            "addPaymentReport": "ಪಾವತಿ ವರದಿ ಸೇರಿಸಿ",
+            "addButtonReport": "ಬಟನ್ ವರದಿ ಸೇರಿಸಿ",
+            "dailyResult": "ದೈನಂದಿನ ಫಲಿತಾಂಶ",
+            "result": "ಫಲಿತಾಂಶ",
+            "agentList": "ಏಜೆಂಟ್ ಪಟ್ಟಿ",
+            "clientList": "ಕ್ಲೈಂಟ್ ಪಟ್ಟಿ",
+            "customerlist": "ಗ್ರಾಹಕ ಪಟ್ಟಿ",
+            "mywallet": "ನನ್ನ ವಾಲೆಟ್",
+
+            // Dashboard Screen Additional Translations
+            "enterGunule": "ಗುನುಲೆ ನಮೂದಿಸಿ",
+            "saralPanNumber": "ಸರಳ ಪ್ಯಾನ್ ಸಂಖ್ಯೆ",
+            "ultaPanNumber": "ಉಲ್ಟಾ ಪ್ಯಾನ್ ಸಂಖ್ಯೆ",
+            "addSaralPan": "ಸರಳ-ಪ್ಯಾನ್ ಸೇರಿಸಿ",
+            "addGunule": "ಗುನುಲೆ ಸೇರಿಸಿ",
+            "number": "ಸಂಖ್ಯೆ",
+            "amount": "ಮೊತ್ತ",
+            "action": "ಕ್ರಿಯೆ",
+            "gunule": "ಗುನುಲೆ",
+            "totalAmount": "ಒಟ್ಟು ಮೊತ್ತ",
+            "openAmount": "ತೆರೆದ ಮೊತ್ತ",
+            "closeAmount": "ಮುಚ್ಚಿದ ಮೊತ್ತ",
+            "payNow": "ಈಗ ಪಾವತಿಸಿ",
+            "confirmPayment": "ಪಾವತಿ ದೃಢೀಕರಿಸಿ",
+            "paymentMessage": "ನೀವು {count} ನಮೂದುಗಳಿಗೆ ₹{amount} ಪಾವತಿಸಲು ಹೊರಟಿದ್ದೀರಿ.",
+            "selectAtLeastOne": "ದಯವಿಟ್ಟು ಪಾವತಿಸಲು ಕನಿಷ್ಠ ಒಂದು ನಮೂದನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+            "confirmDelete": "ನೀವು ಖಚಿತವಾಗಿ ಈ ನಮೂದನ್ನು ಅಳಿಸಲು ಬಯಸುವಿರಾ?",
+            "invalidNumber": "{category} ವರ್ಗಕ್ಕೆ ಅಮಾನ್ಯ ಸಂಖ್ಯೆ ಸ್ವರೂಪ",
+            "pleaseEnterBoth": "ದಯವಿಟ್ಟು ಸಂಖ್ಯೆ ಮತ್ತು ಮೊತ್ತ ಎರಡನ್ನೂ ನಮೂದಿಸಿ",
+            "addNumber": "ಸಂಖ್ಯೆ ಸೇರಿಸಿ",
+            "removeNumber": "ಸಂಖ್ಯೆ ತೆಗೆಯಿರಿ"
         }
     }
 };

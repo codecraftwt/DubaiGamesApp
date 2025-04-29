@@ -5,10 +5,11 @@ import {
   DrawerItem,
   DrawerItemList,
 } from '@react-navigation/drawer';
-import { View, TouchableOpacity, Text, StyleSheet, Image } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Image, ScrollView } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import DashboardScreen from '../../screens/DashboardScreen/DashboardScreen';
 import SettingsScreen from '../../screens/Setting/Settings';
 import AgentList from '../../screens/Agent/AgentList';
@@ -34,6 +35,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomerList from '../../screens/Customer/CustomerList';
 import MyWallet from '../../screens/MyWallet/MyWallet';
 import BetterLuckScreen from '../../screens/ResultScreen/BetterLuckScreen';
+import LanguageSettings from '../../screens/LanguageSettings/LanguageSettings';
 
 const Drawer = createDrawerNavigator();
 
@@ -48,6 +50,7 @@ const ALL_MENU_ITEMS = [
   { name: 'My Account', component: SettingsScreen, icon: 'user' },
   { name: 'Customer List', component: CustomerList, icon: 'user' },
   { name: 'My Wallet', component: MyWallet, icon: 'credit-card' },
+  { name: 'Language Settings', component: LanguageSettings, icon: 'globe' },
   { name: 'Reports', component: null, icon: 'file-text', isDropdown: true },
 ];
 
@@ -84,8 +87,9 @@ const MENU_ITEMS = {
 
 const CustomDrawerContent = props => {
   const [role, setRole] = useState(null);
-  const [dropdownOpen, setDropdownOpen] = useState(false); // State for dropdown toggle
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigation = useNavigation();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchUserRole = async () => {
@@ -99,7 +103,7 @@ const CustomDrawerContent = props => {
   }, []);
 
   const handleToggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen); // Toggle dropdown state
+    setDropdownOpen(!dropdownOpen);
   };
 
   return (
@@ -108,18 +112,17 @@ const CustomDrawerContent = props => {
       style={{ backgroundColor: globalColors.LightWhite }}>
       <View style={styles.drawerHeader}>
         <Image source={DubaiGameslogo} style={styles.drawerLogo} />
-        <Text style={styles.drawerTitle}>Dubai Game</Text>
+        <Text style={styles.drawerTitle}>{t('dashboard')}</Text>
       </View>
 
       {/* Render menu items */}
       {ALL_MENU_ITEMS.map((item, index) => {
         if (role && MENU_ITEMS[role]?.includes(item.name)) {
-          // If the item is a dropdown
           if (item.isDropdown) {
             return (
               <View key={index}>
                 <DrawerItem
-                  label="Reports"
+                  label={t('reports')}
                   icon={({ focused }) => (
                     <Feather
                       name={item.icon}
@@ -128,9 +131,7 @@ const CustomDrawerContent = props => {
                     />
                   )}
                   onPress={handleToggleDropdown}
-                  focused={
-                    props.state.routes[props.state.index].name === item.name
-                  }
+                  focused={props.state.routes[props.state.index].name === item.name}
                   style={{
                     backgroundColor:
                       props.state.routes[props.state.index].name === item.name
@@ -147,10 +148,10 @@ const CustomDrawerContent = props => {
                 {dropdownOpen && (
                   <View style={styles.dropdownItems}>
                     {[
-                      { name: 'Weekly Report', route: 'WeeklyReport' },
-                      { name: 'Verify Report', route: 'VerifyReport' },
-                      { name: 'Add Payment Report', route: 'AddPaymentReport' },
-                      { name: 'Add Button Report', route: 'AddButtonReport' },
+                      { name: t('weeklyReport'), route: 'WeeklyReport' },
+                      { name: t('verifyReport'), route: 'VerifyReport' },
+                      { name: t('addPaymentReport'), route: 'AddPaymentReport' },
+                      { name: t('addButtonReport'), route: 'AddButtonReport' },
                     ].map((subItem, idx) => (
                       <DrawerItem
                         key={idx}
@@ -163,21 +164,16 @@ const CustomDrawerContent = props => {
                           />
                         )}
                         onPress={() => props.navigation.navigate(subItem.route)}
-                        focused={
-                          props.state.routes[props.state.index].name ===
-                          subItem.route
-                        }
+                        focused={props.state.routes[props.state.index].name === subItem.route}
                         style={{
                           backgroundColor:
-                            props.state.routes[props.state.index].name ===
-                              subItem.route
+                            props.state.routes[props.state.index].name === subItem.route
                               ? globalColors.Charcoal
                               : 'transparent',
                         }}
                         labelStyle={{
                           color:
-                            props.state.routes[props.state.index].name ===
-                              subItem.route
+                            props.state.routes[props.state.index].name === subItem.route
                               ? globalColors.white
                               : 'black',
                         }}
@@ -189,11 +185,12 @@ const CustomDrawerContent = props => {
             );
           }
 
-          // Render regular item
+          // Special handling for BetterLuck
+          const translationKey = item.name === 'BetterLuck' ? 'betterluck' : item.name.toLowerCase().replace(/\s+/g, '');
           return (
             <DrawerItem
               key={index}
-              label={item.name}
+              label={t(translationKey)}
               icon={({ focused }) => (
                 <Feather
                   name={item.icon}
@@ -227,6 +224,7 @@ const CustomDrawerContent = props => {
 const DrawerNavigator = () => {
   const CustomHeaderLeft = () => {
     const navigation = useNavigation();
+    const { t } = useTranslation();
 
     return (
       <TouchableOpacity
@@ -238,13 +236,15 @@ const DrawerNavigator = () => {
   };
 
   const CustomHeaderTitle = () => {
+    const { t } = useTranslation();
     return (
       <View style={styles.logoContainer}>
         <Image source={DubaiGameslogo} style={{ height: 28, width: 40 }}></Image>
-        <Text style={styles.logoText}>Dubai Game </Text>
+        <Text style={styles.logoText}>{t('dashboard')}</Text>
       </View>
     );
   };
+
   return (
     <Drawer.Navigator
       drawerContent={props => <CustomDrawerContent {...props} />}
@@ -254,10 +254,6 @@ const DrawerNavigator = () => {
         headerLeft: () => <CustomHeaderLeft />,
         headerTitle: () => <CustomHeaderTitle />,
         headerTitleAlign: 'center',
-        // drawerInactiveTintColor: globalColors.blue,
-        // drawerActiveTintColor: globalColors.Magnolia,
-        // drawerActiveBackgroundColor: "red",
-
         drawerLabelStyle: ({ focused }) => ({
           fontFamily: 'Poppins-Medium',
           fontSize: 16,
@@ -270,7 +266,6 @@ const DrawerNavigator = () => {
       <Drawer.Screen name="Agent List" component={AgentList} />
       <Drawer.Screen name="Client List" component={StaffListScreen} />
       <Drawer.Screen name="My Account" component={SettingsScreen} />
-
       <Drawer.Screen name="WeeklyReport" component={WeeklyReport} />
       <Drawer.Screen name="AddButtonReport" component={AddButtonReport} />
       <Drawer.Screen name="AddPaymentReport" component={AddPaymentReport} />
@@ -278,7 +273,7 @@ const DrawerNavigator = () => {
       <Drawer.Screen name="ResultPage" component={ResultPage} />
       <Drawer.Screen name="Customer List" component={CustomerList} />
       <Drawer.Screen name="My Wallet" component={MyWallet} />
-      {/* ResultPage */}
+      <Drawer.Screen name="Language Settings" component={LanguageSettings} />
     </Drawer.Navigator>
   );
 };
@@ -305,7 +300,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   dropdownItems: {
-    marginLeft: 20, // Indent dropdown items
+    marginLeft: 20,
   },
   menuButton: {
     paddingLeft: 16,
