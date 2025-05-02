@@ -30,16 +30,23 @@ const RegistrationScreen = ({ navigation }) => {
     });
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [localError, setLocalError] = useState(null);
     const dispatch = useDispatch();
     const { registrationLoading, registrationError, isRegistered } = useSelector((state) => state.auth);
 
     useEffect(() => {
-        // Reset registration state when component mounts
         dispatch(resetRegistration());
     }, [dispatch]);
 
     useEffect(() => {
         if (isRegistered) {
+            setLoading(false);
+            Toast.show({
+                type: 'success',
+                text1: t('success'),
+                text2: t('registrationSuccessful'),
+            });
             navigation.navigate('Login');
             setFormData({
                 name: '',
@@ -51,14 +58,29 @@ const RegistrationScreen = ({ navigation }) => {
         }
     }, [isRegistered, navigation]);
 
-    // useEffect(() => {
-    //     if (registrationError) {
-    //         Alert.alert('Error', registrationError);
-    //     }
-    // }, [registrationError]);
+    useEffect(() => {
+        if (registrationError) {
+            setLoading(false);
+            Toast.show({
+                type: 'error',
+                text1: t('error'),
+                text2: registrationError || t('registrationFailed'),
+            });
+        }
+    }, [registrationError]);
 
+    useEffect(() => {
+        console.log('Redux registration loading state changed:', registrationLoading);
+    }, [registrationLoading]);
+
+    useEffect(() => {
+        console.log('Local loading state changed:', loading);
+    }, [loading]);
 
     const handleChange = (name, value) => {
+        if (localError) {
+            setLocalError(null);
+        }
         setFormData((prev) => ({
             ...prev,
             [name]: value,
@@ -70,42 +92,47 @@ const RegistrationScreen = ({ navigation }) => {
         const phoneRegex = /^\d{10}$/;
 
         if (!formData.name.trim()) {
+            setLocalError(t('nameRequired'));
             Toast.show({
                 type: 'error',
-                text1: 'Validation Error',
-                text2: 'Name is required',
+                text1: t('validationError'),
+                text2: t('nameRequired'),
             });
             return false;
         }
         if (!emailRegex.test(formData.email)) {
+            setLocalError(t('invalidEmail'));
             Toast.show({
                 type: 'error',
-                text1: 'Validation Error',
-                text2: 'Invalid email address',
+                text1: t('validationError'),
+                text2: t('invalidEmail'),
             });
             return false;
         }
         if (!phoneRegex.test(formData.phone_number)) {
+            setLocalError(t('invalidPhone'));
             Toast.show({
                 type: 'error',
-                text1: 'Validation Error',
-                text2: 'Invalid phone number (10 digits required)',
+                text1: t('validationError'),
+                text2: t('invalidPhone'),
             });
             return false;
         }
         if (formData.pass.length < 8) {
+            setLocalError(t('passwordLength'));
             Toast.show({
                 type: 'error',
-                text1: 'Validation Error',
-                text2: 'Password must be at least 8 characters',
+                text1: t('validationError'),
+                text2: t('passwordLength'),
             });
             return false;
         }
         if (formData.pass !== formData.confirm_pass) {
+            setLocalError(t('passwordsDoNotMatch'));
             Toast.show({
                 type: 'error',
-                text1: 'Validation Error',
-                text2: 'Passwords do not match',
+                text1: t('validationError'),
+                text2: t('passwordsDoNotMatch'),
             });
             return false;
         }
@@ -113,32 +140,35 @@ const RegistrationScreen = ({ navigation }) => {
         return true;
     };
 
-    const handleSubmit = async () => {
+    const handleSubmit = () => {
         if (!validateForm()) return;
 
-        try {
-            // Simulate API call
-            console.log("formData", formData)
-            await dispatch(registerUser(formData))
+        // Set loading to true immediately
+        setLoading(true);
 
+        // Log the current state
+        console.log('Starting registration, loading state:', true);
 
-            Toast.show({
-                type: 'success',
-                text1: 'Success',
-                text2: 'Registration successful!',
+        // Set a safety timeout to ensure loading state is reset after 10 seconds
+        // even if something goes wrong with the API call or Redux
+        const safetyTimeout = setTimeout(() => {
+            console.log('Safety timeout triggered - resetting loading state');
+            setLoading(false);
+        }, 10000);
+
+        // Dispatch action and watch for completion
+        dispatch(registerUser(formData))
+            .then(() => {
+                // Success is handled in the success useEffect
+                console.log('Registration dispatched successfully');
+                clearTimeout(safetyTimeout);
+            })
+            .catch((error) => {
+                // Just in case the error doesn't trigger our useEffect
+                console.log('Registration dispatch caught error:', error);
+                clearTimeout(safetyTimeout);
+                setLoading(false);
             });
-            navigation.navigate('Login');
-
-            setFormData({
-                name: '',
-                email: '',
-                phone_number: '',
-                pass: '',
-                confirm_pass: ''
-            });
-        } catch (err) {
-            console.log('Error', 'Registration failed. Please try again.', err);
-        }
     };
 
     return (
@@ -158,9 +188,8 @@ const RegistrationScreen = ({ navigation }) => {
 
                 <Text style={styles.title}>{t('createYourAccount')}</Text>
 
-                {/* Name Input */}
                 <View style={styles.inputWrapper}>
-                    <View style={styles.inputContainer}>
+                    <View style={[styles.inputContainer, localError === t('nameRequired') && styles.inputError]}>
                         <Icon name="account-outline" size={hp('2.8%')} color="#888" style={styles.icon} />
                         <TextInput
                             style={styles.input}
@@ -173,9 +202,8 @@ const RegistrationScreen = ({ navigation }) => {
                     </View>
                 </View>
 
-                {/* Email Input */}
                 <View style={styles.inputWrapper}>
-                    <View style={styles.inputContainer}>
+                    <View style={[styles.inputContainer, localError === t('invalidEmail') && styles.inputError]}>
                         <Icon name="email-outline" size={hp('2.8%')} color="#888" style={styles.icon} />
                         <TextInput
                             style={styles.input}
@@ -189,9 +217,8 @@ const RegistrationScreen = ({ navigation }) => {
                     </View>
                 </View>
 
-                {/* Phone Input */}
                 <View style={styles.inputWrapper}>
-                    <View style={styles.inputContainer}>
+                    <View style={[styles.inputContainer, localError === t('invalidPhone') && styles.inputError]}>
                         <Icon name="phone-outline" size={hp('2.8%')} color="#888" style={styles.icon} />
                         <TextInput
                             style={styles.input}
@@ -205,9 +232,8 @@ const RegistrationScreen = ({ navigation }) => {
                     </View>
                 </View>
 
-                {/* Password Input */}
                 <View style={styles.inputWrapper}>
-                    <View style={styles.inputContainer}>
+                    <View style={[styles.inputContainer, (localError === t('passwordLength') || localError === t('passwordsDoNotMatch')) && styles.inputError]}>
                         <Icon name="lock-outline" size={hp('2.8%')} color="#888" style={styles.icon} />
                         <TextInput
                             style={styles.input}
@@ -230,9 +256,8 @@ const RegistrationScreen = ({ navigation }) => {
                     </View>
                 </View>
 
-                {/* Confirm Password Input */}
                 <View style={styles.inputWrapper}>
-                    <View style={styles.inputContainer}>
+                    <View style={[styles.inputContainer, localError === t('passwordsDoNotMatch') && styles.inputError]}>
                         <Icon name="lock-check-outline" size={hp('2.8%')} color="#888" style={styles.icon} />
                         <TextInput
                             style={styles.input}
@@ -255,13 +280,12 @@ const RegistrationScreen = ({ navigation }) => {
                     </View>
                 </View>
 
-                {/* Register Button */}
                 <TouchableOpacity
-                    style={styles.button}
+                    style={[styles.button, loading && styles.buttonDisabled]}
                     onPress={handleSubmit}
-                    disabled={registrationLoading}
+                    disabled={loading}
                 >
-                    {registrationLoading ? (
+                    {loading ? (
                         <ActivityIndicator color="#fff" size="small" />
                     ) : (
                         <Text style={styles.buttonText}>{t("register")}</Text>
@@ -322,6 +346,10 @@ const styles = StyleSheet.create({
         borderColor: globalColors.borderColor,
         backgroundColor: globalColors.inputBackground,
     },
+    inputError: {
+        borderColor: globalColors.vividred,
+        borderWidth: 1,
+    },
     icon: {
         marginRight: wp('3%'),
     },
@@ -345,6 +373,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: hp('3%'),
         marginBottom: hp('1%'),
+    },
+    buttonDisabled: {
+        backgroundColor: globalColors.grey,
     },
     buttonText: {
         color: globalColors.white,

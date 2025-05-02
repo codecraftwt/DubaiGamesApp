@@ -174,14 +174,46 @@ export const registerUser = userData => async dispatch => {
     });
     return response.data;
   } catch (error) {
-    console.log('Registration error:', error.response);
+    console.log('Registration error:', error.response?.data);
+    let errorMessage = 'Registration Failed';
+
+    // Handle different error formats
+    if (error.response?.data?.messages) {
+      const messages = error.response.data.messages;
+      if (typeof messages === 'object') {
+        errorMessage = Object.values(messages).flat().join('\n');
+      }
+    } else if (error.response?.data?.error) {
+      errorMessage = error.response.data.error;
+    } else if (error.response?.data?.message) {
+      errorMessage = error.response.data.message;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+
+    // Check for email already exists error
+    if (errorMessage.toLowerCase().includes('email') &&
+      (errorMessage.toLowerCase().includes('taken') ||
+        errorMessage.toLowerCase().includes('exists') ||
+        errorMessage.toLowerCase().includes('already'))) {
+      errorMessage = 'This email is already registered. Please use a different email or try to login.';
+    }
+
+    // Check for phone already exists error
+    if (errorMessage.toLowerCase().includes('phone') &&
+      (errorMessage.toLowerCase().includes('taken') ||
+        errorMessage.toLowerCase().includes('exists') ||
+        errorMessage.toLowerCase().includes('already'))) {
+      errorMessage = 'This phone number is already registered. Please use a different number or try to login.';
+    }
+
     Toast.show({
       type: 'error',
-      text1: 'Registration Failed ss',
-      text2: error,
+      text1: 'Registration Failed',
+      text2: errorMessage,
     });
+
     dispatch(registrationFailure(errorMessage));
-    throw error;
   }
 };
 

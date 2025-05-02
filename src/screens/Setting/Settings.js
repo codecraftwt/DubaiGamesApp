@@ -1,17 +1,27 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, ScrollView, Modal } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, ScrollView, Modal, TextInput } from 'react-native';
 import { globalColors } from '../../Theme/globalColors';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { logoutUser } from '../../Redux/Slices/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { API_BASE_URL } from '../../utils/Api';
+import Toast from 'react-native-toast-message';
 
 const SettingsScreen = ({ navigation }) => {
     const dispatch = useDispatch();
     const { t, i18n } = useTranslation();
     const user = useSelector((state) => state.auth.user);
+    const token = useSelector((state) => state.auth.token);
     const [showLanguageModal, setShowLanguageModal] = useState(false);
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [password, setPassword] = useState('');
+    const [passwordConfirmation, setPasswordConfirmation] = useState('');
+    const [passwordVisible, setPasswordVisible] = useState(false);
+    const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleLogout = async () => {
         Alert.alert(
@@ -55,6 +65,75 @@ const SettingsScreen = ({ navigation }) => {
         }
     };
 
+    const handleChangePassword = async () => {
+        // Validation
+        if (!password || !passwordConfirmation) {
+            Toast.show({
+                type: 'error',
+                text1: t('error'),
+                text2: t('allFieldsRequired'),
+            });
+            return;
+        }
+
+        if (password !== passwordConfirmation) {
+            Toast.show({
+                type: 'error',
+                text1: t('error'),
+                text2: t('passwordsDoNotMatch'),
+            });
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            console.log("user", user)
+            const response = await axios.put(
+                `${API_BASE_URL}/online_customer/${user.id}`,
+                {
+                    name: user?.name,
+                    email: user?.email,
+                    phone: user?.phone,
+                    password: password,
+                    password_confirmation: passwordConfirmation,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                    },
+                }
+            );
+
+            setIsLoading(false);
+            setShowPasswordModal(false);
+            setPassword('');
+            setPasswordConfirmation('');
+
+            Toast.show({
+                type: 'success',
+                text1: t('success'),
+                text2: t('passwordChangedSuccessfully'),
+            });
+        } catch (error) {
+            setIsLoading(false);
+            console.error('Password change error:', error.response?.data || error.message);
+
+            let errorMessage = t('passwordChangeFailed');
+            if (error.response?.data?.messages) {
+                const messages = error.response.data.messages;
+                errorMessage = Object.values(messages).flat().join('\n');
+            }
+
+            Toast.show({
+                type: 'error',
+                text1: t('error'),
+                text2: errorMessage,
+            });
+        }
+    };
+
     const settingsOptions = [
         // {
         //     id: 1,
@@ -68,20 +147,26 @@ const SettingsScreen = ({ navigation }) => {
             icon: 'language-outline',
             onPress: () => setShowLanguageModal(true),
         },
+        {
+            id: 3,
+            title: t('changePassword'),
+            icon: 'lock-closed-outline',
+            onPress: () => setShowPasswordModal(true),
+        },
         // {
-        //     id: 3,
+        //     id: 4,
         //     title: t('notifications'),
         //     icon: 'notifications-outline',
         //     onPress: () => navigation.navigate('Notifications'),
         // },
         // {
-        //     id: 4,
+        //     id: 5,
         //     title: t('privacy'),
         //     icon: 'shield-outline',
         //     onPress: () => navigation.navigate('Privacy'),
         // },
         // {
-        //     id: 5,
+        //     id: 6,
         //     title: t('help'),
         //     icon: 'help-circle-outline',
         //     onPress: () => navigation.navigate('Help'),
@@ -167,6 +252,85 @@ const SettingsScreen = ({ navigation }) => {
                                     </Text>
                                 </TouchableOpacity>
                             ))}
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Password Change Modal */}
+            <Modal
+                visible={showPasswordModal}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => setShowPasswordModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>{t('changePassword')}</Text>
+                            <TouchableOpacity onPress={() => setShowPasswordModal(false)}>
+                                <Icon name="close" size={24} color={globalColors.darkBlue} />
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.passwordForm}>
+                            {/* New Password Field */}
+                            <View style={styles.inputContainer}>
+                                <View style={styles.passwordContainer}>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder={t('newPassword')}
+                                        value={password}
+                                        onChangeText={setPassword}
+                                        secureTextEntry={!passwordVisible}
+                                        placeholderTextColor={globalColors.grey}
+                                    />
+                                    <TouchableOpacity
+                                        style={styles.eyeIcon}
+                                        onPress={() => setPasswordVisible(!passwordVisible)}
+                                    >
+                                        <Icon
+                                            name={passwordVisible ? 'eye-outline' : 'eye-off-outline'}
+                                            size={20}
+                                            color={globalColors.darkBlue}
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+
+                            {/* Confirm Password Field */}
+                            <View style={styles.inputContainer}>
+                                <View style={styles.passwordContainer}>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder={t('confirmPassword')}
+                                        value={passwordConfirmation}
+                                        onChangeText={setPasswordConfirmation}
+                                        secureTextEntry={!confirmPasswordVisible}
+                                        placeholderTextColor={globalColors.grey}
+                                    />
+                                    <TouchableOpacity
+                                        style={styles.eyeIcon}
+                                        onPress={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
+                                    >
+                                        <Icon
+                                            name={confirmPasswordVisible ? 'eye-outline' : 'eye-off-outline'}
+                                            size={20}
+                                            color={globalColors.darkBlue}
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+
+                            <TouchableOpacity
+                                style={[styles.changePasswordButton, isLoading && styles.disabledButton]}
+                                onPress={handleChangePassword}
+                                disabled={isLoading}
+                            >
+                                <Text style={styles.buttonText}>
+                                    {isLoading ? t('updating') : t('updatePassword')}
+                                </Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
                 </View>
@@ -332,6 +496,46 @@ const styles = StyleSheet.create({
     },
     activeLanguageText: {
         color: globalColors.white,
+        fontFamily: 'Poppins-Bold',
+    },
+    passwordForm: {
+        gap: 15,
+    },
+    inputContainer: {
+        marginBottom: 10,
+    },
+    passwordContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: globalColors.borderColor,
+        borderRadius: 10,
+        backgroundColor: globalColors.LightWhite,
+        paddingHorizontal: 15,
+    },
+    input: {
+        flex: 1,
+        paddingVertical: 12,
+        fontSize: 16,
+        fontFamily: 'Poppins-Regular',
+        color: globalColors.darkBlue,
+    },
+    eyeIcon: {
+        padding: 8,
+    },
+    changePasswordButton: {
+        backgroundColor: globalColors.blue,
+        paddingVertical: 15,
+        borderRadius: 10,
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    disabledButton: {
+        backgroundColor: globalColors.grey,
+    },
+    buttonText: {
+        color: globalColors.white,
+        fontSize: 16,
         fontFamily: 'Poppins-Bold',
     },
 });

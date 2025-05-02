@@ -156,7 +156,19 @@ export const resources = {
             "invalidNumber": "Invalid number format for {category} category",
             "pleaseEnterBoth": "Please enter both number and amount",
             "addNumber": "Add Number",
-            "removeNumber": "Remove Number"
+            "removeNumber": "Remove Number",
+
+            // Settings Screen - Password Change
+            "changePassword": "Change Password",
+            "newPassword": "New Password",
+            "updatePassword": "Update Password",
+            "updating": "Updating...",
+            "passwordChangedSuccessfully": "Password changed successfully",
+            "passwordChangeFailed": "Failed to change password",
+            "allFieldsRequired": "All fields are required",
+
+            // Registration validation messages
+            "registrationFailed": "Registration failed. Please try again."
         }
     },
     hi: {
@@ -315,7 +327,19 @@ export const resources = {
             "invalidNumber": "{category} श्रेणी के लिए अमान्य नंबर प्रारूप",
             "pleaseEnterBoth": "कृपया नंबर और राशि दोनों दर्ज करें",
             "addNumber": "नंबर जोड़ें",
-            "removeNumber": "नंबर हटाएं"
+            "removeNumber": "नंबर हटाएं",
+
+            // Settings Screen - Password Change
+            "changePassword": "पासवर्ड बदलें",
+            "newPassword": "नया पासवर्ड",
+            "updatePassword": "पासवर्ड अपडेट करें",
+            "updating": "अपडेट हो रहा है...",
+            "passwordChangedSuccessfully": "पासवर्ड सफलतापूर्वक बदल दिया गया है",
+            "passwordChangeFailed": "पासवर्ड बदलने में विफल",
+            "allFieldsRequired": "सभी फ़ील्ड आवश्यक हैं",
+
+            // Registration validation messages
+            "registrationFailed": "पंजीकरण विफल हुआ। कृपया पुन: प्रयास करें।"
         }
     },
     mr: {
@@ -474,7 +498,19 @@ export const resources = {
             "invalidNumber": "{category} श्रेणीसाठी अवैध क्रमांक स्वरूप",
             "pleaseEnterBoth": "कृपया क्रमांक आणि रक्कम दोन्ही प्रविष्ट करा",
             "addNumber": "क्रमांक जोडा",
-            "removeNumber": "क्रमांक काढा"
+            "removeNumber": "क्रमांक काढा",
+
+            // Settings Screen - Password Change
+            "changePassword": "पासवर्ड बदला",
+            "newPassword": "नवीन पासवर्ड",
+            "updatePassword": "पासवर्ड अपडेट करा",
+            "updating": "अपडेट होत आहे...",
+            "passwordChangedSuccessfully": "पासवर्ड यशस्वीरित्या बदलला",
+            "passwordChangeFailed": "पासवर्ड बदलण्यात अयशस्वी",
+            "allFieldsRequired": "सर्व फील्ड आवश्यक आहेत",
+
+            // Registration validation messages
+            "registrationFailed": "नोंदणी अयशस्वी झाली. कृपया पुन्हा प्रयत्न करा."
         }
     },
     kn: {
@@ -633,7 +669,19 @@ export const resources = {
             "invalidNumber": "{category} ವರ್ಗಕ್ಕೆ ಅಮಾನ್ಯ ಸಂಖ್ಯೆ ಸ್ವರೂಪ",
             "pleaseEnterBoth": "ದಯವಿಟ್ಟು ಸಂಖ್ಯೆ ಮತ್ತು ಮೊತ್ತ ಎರಡನ್ನೂ ನಮೂದಿಸಿ",
             "addNumber": "ಸಂಖ್ಯೆ ಸೇರಿಸಿ",
-            "removeNumber": "ಸಂಖ್ಯೆ ತೆಗೆಯಿರಿ"
+            "removeNumber": "ಸಂಖ್ಯೆ ತೆಗೆಯಿರಿ",
+
+            // Settings Screen - Password Change
+            "changePassword": "ಪಾಸ್‌ವರ್ಡ್ ಬದಲಾಯಿಸಿ",
+            "newPassword": "ಹೊಸ ಪಾಸ್‌ವರ್ಡ್",
+            "updatePassword": "ಪಾಸ್‌ವರ್ಡ್ ಅಪ್‌ಡೇಟ್ ಮಾಡಿ",
+            "updating": "ಅಪ್‌ಡೇಟ್ ಆಗುತ್ತಿದೆ...",
+            "passwordChangedSuccessfully": "ಪಾಸ್‌ವರ್ಡ್ ಯಶಸ್ವಿಯಾಗಿ ಬದಲಾಯಿಸಲಾಗಿದೆ",
+            "passwordChangeFailed": "ಪಾಸ್‌ವರ್ಡ್ ಬದಲಾಯಿಸಲು ವಿಫಲವಾಗಿದೆ",
+            "allFieldsRequired": "ಎಲ್ಲಾ ಕ್ಷೇತ್ರಗಳು ಅಗತ್ಯವಿದೆ",
+
+            // Registration validation messages
+            "registrationFailed": "ನೋಂದಣಿ ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."
         }
     }
 };
