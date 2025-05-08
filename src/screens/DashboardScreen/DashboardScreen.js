@@ -913,11 +913,13 @@ const DashboardScreen = ({ navigation }) => {
           break;
 
         case 'cycle':
-          payload.entry_number = editNumber.split(',').map(num => num.trim());
+          // For cycle type, only allow two numbers
+          const cycleNumbers = editNumber.split(',').map(num => num.trim()).filter(num => num !== '');
+          if (cycleNumbers.length !== 2) {
+            throw new Error('For cycle type, exactly two numbers separated by a comma are required');
+          }
+          payload.entry_number = cycleNumbers;
           break;
-        // case 'cycle':
-        //     payload.number = [editNumber];
-        //     break;
 
         case 'running_pan':
           // For RUNNING_PAN, entry_number should be an array of separate numbers
@@ -932,6 +934,9 @@ const DashboardScreen = ({ navigation }) => {
           break;
 
         case 'open':
+          payload.number = editNumber.split(',').map(num => num.trim());
+          break;
+
         case 'close':
           // For these types, use ocj field
           payload.number = [editNumber];
@@ -972,7 +977,7 @@ const DashboardScreen = ({ navigation }) => {
       Alert.alert('Success', 'Entry updated successfully');
     } catch (error) {
       console.error('Error updating entry:', error);
-      let errorMessage = 'Your wallet balance is too low to place this entry. Please add funds to your wallet.';
+      let errorMessage = error.message || 'Your wallet balance is too low to place this entry. Please add funds to your wallet.';
       if (
         error.response &&
         error.response.data &&
@@ -980,7 +985,7 @@ const DashboardScreen = ({ navigation }) => {
       ) {
         errorMessage = error.response.data.message;
       }
-      Alert.alert('Insufficient Balance', errorMessage);
+      Alert.alert(error.message ? 'Validation Error' : 'Insufficient Balance', errorMessage);
     }
   };
 
