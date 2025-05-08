@@ -972,7 +972,7 @@ const DashboardScreen = ({ navigation }) => {
       Alert.alert('Success', 'Entry updated successfully');
     } catch (error) {
       console.error('Error updating entry:', error);
-      let errorMessage = 'Failed to update entry';
+      let errorMessage = 'Your wallet balance is too low to place this entry. Please add funds to your wallet.';
       if (
         error.response &&
         error.response.data &&
@@ -980,7 +980,7 @@ const DashboardScreen = ({ navigation }) => {
       ) {
         errorMessage = error.response.data.message;
       }
-      Alert.alert('Error', errorMessage);
+      Alert.alert('Insufficient Balance', errorMessage);
     }
   };
 

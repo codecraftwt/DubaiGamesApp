@@ -82,13 +82,13 @@ const BetterLuckScreen = ({ navigation, route }) => {
             <Animated.View style={[styles.contentContainer, contentStyle]}>
                 <Text style={styles.mainText}>{t('betterLuck')}</Text>
                 <Text style={styles.nextTimeText}>{t('nextTime')}</Text>
-                <Text style={styles.lossText}>-₹{route.params?.amount || '0'}</Text>
+                {/* <Text style={styles.lossText}>-₹{route.params?.amount || '0'}</Text> */}
 
                 <View style={styles.detailsContainer}>
                     <View style={styles.detailItem}>
                         <Icon name="calendar-outline" size={24} color="#FF6B6B" />
                         <Text style={styles.detailText}>
-                            {new Date().toLocaleDateString('en-IN', {
+                            {new Date(route?.params?.data?.date).toLocaleDateString('en-IN', {
                                 day: 'numeric',
                                 month: 'short',
                                 year: 'numeric',

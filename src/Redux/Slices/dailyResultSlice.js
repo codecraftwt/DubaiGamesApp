@@ -7,10 +7,19 @@ export const fetchDailyResult = createAsyncThunk(
     'dailyResult/fetch',
     async ({ agentName, market, date, agentId }, { getState }) => {
         const { token } = getState().auth;
-        const response = await axios.get(`${API_BASE_URL}/dailyresult?agent_name=${agentName}&filtermarket=${market}&market_date=${date}&agentid=${agentId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-
+        console.log(agentName, market, date, agentId)
+        const response = await axios.post(`${API_BASE_URL}/daily`,
+            {
+                market: market,
+                date: date
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            },
+        );
+        console.log("fetchDailyResult===>", response.data)
         return response.data;
     }
 );

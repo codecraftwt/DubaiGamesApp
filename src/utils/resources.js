@@ -93,7 +93,7 @@ export const resources = {
 
             // Customer List
             "customers": "Customers",
-            "searchCustomers": "Search customers...",
+            "searchCustomers": "Search customer",
             "addCustomer": "Add Customer",
             "editCustomer": "Edit Customer",
             "deleteCustomer": "Delete Customer",
@@ -168,7 +168,19 @@ export const resources = {
             "allFieldsRequired": "All fields are required",
 
             // Registration validation messages
-            "registrationFailed": "Registration failed. Please try again."
+            "registrationFailed": "Registration failed. Please try again.",
+
+            // Daily Result Form Screen
+            "pleaseSelectMarket": "Please select a market",
+            "somethingWentWrong": "Something went wrong",
+            "checkResult": "Check Result",
+            "checkYourWinnings": "Check your winnings",
+            "selectMarket": "Select Market",
+            "selectDate": "Select Date",
+            "CheckResult": "Check Result",
+
+            // Filter controls
+            "reset": "Reset"
         }
     },
     hi: {
@@ -339,7 +351,19 @@ export const resources = {
             "allFieldsRequired": "सभी फ़ील्ड आवश्यक हैं",
 
             // Registration validation messages
-            "registrationFailed": "पंजीकरण विफल हुआ। कृपया पुन: प्रयास करें।"
+            "registrationFailed": "पंजीकरण विफल हुआ। कृपया पुन: प्रयास करें।",
+
+            // Daily Result Form Screen
+            "pleaseSelectMarket": "कृपया एक बाजार चुनें",
+            "somethingWentWrong": "कुछ गलत हो गया",
+            "checkResult": "परिणाम देखें",
+            "checkYourWinnings": "अपनी जीत की जांच करें",
+            "selectMarket": "बाजार चुनें",
+            "selectDate": "तारीख चुनें",
+            "CheckResult": "परिणाम देखें",
+
+            // Filter controls
+            "reset": "Reset"
         }
     },
     mr: {
@@ -510,7 +534,19 @@ export const resources = {
             "allFieldsRequired": "सर्व फील्ड आवश्यक आहेत",
 
             // Registration validation messages
-            "registrationFailed": "नोंदणी अयशस्वी झाली. कृपया पुन्हा प्रयत्न करा."
+            "registrationFailed": "नोंदणी अयशस्वी झाली. कृपया पुन्हा प्रयत्न करा.",
+
+            // Daily Result Form Screen
+            "pleaseSelectMarket": "कृपया एक बाजार निवडा",
+            "somethingWentWrong": "काहीतरी चूक झाली",
+            "checkResult": "निकाल तपासा",
+            "checkYourWinnings": "तुमची जीत तपासा",
+            "selectMarket": "बाजार निवडा",
+            "selectDate": "तारीख निवडा",
+            "CheckResult": "निकाल तपासा",
+
+            // Filter controls
+            "reset": "Reset"
         }
     },
     kn: {
@@ -681,7 +717,19 @@ export const resources = {
             "allFieldsRequired": "ಎಲ್ಲಾ ಕ್ಷೇತ್ರಗಳು ಅಗತ್ಯವಿದೆ",
 
             // Registration validation messages
-            "registrationFailed": "ನೋಂದಣಿ ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."
+            "registrationFailed": "ನೋಂದಣಿ ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+
+            // Daily Result Form Screen
+            "pleaseSelectMarket": "ದಯವಿಟ್ಟು ಒಂದು ಮಾರುಕಟ್ಟೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+            "somethingWentWrong": "ಏನೋ ತಪ್ಪಾಗಿದೆ",
+            "checkResult": "ಫಲಿತಾಂಶ ಪರಿಶೀಲಿಸಿ",
+            "checkYourWinnings": "ನಿಮ್ಮ ಗೆಲುವನ್ನು ಪರಿಶೀಲಿಸಿ",
+            "selectMarket": "ಮಾರುಕಟ್ಟೆ ಆಯ್ಕೆಮಾಡಿ",
+            "selectDate": "ದಿನಾಂಕ ಆಯ್ಕೆಮಾಡಿ",
+            "CheckResult": "ಫಲಿತಾಂಶ ಪರಿಶೀಲಿಸಿ",
+
+            // Filter controls
+            "reset": "Reset"
         }
     }
 };

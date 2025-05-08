@@ -17,11 +17,14 @@ const SettingsScreen = ({ navigation }) => {
     const token = useSelector((state) => state.auth.token);
     const [showLanguageModal, setShowLanguageModal] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
     const [password, setPassword] = useState('');
     const [passwordConfirmation, setPasswordConfirmation] = useState('');
+    const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [isForgotLoading, setIsForgotLoading] = useState(false);
 
     const handleLogout = async () => {
         Alert.alert(
@@ -134,6 +137,73 @@ const SettingsScreen = ({ navigation }) => {
         }
     };
 
+    const handleForgotPassword = async () => {
+        // Validation
+        if (!forgotPasswordEmail) {
+            Toast.show({
+                type: 'error',
+                text1: t('error'),
+                text2: t('emailRequired'),
+            });
+            return;
+        }
+
+        // Email validation regex
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(forgotPasswordEmail)) {
+            Toast.show({
+                type: 'error',
+                text1: t('error'),
+                text2: t('invalidEmail'),
+            });
+            return;
+        }
+
+        setIsForgotLoading(true);
+        try {
+            const response = await axios.post(
+                'http://staging.rdnidhi.com/api/forgot-password',
+                {
+                    email: forgotPasswordEmail,
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                    },
+                }
+            );
+
+            console.log("response is coming handleForgotPassword", response)
+
+            setIsForgotLoading(false);
+            setShowForgotPasswordModal(false);
+            setForgotPasswordEmail('');
+
+            Toast.show({
+                type: 'success',
+                text1: t('success'),
+                text2: response.data?.status || t('passwordResetLinkSent'),
+            });
+        } catch (error) {
+            setIsForgotLoading(false);
+            console.error('Forgot password error:', error.response?.data || error.message);
+
+            let errorMessage = t('forgotPasswordFailed');
+            if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            } else if (error.response?.data?.status) {
+                errorMessage = error.response.data.status;
+            }
+
+            Toast.show({
+                type: 'error',
+                text1: t('error'),
+                text2: errorMessage,
+            });
+        }
+    };
+
     const settingsOptions = [
         // {
         //     id: 1,
@@ -153,20 +223,26 @@ const SettingsScreen = ({ navigation }) => {
             icon: 'lock-closed-outline',
             onPress: () => setShowPasswordModal(true),
         },
+        {
+            id: 4,
+            title: t('forgotPassword'),
+            icon: 'key-outline',
+            onPress: () => setShowForgotPasswordModal(true),
+        },
         // {
-        //     id: 4,
+        //     id: 5,
         //     title: t('notifications'),
         //     icon: 'notifications-outline',
         //     onPress: () => navigation.navigate('Notifications'),
         // },
         // {
-        //     id: 5,
+        //     id: 6,
         //     title: t('privacy'),
         //     icon: 'shield-outline',
         //     onPress: () => navigation.navigate('Privacy'),
         // },
         // {
-        //     id: 6,
+        //     id: 7,
         //     title: t('help'),
         //     icon: 'help-circle-outline',
         //     onPress: () => navigation.navigate('Help'),
@@ -223,7 +299,7 @@ const SettingsScreen = ({ navigation }) => {
             <Modal
                 visible={showLanguageModal}
                 transparent={true}
-                animationType="slide"
+                animationType="fade"
                 onRequestClose={() => setShowLanguageModal(false)}
             >
                 <View style={styles.modalOverlay}>
@@ -261,7 +337,7 @@ const SettingsScreen = ({ navigation }) => {
             <Modal
                 visible={showPasswordModal}
                 transparent={true}
-                animationType="slide"
+                animationType="fade"
                 onRequestClose={() => setShowPasswordModal(false)}
             >
                 <View style={styles.modalOverlay}>
@@ -335,6 +411,55 @@ const SettingsScreen = ({ navigation }) => {
                     </View>
                 </View>
             </Modal>
+
+            {/* Forgot Password Modal */}
+            <Modal
+                visible={showForgotPasswordModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowForgotPasswordModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>{t('forgotPassword')}</Text>
+                            <TouchableOpacity onPress={() => setShowForgotPasswordModal(false)}>
+                                <Icon name="close" size={24} color={globalColors.darkBlue} />
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.passwordForm}>
+                            {/* <Text style={styles.forgotPasswordText}>
+                                {t('forgotPasswordDescription')}
+                            </Text> */}
+                            {/* Email Field */}
+                            <View style={styles.inputContainer}>
+                                <View style={styles.passwordContainer}>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder={t('email')}
+                                        value={forgotPasswordEmail}
+                                        onChangeText={setForgotPasswordEmail}
+                                        keyboardType="email-address"
+                                        autoCapitalize="none"
+                                        placeholderTextColor={globalColors.grey}
+                                    />
+                                </View>
+                            </View>
+
+                            <TouchableOpacity
+                                style={[styles.changePasswordButton, isForgotLoading && styles.disabledButton]}
+                                onPress={handleForgotPassword}
+                                disabled={isForgotLoading}
+                            >
+                                <Text style={styles.buttonText}>
+                                    {isForgotLoading ? t('sending') : t('sendResetLink')}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </ScrollView>
     );
 };
@@ -400,14 +525,16 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         marginHorizontal: 20,
         marginBottom: 20,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
+        borderColor: globalColors.Magnolia,
+        borderWidth: 1,
+        // shadowColor: '#000',
+        // shadowOffset: {
+        //     width: 0,
+        //     height: 1,
+        // },
+        // shadowOpacity: 0.1,
+        // shadowRadius: 2,
+        // elevation: 2,
     },
     optionItem: {
         flexDirection: 'row',
@@ -537,6 +664,13 @@ const styles = StyleSheet.create({
         color: globalColors.white,
         fontSize: 16,
         fontFamily: 'Poppins-Bold',
+    },
+    forgotPasswordText: {
+        fontSize: 14,
+        fontFamily: 'Poppins-Regular',
+        color: globalColors.darkBlue,
+        marginBottom: 15,
+        textAlign: 'center',
     },
 });
 

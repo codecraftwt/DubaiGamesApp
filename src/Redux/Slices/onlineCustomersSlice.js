@@ -38,19 +38,39 @@ export const createOnlineCustomer = createAsyncThunk(
 // Fetch all customers
 export const fetchOnlineCustomers = createAsyncThunk(
     'onlineCustomers/fetchOnlineCustomers',
-    async (_, { getState }) => {
+    async (filterData = {}, { getState }) => {
         try {
             const { token } = getState().auth;
-            console.log("Tooken --------->", token)
+            // console.log("Token --------->", token);
+            // console.log("Filter Data --------->", filterData);
+
+            // If no date is provided, use today's date
+            if (!filterData.date) {
+                const today = new Date();
+                filterData.date = today.toISOString().split('T')[0];
+            }
+
+            // If no market is provided, use kalyan as default
+            if (!filterData.market) {
+                filterData.market = 'kalyan';
+            }
+            console.log("Filter Data --------->", filterData);
+
             const response = await axios.get(
                 `${API_BASE_URL}/online_customer`,
+                // filterData, // Send as request body
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
+                        // 'Content-Type': 'application/json'
                     },
+                    params: {
+                        date: filterData.date,
+                        market: filterData.market
+                    }
                 }
             );
-            console.log("Response Data --->", response.data)
+            console.log("Response Data --->", response.data);
             return response.data;
         } catch (error) {
             console.error("Error fetching customers", error);

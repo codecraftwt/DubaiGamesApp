@@ -28,6 +28,7 @@ import AddBalanceScreen from '../../screens/MyWallet/AddBalanceScreen';
 import WithdrawBalanceScreen from '../../screens/MyWallet/WithdrawBalanceScreen';
 import ResultScreen from '../../screens/ResultScreen/ResultScreen';
 import BetterLuckScreen from '../../screens/ResultScreen/BetterLuckScreen';
+import DailyResultFormScreen from '../../screens/DailyResultFormScreen';
 
 const Stack = createStackNavigator();
 
@@ -37,8 +38,8 @@ const StackNavigator = () => (
     <Stack.Screen name="Login" component={LoginScreen} />
     <Stack.Screen name="AgentList" component={AgentList} />
     <Stack.Screen name="StaffList" component={StaffListScreen} />
-    {/* <Stack.Screen name="Daily Result" component={DailyResult} /> */}
-    <Stack.Screen name="ResultPage" component={ResultPage} />
+    <Stack.Screen name="DailyResultForm" component={DailyResultFormScreen} />
+    <Stack.Screen name="ResultPage" component={ResultScreen} />
     <Stack.Screen name="Advance" component={Advance} />
     <Stack.Screen name="EntryDelete" component={EntryDelete} />
     <Stack.Screen name="AddPayment" component={AddPayment} />
@@ -62,7 +63,7 @@ const StackNavigator = () => (
     <Stack.Screen name="WithdrawBalance" component={WithdrawBalanceScreen} />
     <Stack.Screen
       name="Result"
-      component={ResultScreen}
+      component={DailyResultFormScreen}
     />
     <Stack.Screen
       name="BetterLuck"

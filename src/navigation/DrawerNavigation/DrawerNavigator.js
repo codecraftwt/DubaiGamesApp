@@ -36,15 +36,17 @@ import CustomerList from '../../screens/Customer/CustomerList';
 import MyWallet from '../../screens/MyWallet/MyWallet';
 import BetterLuckScreen from '../../screens/ResultScreen/BetterLuckScreen';
 import LanguageSettings from '../../screens/LanguageSettings/LanguageSettings';
+import DailyResultFormScreen from '../../screens/DailyResultFormScreen';
+
 
 const Drawer = createDrawerNavigator();
 
 const ALL_MENU_ITEMS = [
   { name: 'Dashboard', component: DashboardScreen, icon: 'home' },
-  { name: 'Daily Result', component: DailyResult, icon: 'clipboard' },
+  { name: 'Result', component: DailyResultFormScreen, icon: 'clipboard' },
   { name: 'ResultPage', component: ResultPage, icon: 'clipboard' },
-  { name: 'Result', component: ResultScreen, icon: 'award' },
-  { name: 'BetterLuck', component: BetterLuckScreen, icon: 'frown' },
+  // { name: 'Result', component: ResultScreen, icon: 'award' },
+  // { name: 'BetterLuck', component: BetterLuckScreen, icon: 'frown' },
   { name: 'Agent List', component: AgentList, icon: 'users' },
   { name: 'Client List', component: StaffListScreen, icon: 'user' },
   { name: 'My Account', component: SettingsScreen, icon: 'user' },
@@ -61,28 +63,25 @@ const ALL_MENU_ITEMS = [
 // };
 
 const MENU_ITEMS = {
-  admin: ['Dashboard', 'Daily Result', 'My Account', 'Customer List', 'Result',
-    'BetterLuck'
-  ],
+  admin: ['Dashboard', 'DailyResultForm', 'My Account', 'Customer List', 'Result', 'BetterLuck'],
   staff: [
     'Dashboard',
     'My Account',
     'Client List',
-    'Daily Result',
+    'DailyResultForm',
     'Reports',
     'Result',
     'BetterLuck'
   ],
-  editor: ['Dashboard', 'My Account', 'Daily Result', 'Result'],
+  editor: ['Dashboard', 'My Account', 'DailyResultForm', 'Result'],
   online_customer: [
     'Dashboard',
     'My Account',
     'Customer List',
     'My Wallet',
-    'Result',
-    'BetterLuck'
+    , "Result"
   ],
-  agent: ['Dashboard', 'My Account', 'Customer List', 'My Wallet', 'Result', 'BetterLuck'],
+  agent: ['Dashboard', 'My Account', 'Customer List', 'My Wallet', "Result",],
 };
 
 const CustomDrawerContent = props => {
@@ -112,7 +111,7 @@ const CustomDrawerContent = props => {
       style={{ backgroundColor: globalColors.LightWhite }}>
       <View style={styles.drawerHeader}>
         <Image source={DubaiGameslogo} style={styles.drawerLogo} />
-        <Text style={styles.drawerTitle}>{t('dashboard')}</Text>
+        <Text style={styles.drawerTitle}>Dubai Game</Text>
       </View>
 
       {/* Render menu items */}
@@ -240,7 +239,7 @@ const DrawerNavigator = () => {
     return (
       <View style={styles.logoContainer}>
         <Image source={DubaiGameslogo} style={{ height: 28, width: 40 }}></Image>
-        <Text style={styles.logoText}>{t('dashboard')}</Text>
+        <Text style={styles.logoText}>Dubai Game</Text>
       </View>
     );
   };
@@ -260,19 +259,20 @@ const DrawerNavigator = () => {
         }),
       }}>
       <Drawer.Screen name="Dashboard" component={DashboardScreen} />
-      <Drawer.Screen name="Daily Result" component={DailyResult} />
-      <Drawer.Screen name="Result" component={ResultScreen} />
+      <Drawer.Screen name="DailyResultForm" component={DailyResultFormScreen} />
+      <Drawer.Screen name="Result" component={DailyResultFormScreen} />
       <Drawer.Screen name="BetterLuck" component={BetterLuckScreen} />
       <Drawer.Screen name="Agent List" component={AgentList} />
       <Drawer.Screen name="Client List" component={StaffListScreen} />
-      <Drawer.Screen name="My Account" component={SettingsScreen} />
+
       <Drawer.Screen name="WeeklyReport" component={WeeklyReport} />
       <Drawer.Screen name="AddButtonReport" component={AddButtonReport} />
       <Drawer.Screen name="AddPaymentReport" component={AddPaymentReport} />
       <Drawer.Screen name="VerifyReport" component={VerifyReport} />
-      <Drawer.Screen name="ResultPage" component={ResultPage} />
+      <Drawer.Screen name="ResultPage" component={ResultScreen} />
       <Drawer.Screen name="Customer List" component={CustomerList} />
       <Drawer.Screen name="My Wallet" component={MyWallet} />
+      <Drawer.Screen name="My Account" component={SettingsScreen} />
       <Drawer.Screen name="Language Settings" component={LanguageSettings} />
     </Drawer.Navigator>
   );

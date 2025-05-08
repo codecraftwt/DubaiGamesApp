@@ -95,7 +95,7 @@ const ResultScreen = ({ navigation, route }) => {
               color={globalColors.primary}
             />
             <Text style={styles.detailText}>
-              {new Date().toLocaleDateString('en-IN', {
+              {new Date(route?.params?.data?.date).toLocaleDateString('en-IN', {
                 day: 'numeric',
                 month: 'short',
                 year: 'numeric',

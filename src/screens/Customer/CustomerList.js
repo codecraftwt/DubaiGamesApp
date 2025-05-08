@@ -30,6 +30,8 @@ import {
 } from '../../Redux/Slices/onlineCustomersSlice';
 import { globalColors } from '../../Theme/globalColors';
 import { useTranslation } from 'react-i18next';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import DropDownPicker from 'react-native-dropdown-picker';
 
 const CustomerCard = ({ customer, onEdit, onDelete }) => {
     const [expanded, setExpanded] = useState(false);
@@ -73,6 +75,8 @@ const CustomerCard = ({ customer, onEdit, onDelete }) => {
                         <Text style={styles.customerName}>{customer?.name}</Text>
                         <Text style={styles.customerEmail}>{customer?.email}</Text>
                         <Text style={styles.customerPhone}>{customer?.phone}</Text>
+                        <Text style={styles.customerPhone}>openAmount: {customer?.total_open}</Text>
+                        <Text style={styles.customerPhone}>closeAmount: {customer?.total_close}</Text>
                     </View>
                 </View>
                 <Animated.View style={{ transform: [{ rotate }] }}>
@@ -117,6 +121,17 @@ const CustomerList = () => {
     const [filteredCustomers, setFilteredCustomers] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
 
+    // Filter states
+    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [marketOpen, setMarketOpen] = useState(false);
+    const [selectedMarket, setSelectedMarket] = useState('kalyan');
+    const [markets] = useState([
+        { label: 'Kalyan', value: 'kalyan' },
+        { label: 'Mumbai', value: 'mumbai' },
+    ]);
+    const [showFilters, setShowFilters] = useState(false);
+
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -126,7 +141,20 @@ const CustomerList = () => {
     });
 
     useEffect(() => {
-        dispatch(fetchOnlineCustomers());
+        // Initial fetch with default filters
+        const formattedDate = selectedDate.toISOString().split('T')[0];
+        const filterData = {
+            date: formattedDate,
+            market: selectedMarket
+        };
+        dispatch(fetchOnlineCustomers(filterData));
+
+        // Cleanup function to reset states when component unmounts
+        return () => {
+            setShowFilters(false);
+            setMarketOpen(false);
+            setShowDatePicker(false);
+        };
     }, [dispatch]);
 
     useEffect(() => {
@@ -163,7 +191,12 @@ const CustomerList = () => {
 
     const onRefresh = () => {
         setRefreshing(true);
-        dispatch(fetchOnlineCustomers())
+        const formattedDate = selectedDate.toISOString().split('T')[0];
+        const filterData = {
+            date: formattedDate,
+            market: selectedMarket
+        };
+        dispatch(fetchOnlineCustomers(filterData))
             .then(() => setRefreshing(false))
             .catch(() => setRefreshing(false));
     };
@@ -179,8 +212,6 @@ const CustomerList = () => {
             password: '',
             password_confirmation: ''
         });
-        dispatch(fetchOnlineCustomers());
-
     };
 
     const handleEditCustomer = (customer) => {
@@ -198,7 +229,13 @@ const CustomerList = () => {
                     text: t('delete'),
                     onPress: () => {
                         dispatch(deleteOnlineCustomer(id));
-                        dispatch(fetchOnlineCustomers());
+                        // After deletion, fetch again with current filters
+                        const formattedDate = selectedDate.toISOString().split('T')[0];
+                        const filterData = {
+                            date: formattedDate,
+                            market: selectedMarket
+                        };
+                        dispatch(fetchOnlineCustomers(filterData));
                     },
                     style: 'destructive'
                 }
@@ -267,17 +304,81 @@ const CustomerList = () => {
             }
 
             setModalVisible(false);
-            dispatch(fetchOnlineCustomers());
+            // Fetch with current filters
+            const formattedDate = selectedDate.toISOString().split('T')[0];
+            const filterData = {
+                date: formattedDate,
+                market: selectedMarket
+            };
+            dispatch(fetchOnlineCustomers(filterData));
         } catch (error) {
             Alert.alert(t('error'), error.message || 'An error occurred');
         }
     };
 
+    const onDateChange = (event, selected) => {
+        setShowDatePicker(false);
+        if (selected) {
+            setSelectedDate(selected);
+            setShowFilters(false);
+
+            // Fetch customers with updated date filter
+            const formattedDate = selected.toISOString().split('T')[0];
+            const filterData = {
+                date: formattedDate,
+                market: selectedMarket
+            };
+            dispatch(fetchOnlineCustomers(filterData));
+        }
+    };
+
+    const handleMarketChange = (value) => {
+        setShowFilters(false);
+
+        // Fetch customers with updated market filter
+        const formattedDate = selectedDate.toISOString().split('T')[0];
+        const filterData = {
+            date: formattedDate,
+            market: value
+        };
+        dispatch(fetchOnlineCustomers(filterData));
+    };
+
+    // Check if any filters are applied (different from defaults)
+    const isFilterActive = () => {
+        const today = new Date();
+        const formattedToday = today.toISOString().split('T')[0];
+        const formattedSelectedDate = selectedDate.toISOString().split('T')[0];
+
+        // Check if date is different from today or market is different from default
+        return formattedSelectedDate !== formattedToday || selectedMarket !== 'kalyan';
+    };
+
+    const resetFilters = () => {
+        const today = new Date();
+        setSelectedDate(today);
+        setSelectedMarket('kalyan');
+        setShowFilters(false);
+
+        // Fetch with default filters
+        const formattedDate = today.toISOString().split('T')[0];
+        const filterData = {
+            date: formattedDate,
+            market: 'kalyan'
+        };
+        dispatch(fetchOnlineCustomers(filterData));
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.content}>
-                <Text style={styles.title}>{t('customers')}</Text>
-
+                <View style={styles.headerContainer}>
+                    <Text style={styles.title}>{t('customers')}</Text>
+                    <TouchableOpacity style={styles.addButton} onPress={handleAddCustomer}>
+                        <FontAwesome name="plus" size={16} color="#fff" />
+                        <Text style={styles.addButtonText}>{t('addCustomer')}</Text>
+                    </TouchableOpacity>
+                </View>
                 <View style={styles.card}>
                     <View style={styles.cardHeader}>
                         <View style={styles.searchContainer}>
@@ -291,13 +392,67 @@ const CustomerList = () => {
                         </View>
 
                         <TouchableOpacity
-                            style={styles.addButton}
-                            onPress={handleAddCustomer}
+                            style={styles.filterButton}
+                            onPress={() => setShowFilters(!showFilters)}
                         >
-                            <FontAwesome name="plus" size={20} color="#fff" />
-                            <Text style={styles.addButtonText}>{t('addCustomer')}</Text>
+                            <FontAwesome name="filter" size={20} color={showFilters ? "#007AFF" : "#666"} />
+                            {isFilterActive() && <View style={styles.filterBadge} />}
                         </TouchableOpacity>
+
+
                     </View>
+
+                    {showFilters && (
+                        <View style={styles.filterContainer}>
+                            <View style={styles.filterRow}>
+                                <View style={styles.filterItem}>
+                                    <Text style={styles.filterLabel}>{t('selectDate')}</Text>
+                                    <TouchableOpacity
+                                        style={styles.dateButton}
+                                        onPress={() => setShowDatePicker(true)}
+                                    >
+                                        <FontAwesome name="calendar" size={18} color="#666" />
+                                        <Text style={styles.dateText}>
+                                            {selectedDate.toLocaleDateString()}
+                                        </Text>
+                                    </TouchableOpacity>
+                                    {showDatePicker && (
+                                        <DateTimePicker
+                                            value={selectedDate}
+                                            mode="date"
+                                            display="default"
+                                            onChange={onDateChange}
+                                        />
+                                    )}
+                                </View>
+
+                                <View style={styles.filterItem}>
+                                    <Text style={styles.filterLabel}>{t('selectMarket')}</Text>
+                                    <DropDownPicker
+                                        open={marketOpen}
+                                        value={selectedMarket}
+                                        items={markets}
+                                        setOpen={setMarketOpen}
+                                        setValue={setSelectedMarket}
+                                        onChangeValue={handleMarketChange}
+                                        style={styles.marketDropdown}
+                                        dropDownContainerStyle={styles.dropdownContainer}
+                                        maxHeight={150}
+                                        zIndex={2000}
+                                    />
+                                </View>
+                            </View>
+
+                            {isFilterActive() && (
+                                <TouchableOpacity
+                                    style={styles.resetButton}
+                                    onPress={resetFilters}
+                                >
+                                    <Text style={styles.resetButtonText}>{t('reset')}</Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    )}
 
                     {status === 'loading' ? (
                         <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />
@@ -311,7 +466,7 @@ const CustomerList = () => {
                                     onDelete={handleDeleteCustomer}
                                 />
                             )}
-                            keyExtractor={(item) => item?.id?.toString()}
+                            keyExtractor={(item) => `customer-${item.id}`}
                             contentContainerStyle={styles.listContainer}
                             ListEmptyComponent={
                                 <View style={styles.emptyContainer}>
@@ -450,7 +605,8 @@ const styles = StyleSheet.create({
     content: {
         flex: 1,
         padding: 10,
-        paddingBottom: 200
+        // paddingBottom: 200
+        marginBottom: 150
     },
     title: {
         fontSize: 28,
@@ -479,16 +635,26 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         flex: 1,
-        marginRight: 16,
+        marginRight: 10,
         backgroundColor: '#f5f5f5',
         borderRadius: 12,
-        padding: 12,
+        padding: 5,
     },
     searchInput: {
         flex: 1,
         marginLeft: 12,
         fontSize: 16,
         color: '#333',
+    },
+    filterButton: {
+        padding: 12,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 12,
+        backgroundColor: '#f9f9f9',
+        marginRight: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     addButton: {
         backgroundColor: '#007AFF',
@@ -680,6 +846,106 @@ const styles = StyleSheet.create({
     listContainer: {
         paddingBottom: 16,
     },
+    filterContainer: {
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#e0e0e0',
+        backgroundColor: '#fff',
+    },
+    filterRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+    },
+    filterItem: {
+        flex: 1,
+        marginHorizontal: 8,
+    },
+    filterLabel: {
+        fontSize: 14,
+        color: '#333',
+        marginBottom: 8,
+        fontWeight: '500',
+    },
+    dateButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 12,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        backgroundColor: '#f9f9f9',
+    },
+    dateText: {
+        marginLeft: 8,
+        fontSize: 14,
+        color: '#333',
+    },
+    marketDropdown: {
+        borderColor: '#ddd',
+        backgroundColor: '#f9f9f9',
+        height: 45,
+        borderRadius: 8,
+    },
+    dropdownContainer: {
+        borderColor: '#ddd',
+        backgroundColor: '#fff',
+    },
+    filterBadge: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#007AFF',
+        position: 'absolute',
+        top: 8,
+        right: 8,
+    },
+    resetButton: {
+        alignSelf: 'flex-end',
+        backgroundColor: '#FF3B30',
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+        marginTop: 12,
+        marginRight: 8,
+        marginBottom: 8,
+    },
+    resetButtonText: {
+        color: '#fff',
+        fontWeight: '500',
+        fontSize: 14,
+    },
+    headerContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        marginVertical: 12,
+    },
+    // title: {
+    //     fontSize: 20,
+    //     fontWeight: 'bold',
+    //     color: '#333',
+    // },
+    // addButton: {
+    //     flexDirection: 'row',
+    //     backgroundColor: '#007bff',
+    //     paddingVertical: 8,
+    //     paddingHorizontal: 12,
+    //     borderRadius: 8,
+    //     alignItems: 'center',
+    //     shadowColor: '#000',
+    //     shadowOpacity: 0.1,
+    //     shadowOffset: { width: 0, height: 2 },
+    //     shadowRadius: 4,
+    //     elevation: 3,
+    // },
+    // addButtonText: {
+    //     color: '#fff',
+    //     marginLeft: 6,
+    //     fontWeight: '600',
+    //     fontSize: 14,
+    // },
 });
 
 export default CustomerList;
