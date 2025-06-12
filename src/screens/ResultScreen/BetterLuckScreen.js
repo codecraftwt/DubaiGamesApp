@@ -105,6 +105,12 @@ const BetterLuckScreen = ({ navigation, route }) => {
                         </Text>
                     </View>
                 </View>
+                <View style={styles.detailItem}>
+                    <Icon name="storefront-outline" size={24} color={globalColors.primary} />
+                    <Text style={styles.detailText}>
+                        {route?.params?.data?.market}
+                    </Text>
+                </View>
 
                 <TouchableOpacity
                     style={styles.button}

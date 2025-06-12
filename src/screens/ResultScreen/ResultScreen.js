@@ -111,6 +111,16 @@ const ResultScreen = ({ navigation, route }) => {
               })}
             </Text>
           </View>
+          {/* <View>
+            <Text>Market {route?.params?.data?.market}</Text>
+          </View> */}
+
+        </View>
+        <View style={styles.detailItem}>
+          <Icon name="storefront-outline" size={24} color={globalColors.primary} />
+          <Text style={styles.detailText}>
+            {route?.params?.data?.market}
+          </Text>
         </View>
 
         <TouchableOpacity

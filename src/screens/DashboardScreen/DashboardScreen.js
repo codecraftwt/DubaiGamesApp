@@ -512,16 +512,23 @@ const DashboardScreen = ({ navigation }) => {
   };
 
   const handleSubmit = async () => {
-    if (!validateNumber(number, selectedCategory, selectedButton)) {
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: t('invalidNumber', { category: selectedCategory }),
-        position: 'top',
-      });
+    if (selectedCategory === 'SARAL_PAN') {
+      // Only check if there are entries, don't validate empty fields
+      if (saralPanEntries.length === 0 && gunuleEntries.length === 0) {
+        Alert.alert('Error', 'Please add at least one entry using the + button');
+        return;
+      }
+    } else if (selectedCategory === 'ULTA PAN') {
+      // Only check if there are entries, don't validate empty fields
+      if (ultaPanEntries.length === 0 && ultaGunuleEntries.length === 0) {
+        Alert.alert('Error', 'Please add at least one entry using the + button');
+        return;
+      }
+    } else if (!validateNumber(number, selectedCategory, selectedButton)) {
+      Alert.alert('Error', t('invalidNumber', { category: selectedCategory }));
       return;
     }
-    console.log("111111111111111111111111111111111111111111111")
+
     if (
       (selectedCategory === 'CYCLE' || selectedCategory === 'RUNNING_PAN') &&
       !validateNumber(anotherNumber, selectedCategory)
@@ -743,32 +750,45 @@ const DashboardScreen = ({ navigation }) => {
   const [gunuleEntries, setGunuleEntries] = useState([]);
 
   const handleAddSaralPan = () => {
-    if (saralPanNumber && saralPanAmount) {
-      const newEntry = {
-        number: saralPanNumber,
-        amount: saralPanAmount,
-      };
-      setSaralPanEntries([...saralPanEntries, newEntry]);
-      setSaralPanNumber('');
-      setSaralPanAmount('');
-    } else {
+    if (!saralPanNumber || !saralPanAmount) {
       Alert.alert('Error', t('pleaseEnterBoth'));
+      return;
     }
+
+    if (saralPanNumber.length !== 3) {
+      Alert.alert('Error', 'SARAL PAN must be exactly 3 digits');
+      return;
+    }
+
+    const newEntry = {
+      number: saralPanNumber,
+      amount: saralPanAmount,
+    };
+    setSaralPanEntries([...saralPanEntries, newEntry]);
+    setSaralPanNumber('');
+    setSaralPanAmount('');
   };
 
   const handleAddGunule = () => {
-    if (saralPanGunule && saralPanGunuleAmount) {
-      const newEntry = {
-        number: saralPanGunule,
-        amount: saralPanGunuleAmount,
-      };
-      setGunuleEntries([...gunuleEntries, newEntry]);
-      setsaralPanGunule('');
-      setsaralPanGunuleAmount('');
-    } else {
+    if (!saralPanGunule || !saralPanGunuleAmount) {
       Alert.alert('Error', 'Please enter both gunule and amount');
+      return;
     }
+
+    if (!/^[0-9]$/.test(saralPanGunule)) {
+      Alert.alert('Error', 'Gunule must be exactly 1 digit (0-9)');
+      return;
+    }
+
+    const newEntry = {
+      number: saralPanGunule,
+      amount: saralPanGunuleAmount,
+    };
+    setGunuleEntries([...gunuleEntries, newEntry]);
+    setsaralPanGunule('');
+    setsaralPanGunuleAmount('');
   };
+
   const handleRemoveSaralPan = index => {
     const updatedEntries = [...saralPanEntries];
     updatedEntries.splice(index, 1);
@@ -1026,31 +1046,43 @@ const DashboardScreen = ({ navigation }) => {
   };
 
   const handleAddUltaPan = () => {
-    if (ultaPanNumber && ultaPanAmount) {
-      const newEntry = {
-        number: ultaPanNumber,
-        amount: ultaPanAmount,
-      };
-      setUltaPanEntries([...ultaPanEntries, newEntry]);
-      setUltaPanNumber('');
-      setUltaPanAmount('');
-    } else {
+    if (!ultaPanNumber || !ultaPanAmount) {
       Alert.alert('Error', 'Please enter both number and amount');
+      return;
     }
+
+    if (ultaPanNumber.length !== 3) {
+      Alert.alert('Error', 'ULTA PAN must be exactly 3 digits');
+      return;
+    }
+
+    const newEntry = {
+      number: ultaPanNumber,
+      amount: ultaPanAmount,
+    };
+    setUltaPanEntries([...ultaPanEntries, newEntry]);
+    setUltaPanNumber('');
+    setUltaPanAmount('');
   };
 
   const handleAddUltaGunule = () => {
-    if (ultaPanGunule && ultaPanGunuleAmount) {
-      const newEntry = {
-        number: ultaPanGunule,
-        amount: ultaPanGunuleAmount,
-      };
-      setUltaGunuleEntries([...ultaGunuleEntries, newEntry]);
-      setUltaPanGunule('');
-      setUltaPanGunuleAmount('');
-    } else {
+    if (!ultaPanGunule || !ultaPanGunuleAmount) {
       Alert.alert('Error', 'Please enter both gunule and amount');
+      return;
     }
+
+    if (!/^[0-9]$/.test(ultaPanGunule)) {
+      Alert.alert('Error', 'Gunule must be exactly 1 digit (0-9)');
+      return;
+    }
+
+    const newEntry = {
+      number: ultaPanGunule,
+      amount: ultaPanGunuleAmount,
+    };
+    setUltaGunuleEntries([...ultaGunuleEntries, newEntry]);
+    setUltaPanGunule('');
+    setUltaPanGunuleAmount('');
   };
 
   const handleRemoveUltaPan = index => {
@@ -1518,7 +1550,9 @@ const DashboardScreen = ({ navigation }) => {
                       keyboardType="numeric"
                     />
                   </View>
-                  <TouchableOpacity style={styles.addButton} onPress={handleAddSaralPan}>
+                  <TouchableOpacity style={styles.addButton}
+                    onPress={handleAddSaralPan}>
+
                     <Text style={styles.addButtonText}>+</Text>
                   </TouchableOpacity>
                 </View>
@@ -1770,16 +1804,18 @@ const DashboardScreen = ({ navigation }) => {
         onSelectionChange={handleEntrySelection}
       />
 
-      {selectedEntries?.length > 0 && (
-        <View style={styles.paymentContainer}>
-          <Text style={styles.totalAmount}>
-            {t('totalAmount')}: ₹{calculateTotalAmount()}
-          </Text>
-          <TouchableOpacity style={styles.payButton} onPress={handlePayment}>
-            <Text style={styles.payButtonText}>{t('payNow')}</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      {
+        selectedEntries?.length > 0 && (
+          <View style={styles.paymentContainer}>
+            <Text style={styles.totalAmount}>
+              {t('totalAmount')}: ₹{calculateTotalAmount()}
+            </Text>
+            <TouchableOpacity style={styles.payButton} onPress={handlePayment}>
+              <Text style={styles.payButtonText}>{t('payNow')}</Text>
+            </TouchableOpacity>
+          </View>
+        )
+      }
 
       <Modal
         visible={showPaymentModal}
@@ -1821,7 +1857,7 @@ const DashboardScreen = ({ navigation }) => {
         editAmount={editAmount}
         setEditAmount={setEditAmount}
       />
-    </ScrollView>
+    </ScrollView >
   );
 };
 
