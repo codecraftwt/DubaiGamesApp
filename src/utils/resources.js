@@ -180,7 +180,10 @@ export const resources = {
             "CheckResult": "Check Result",
 
             // Filter controls
-            "reset": "Reset"
+            "reset": "Reset",
+            "forgotPassword": "Forgot Password",
+            "accountdetails": "Account Details"
+
         }
     },
     hi: {
@@ -363,7 +366,10 @@ export const resources = {
             "CheckResult": "परिणाम देखें",
 
             // Filter controls
-            "reset": "Reset"
+            "reset": "Reset",
+            "forgotPassword": "पासवर्ड भूल गया",
+            "accountdetails": "खाता विवरण"
+
         }
     },
     mr: {
@@ -546,7 +552,10 @@ export const resources = {
             "CheckResult": "निकाल तपासा",
 
             // Filter controls
-            "reset": "Reset"
+            "reset": "Reset",
+            "forgotPassword": "पासवर्ड विसरलात",
+            "accountdetails": "खाते तपशील"
+
         }
     },
     kn: {
@@ -729,7 +738,11 @@ export const resources = {
             "CheckResult": "ಫಲಿತಾಂಶ ಪರಿಶೀಲಿಸಿ",
 
             // Filter controls
-            "reset": "Reset"
+            "reset": "Reset",
+            "forgotPassword": "ಪಾಸ್‌ವರ್ಡ್ ಮರೆತುಹೋಗಿದೆ",
+            "accountdetails": "ಖಾತೆ ವಿವರಗಳು"
+
+
         }
     }
 };

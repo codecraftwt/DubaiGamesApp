@@ -3,19 +3,21 @@ import {
     View, Text, TextInput, TouchableOpacity, StyleSheet, Alert,
     Image, Dimensions,
     ScrollView,
-    KeyboardAvoidingView
+    KeyboardAvoidingView,
+    Modal
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { globalColors } from '../../Theme/globalColors';
 import { DubaiGames } from '../../Theme/globalImage';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import { loginUser } from '../../Redux/Slices/authSlice';
+import { loginFailure, loginUser, resetRegistration } from '../../Redux/Slices/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { ActivityIndicator } from 'react-native-paper';
 import LanguageSelector from '../LanguageSelector/LanguageSelector';
 import { useTranslation } from 'react-i18next';
-
+import axios from 'axios';
+import Toast from 'react-native-toast-message';
 
 const LoginScreen = ({ navigation }) => {
     const dispatch = useDispatch();
@@ -37,6 +39,76 @@ const LoginScreen = ({ navigation }) => {
         password: false
     });
     const [submitAttempted, setSubmitAttempted] = useState(false);
+
+    const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
+    const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
+    const [isForgotLoading, setIsForgotLoading] = useState(false);
+
+
+    const handleForgotPassword = async () => {
+        // Validation
+        if (!forgotPasswordEmail) {
+            Toast.show({
+                type: 'error',
+                text1: t('error'),
+                text2: t('emailRequired'),
+            });
+            return;
+        }
+
+        // Email validation regex
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(forgotPasswordEmail)) {
+            Toast.show({
+                type: 'error',
+                text1: t('error'),
+                text2: t('invalidEmail'),
+            });
+            return;
+        }
+
+        setIsForgotLoading(true);
+        try {
+            const response = await axios.post(
+                'http://staging.rdnidhi.com/api/forgot-password',
+                {
+                    email: forgotPasswordEmail,
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                    },
+                }
+            );
+
+            setIsForgotLoading(false);
+            setShowForgotPasswordModal(false);
+            setForgotPasswordEmail('');
+
+            Toast.show({
+                type: 'success',
+                text1: t('success'),
+                text2: response.data?.status || t('passwordResetLinkSent'),
+            });
+        } catch (error) {
+            setIsForgotLoading(false);
+            console.error('Forgot password error:', error.response?.data || error.message);
+
+            let errorMessage = t('forgotPasswordFailed');
+            if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            } else if (error.response?.data?.status) {
+                errorMessage = error.response.data.status;
+            }
+
+            Toast.show({
+                type: 'error',
+                text1: t('error'),
+                text2: errorMessage,
+            });
+        }
+    };
 
     const validateForm = () => {
         let valid = true;
@@ -95,6 +167,11 @@ const LoginScreen = ({ navigation }) => {
         }
     }, [authState.isAuthenticated, authState.error, navigation]);
 
+    useEffect(() => {
+        dispatch(resetRegistration());
+        dispatch(loginFailure(null));
+    }, [dispatch]);
+
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -124,7 +201,7 @@ const LoginScreen = ({ navigation }) => {
                     <Icon name="account-outline" size={hp('3%')} color="#888" style={styles.icon} />
                     <TextInput
                         style={styles.input}
-                        placeholder={t('Email or Mobile')} 
+                        placeholder={t('Email or Mobile')}
                         placeholderTextColor={globalColors.inputLabel}
                         value={username}
                         onChangeText={(text) => {
@@ -170,6 +247,9 @@ const LoginScreen = ({ navigation }) => {
                     <Text style={styles.fieldError}>{errors.password}</Text>
                 )}
 
+
+
+
                 {/* Login Button - Always visible now */}
                 <TouchableOpacity
                     style={styles.button}
@@ -183,12 +263,99 @@ const LoginScreen = ({ navigation }) => {
                     )}
                 </TouchableOpacity>
                 <LanguageSelector></LanguageSelector>
-                <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                    <Text style={[styles.subtitle, { fontSize: hp('2%'), color: globalColors.black, marginTop: hp('1.5%') }]}>
+
+                {/* Forgot Password Link */}
+                <TouchableOpacity
+                    style={styles.forgotPasswordLink}
+                    onPress={() => setShowForgotPasswordModal(true)}
+                >
+                    <Text style={[styles.subtitle, { fontSize: hp('2%'), color: globalColors.black, }]}>{t('forgotPassword')}</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => {
+                    dispatch(loginFailure(null));
+                    dispatch(resetRegistration());
+                    navigation.navigate('Register');
+                }}>
+                    <Text style={[styles.subtitle, { fontSize: hp('2%'), color: globalColors.black }]}>
                         {t('createNewAccount')}</Text>
                 </TouchableOpacity>
 
+                <TouchableOpacity onPress={() => {
+                    dispatch(loginFailure(null));
+                    dispatch(resetRegistration());
+                    navigation.navigate('LogoutAllDevices');
+                }}>
+                    <Text style={[styles.subtitle, { fontSize: hp('2%'), color: globalColors.black }]}>
+                        {t('Logout all Devices')}</Text>
+                </TouchableOpacity>
 
+
+                {/* Forgot Password Modal */}
+                <Modal
+                    visible={showForgotPasswordModal}
+                    transparent={true}
+                    animationType="fade"
+                    onRequestClose={() => setShowForgotPasswordModal(false)}
+                >
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalContent}>
+                            <View style={styles.modalHeader}>
+                                <Text style={styles.modalTitle}>{t('forgotPassword')}</Text>
+                                <TouchableOpacity
+                                    style={styles.closeButton}
+                                    onPress={() => setShowForgotPasswordModal(false)}
+                                >
+                                    <Icon name="close" size={24} color={globalColors.darkGrey} />
+                                </TouchableOpacity>
+                            </View>
+
+                            <View style={styles.modalBody}>
+                                {/* <Text style={styles.modalDescription}>
+                                    {t('forgotPassword')}
+                                </Text> */}
+
+                                <View style={styles.modalInputContainer}>
+                                    <Icon
+                                        name="email-outline"
+                                        size={20}
+                                        color={globalColors.darkGrey}
+                                        style={styles.inputIcon}
+                                    />
+                                    <TextInput
+                                        style={styles.modalInput}
+                                        placeholder={t('email')}
+                                        placeholderTextColor={globalColors.black}
+                                        value={forgotPasswordEmail}
+                                        onChangeText={setForgotPasswordEmail}
+                                        keyboardType="email-address"
+                                        autoCapitalize="none"
+                                        autoFocus={true}
+                                    />
+                                </View>
+                            </View>
+
+                            <View style={styles.modalFooter}>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.submitButton,
+                                        isForgotLoading && styles.submitButtonDisabled
+                                    ]}
+                                    onPress={handleForgotPassword}
+                                    disabled={isForgotLoading}
+                                >
+                                    {isForgotLoading ? (
+                                        <ActivityIndicator size="small" color={globalColors.white} />
+                                    ) : (
+                                        <Text style={styles.submitButtonText}>
+                                            {t('sendResetLink')}
+                                        </Text>
+                                    )}
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
             </ScrollView>
 
         </KeyboardAvoidingView>
@@ -207,7 +374,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins-Light',
         color: '#666',
         textAlign: 'center',
-        marginBottom: hp('2%'),
+        // marginBottom: hp('2%'),
     },
     scrollContainer: {
         flexGrow: 1,
@@ -275,6 +442,98 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins-Bold',
         fontSize: hp('1.9%'),
         fontWeight: 'bold',
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        paddingHorizontal: wp('4%'),
+    },
+    modalContent: {
+        backgroundColor: globalColors.white,
+        borderRadius: 15,
+        overflow: 'hidden',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: wp('3%'),
+        // borderBottomWidth: 1,
+        borderBottomColor: globalColors.lightgrey,
+    },
+    modalTitle: {
+        fontSize: hp('2.2%'),
+        fontFamily: 'Poppins-SemiBold',
+        color: globalColors.darkBlue,
+    },
+    closeButton: {
+        padding: 5,
+    },
+    modalBody: {
+        padding: wp('5%'),
+    },
+    modalDescription: {
+        fontSize: hp('1.8%'),
+        fontFamily: 'Poppins-Regular',
+        color: globalColors.darkGrey,
+        marginBottom: hp('2%'),
+        lineHeight: hp('2.4%'),
+    },
+    modalInputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: globalColors.borderColor,
+        borderRadius: 8,
+        paddingHorizontal: wp('3%'),
+        marginBottom: hp('2%'),
+    },
+    inputIcon: {
+        marginRight: wp('2%'),
+    },
+    modalInput: {
+        flex: 1,
+        height: hp('6%'),
+        fontFamily: 'Poppins-Regular',
+        fontSize: hp('1.8%'),
+        color: globalColors.darkBlue,
+    },
+    modalFooter: {
+        padding: wp('5%'),
+        paddingTop: 0,
+    },
+    submitButton: {
+        backgroundColor: globalColors.blue,
+        borderRadius: 8,
+        height: hp('6%'),
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    submitButtonDisabled: {
+        backgroundColor: globalColors.lightgrey,
+    },
+    submitButtonText: {
+        color: globalColors.white,
+        fontFamily: 'Poppins-Bold',
+        fontSize: 16,
+    },
+    forgotPasswordLink: {
+        alignSelf: 'center',
+        marginTop: hp('-1%'),
+        marginBottom: hp('1%'),
+        // marginRight: wp('5%'),
+    },
+    forgotPasswordText: {
+        color: globalColors.primary,
+        fontSize: hp('1.7%'),
+        fontFamily: 'Poppins-Medium',
+        textDecorationLine: 'underline',
     },
 });
 

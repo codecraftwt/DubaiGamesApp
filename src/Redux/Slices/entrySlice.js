@@ -28,7 +28,7 @@ export const submitEntry = createAsyncThunk(
                         'Insufficient Balance',
                         'Your wallet balance is too low to place this entry. Please add funds to your wallet.',
                         [
-                          
+
                             {
                                 text: 'Cancel',
                                 style: 'cancel',

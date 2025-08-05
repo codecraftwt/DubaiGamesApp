@@ -1,6 +1,7 @@
 
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { API_BASE_URL } from '../../utils/Api';
 
 export const fetchStaffList = createAsyncThunk(
     'staff/fetchStaffList',
@@ -8,8 +9,7 @@ export const fetchStaffList = createAsyncThunk(
         console.log("api calling")
 
         const { token } = getState().auth;
-
-        const response = await axios.get('https://staging.rdnidhi.com/api/user-list', {
+        const response = await axios.get(`${API_BASE_URL}/user-list`, {
             headers: { Authorization: `Bearer ${token}` },
         });
         return response.data;

@@ -37,6 +37,7 @@ import MyWallet from '../../screens/MyWallet/MyWallet';
 import BetterLuckScreen from '../../screens/ResultScreen/BetterLuckScreen';
 import LanguageSettings from '../../screens/LanguageSettings/LanguageSettings';
 import DailyResultFormScreen from '../../screens/DailyResultFormScreen';
+import AddFundAccount from '../../screens/MyWallet/AddFundAccount';
 
 
 const Drawer = createDrawerNavigator();
@@ -54,6 +55,8 @@ const ALL_MENU_ITEMS = [
   { name: 'My Wallet', component: MyWallet, icon: 'credit-card' },
   { name: 'Language Settings', component: LanguageSettings, icon: 'globe' },
   { name: 'Reports', component: null, icon: 'file-text', isDropdown: true },
+  { name: 'Account Details', component: AddFundAccount, icon: 'database' },
+
 ];
 
 // const MENU_ITEMS = {
@@ -63,7 +66,7 @@ const ALL_MENU_ITEMS = [
 // };
 
 const MENU_ITEMS = {
-  admin: ['Dashboard', 'DailyResultForm', 'My Account', 'Customer List', 'Result', 'BetterLuck'],
+  admin: ['Dashboard', 'DailyResultForm', 'My Account', 'Customer List', 'Result', 'BetterLuck', "Account Details"],
   staff: [
     'Dashboard',
     'My Account',
@@ -71,17 +74,20 @@ const MENU_ITEMS = {
     'DailyResultForm',
     'Reports',
     'Result',
-    'BetterLuck'
+    'BetterLuck',
+    "Account Details"
+
   ],
-  editor: ['Dashboard', 'My Account', 'DailyResultForm', 'Result'],
+  editor: ['Dashboard', 'My Account', 'DailyResultForm', 'Result', "Account Details"
+  ],
   online_customer: [
     'Dashboard',
     'My Account',
-    'Customer List',
     'My Wallet',
-    , "Result"
+    , "Result",
+    "Account Details",
   ],
-  agent: ['Dashboard', 'My Account', 'Customer List', 'My Wallet', "Result",],
+  agent: ['Dashboard', 'My Account', 'Customer List', 'My Wallet', "Result", "Account Details"],
 };
 
 const CustomDrawerContent = props => {
@@ -274,6 +280,7 @@ const DrawerNavigator = () => {
       <Drawer.Screen name="My Wallet" component={MyWallet} />
       <Drawer.Screen name="My Account" component={SettingsScreen} />
       <Drawer.Screen name="Language Settings" component={LanguageSettings} />
+      <Drawer.Screen name="Account Details" component={AddFundAccount} />
     </Drawer.Navigator>
   );
 };

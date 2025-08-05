@@ -6,14 +6,18 @@ import Toast from 'react-native-toast-message';
 // Async thunk to add money to wallet
 export const addToWallet = createAsyncThunk(
   'wallet/addToWallet',
-  async ({ amount }, { rejectWithValue, getState }) => {
+  async ({ amount, razorpay_payment_id }, { rejectWithValue, getState }) => {
     try {
-      const { token } = getState().auth;
+      const { token, user } = getState().auth;
+      const user_id = user?.id || user?._id;
+      console.log("user_id", user_id)
       const response = await axios.post(
         `${API_BASE_URL}/wallet_management`,
         {
+          user_id,
           transaction_type: 'credit',
           amount: amount.toString(),
+          razorpay_payment_id: razorpay_payment_id
         },
         {
           headers: {
@@ -21,6 +25,7 @@ export const addToWallet = createAsyncThunk(
           },
         },
       );
+      console.log("response.data come from the addToWallet", response.data)
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || 'Something went wrong');
@@ -29,16 +34,41 @@ export const addToWallet = createAsyncThunk(
 );
 
 // Async thunk to withdraw money from wallet
+// export const withdrawFromWallet = createAsyncThunk(
+//   'wallet/withdrawFromWallet',
+//   async ({ amount }, { rejectWithValue, getState }) => {
+//     try {
+//       const { token } = getState().auth;
+//       const response = await axios.post(
+//         `${API_BASE_URL}/wallet_management`,
+//         {
+//           transaction_type: 'debit',
+//           amount: amount.toString(),
+//         },
+//         {
+//           headers: {
+//             Authorization: `Bearer ${token}`,
+//           },
+//         },
+//       );
+//       return response.data;
+//     } catch (error) {
+//       return rejectWithValue(error.response?.data || 'Something went wrong');
+//     }
+//   },
+// );
+
 export const withdrawFromWallet = createAsyncThunk(
   'wallet/withdrawFromWallet',
   async ({ amount }, { rejectWithValue, getState }) => {
     try {
+      console.log("amount from slice", amount)
       const { token } = getState().auth;
+      console.log("token", token)
       const response = await axios.post(
-        `${API_BASE_URL}/wallet_management`,
+        `${API_BASE_URL}/withdraw/request`, // Correct API endpoint
         {
-          transaction_type: 'debit',
-          amount: amount.toString(),
+          amount: amount // Only include the amount in the request body as per your example
         },
         {
           headers: {
@@ -72,6 +102,24 @@ export const getWalletHistory = createAsyncThunk(
   },
 );
 
+export const getWithdrawHistory = createAsyncThunk(
+  'wallet/getWithdrawHistory',
+  async (_, { rejectWithValue, getState }) => {
+    try {
+      const { token } = getState().auth;
+      const response = await axios.get(`${API_BASE_URL}/withdraw/history`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log("response.data", response.data)
+      return response.data.history;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Something went wrong');
+    }
+  },
+);
+
 const walletSlice = createSlice({
   name: 'wallet',
   initialState: {
@@ -80,6 +128,7 @@ const walletSlice = createSlice({
     loading: false,
     error: null,
     success: null,
+    withdrawHistory: [],
   },
   reducers: {
     setWalletBalance: (state, action) => {
@@ -126,7 +175,7 @@ const walletSlice = createSlice({
       })
       .addCase(withdrawFromWallet.fulfilled, (state, action) => {
         state.loading = false;
-        state.balance = action.payload.wallet_balance;
+        state.balance = action.payload.wallet_balance || state.balance
         state.success = action.payload.success;
         Toast.show({
           type: 'success',
@@ -158,6 +207,19 @@ const walletSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
         console.log('Action payload error ------->', action.payload);
+      })
+      .addCase(getWithdrawHistory.pending, state => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getWithdrawHistory.fulfilled, (state, action) => {
+        state.loading = false;
+        state.withdrawHistory = action.payload; // Update with withdrawal history
+        state.balance = action.payload.wallet_balance || state.balance;
+      })
+      .addCase(getWithdrawHistory.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });

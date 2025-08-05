@@ -606,12 +606,12 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 10,
         // paddingBottom: 200
-        marginBottom: 150
+        marginBottom: 125
     },
     title: {
-        fontSize: 28,
+        fontSize: 22,
         fontWeight: 'bold',
-        marginBottom: 10,
+        // marginBottom: 10,
         color: '#1a1a1a',
     },
     card: {
@@ -626,7 +626,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 16,
+        padding: 10,
         borderBottomWidth: 1,
         borderBottomColor: '#e0e0e0',
         backgroundColor: '#fff',
@@ -660,7 +660,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#007AFF',
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 12,
+        padding: 10,
         borderRadius: 12,
         gap: 8,
     },
@@ -671,8 +671,8 @@ const styles = StyleSheet.create({
     },
     customerCard: {
         backgroundColor: '#fff',
-        borderRadius: 16,
-        marginHorizontal: 16,
+        borderRadius: 10,
+        marginHorizontal: 10,
         marginTop: 16,
         padding: 16,
         elevation: 2,

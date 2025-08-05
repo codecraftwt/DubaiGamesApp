@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
-import {useState} from 'react';
+import { useState } from 'react';
 
 const EntriesList = ({
   reversedGroupedEntries,
@@ -17,10 +17,10 @@ const EntriesList = ({
 
   if (!reversedGroupedEntries) return null;
 
-    // Function to check if results are out for specific markets
-    const isKalyanResultOut = marketResults?.some(result =>
-        result.market === "Kalyan"
-    );
+  // Function to check if results are out for specific markets
+  const isKalyanResultOut = marketResults?.some(result =>
+    result.market === "Kalyan"
+  );
 
   const isMumbaiResultOut = marketResults?.some(
     result => result.market === 'Mumbai',
@@ -40,8 +40,8 @@ const EntriesList = ({
     onSelectionChange(newSelectedEntries);
   };
 
-    const formatNumbers = (entry, type) => {
-        if (!entry) return "N/A";
+  const formatNumbers = (entry, type) => {
+    if (!entry) return "N/A";
 
     try {
       if (
@@ -101,8 +101,8 @@ const EntriesList = ({
         entry.market === 'Kalyan'
           ? isKalyanResultOut
           : entry.market === 'Mumbai'
-          ? isMumbaiResultOut
-          : false;
+            ? isMumbaiResultOut
+            : false;
 
       const isSelected = selectedEntries.some(e => e.id === entry.id);
 
@@ -111,22 +111,21 @@ const EntriesList = ({
           key={`normal-${entry.id}-${index}`}
           style={[
             styles.cardStyle,
-            {backgroundColor: entry.verified_by === 0 ? '#fff' : 'lightgreen'},
+            { backgroundColor: entry.verified_by === 0 ? '#fff' : 'lightgreen' },
           ]}>
           <View style={styles.cardHeader}>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={styles.checkboxContainer}
-              onPress={() => handleEntrySelection(entry)}>
-              <View style={[styles.checkbox, isSelected && styles.checked]}>
-                {isSelected && <Icon name="check" size={12} color="#fff" />}
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
+              onPress={() => handleEntrySelection(entry)}> */}
+            {/* <View style={{ alignContent: 'center' }}>
+              {isSelected && <Icon name="check" size={12} color="#fff" />}
+            </View> */}
+            {/* </TouchableOpacity> */}
+            {/* <TouchableOpacity
               onPress={() => {
-                /* verify_status would go here */
-              }}>
-              <Text style={styles.cardType}>{entry.type.toUpperCase()}</Text>
-            </TouchableOpacity>
+            }}> */}
+            <Text style={styles.cardType}>{entry.type.toUpperCase()}</Text>
+            {/* </TouchableOpacity> */}
           </View>
           <View style={styles.cardContent}>
             <Text style={styles.numbers}>
@@ -195,8 +194,8 @@ const EntriesList = ({
             market === 'Kalyan'
               ? isKalyanResultOut
               : market === 'Mumbai'
-              ? isMumbaiResultOut
-              : false;
+                ? isMumbaiResultOut
+                : false;
 
           let parentContent = [];
           let childContent = [];
@@ -238,7 +237,7 @@ const EntriesList = ({
           return (
             <View
               key={`pan-${index}`}
-              style={[styles.cardStyle, {backgroundColor}]}>
+              style={[styles.cardStyle, { backgroundColor }]}>
               <View style={styles.cardHeader}>
                 <TouchableOpacity
                   onPress={() => {
@@ -336,7 +335,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#333',
-    marginLeft: 20,
+    alignSelf: 'center'
+    // marginLeft: 20,
   },
   cardContent: {
     padding: 10,

@@ -11,6 +11,7 @@ import {
   SectionList,
   Alert,
   Modal,
+  RefreshControl,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Header from '../../components/Header/Header';
@@ -45,6 +46,7 @@ import { fetchCountdowns } from '../../Redux/Slices/countdownSlice';
 import { isTimeExceeded } from '../../utils/marketTime';
 import { useNavigation } from '@react-navigation/native';
 import { getWalletHistory, setWalletBalance, withdrawFromWallet } from '../../Redux/Slices/walletSlice';
+import { Marquee } from '@animatereactnative/marquee';
 
 const DashboardScreen = ({ navigation }) => {
   const { t } = useTranslation();
@@ -87,6 +89,7 @@ const DashboardScreen = ({ navigation }) => {
   const [editingEntry, setEditingEntry] = useState(null);
   const [editAmount, setEditAmount] = useState('');
   const [editNumber, setEditNumber] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
 
   console.log('market data 11 fetch------->', data);
 
@@ -162,6 +165,25 @@ const DashboardScreen = ({ navigation }) => {
       setId(agent?.id);
     }
   }, [agent]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchData().then(() => {
+      // Reset selected category if needed
+      const { categories: newFilteredCategories } = getFilteredCategories(
+        data?.results,
+        data?.role,
+        marketsTime,
+        currentTime,
+        market
+      );
+
+      if (!newFilteredCategories.includes(selectedCategory)) {
+        setSelectedCategory(newFilteredCategories[0]);
+      }
+      setRefreshing(false);
+    });
+  }, [fetchData, getFilteredCategories, selectedCategory]);
 
   const fetchData = async () => {
     try {
@@ -510,8 +532,24 @@ const DashboardScreen = ({ navigation }) => {
         return 'Invalid input';
     }
   };
+  const isPastDate = (selectedDate) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to midnight for accurate comparison
+
+    // Create a new date object without time component for comparison
+    const compareDate = new Date(selectedDate);
+    compareDate.setHours(0, 0, 0, 0);
+
+    return compareDate < today;
+  };
 
   const handleSubmit = async () => {
+
+    if (isPastDate(date)) {
+      Alert.alert('Error', 'Cannot submit entries for past dates');
+      return;
+    }
+
     if (selectedCategory === 'SARAL_PAN') {
       // Only check if there are entries, don't validate empty fields
       if (saralPanEntries.length === 0 && gunuleEntries.length === 0) {
@@ -1197,7 +1235,16 @@ const DashboardScreen = ({ navigation }) => {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={[globalColors.blue]} // Customize the loading indicator color
+          tintColor={globalColors.blue} // Customize the loading indicator color (iOS)
+        />
+      }
+    >
       {marketsTime && currentTime && (
         <MarketCountdown
           marketData={marketsTime}
@@ -1206,7 +1253,20 @@ const DashboardScreen = ({ navigation }) => {
           selectedDate={date}
         />
       )}
-      <Text style={styles.sectionTitle}>{t('agentDetails')}</Text>
+      {/* <Text style={styles.sectionTitle}>{t('agentDetails')}</Text> */}
+      <View style={styles.marqueeWrapper}>
+        <Marquee
+          speed={0.5} // control speed here
+          spacing={20} // spacing between repetitions
+          delay={0} // delay before animation starts
+          repeat={true} // keep it scrolling forever
+        >
+          <Text style={styles.marqueeText}>
+            🔥 This is scrolling marquee text using @animatereactnative/marquee! 💫 Welcome to the app. 🎉
+          </Text>
+        </Marquee>
+      </View>
+
       <View style={styles.formContainer}>
         {user?.role !== 'online_customer' && user?.role !== 'agent' ? (
           <View style={styles.row}>
@@ -1917,7 +1977,8 @@ const styles = StyleSheet.create({
   formContainer: {
     // backgroundColor: globalColors.white,
     // margin: 10,
-    padding: 10,
+    // padding: 10,
+    // marginHorizontal: 5
     // borderRadius: 12,
     // shadowColor: globalColors.black,
     // shadowOffset: { width: 0, height: 4 },
@@ -1926,17 +1987,17 @@ const styles = StyleSheet.create({
     // elevation: 3,
   },
   sectionTitle: {
-    fontSize: 21,
+    fontSize: 16,
     fontFamily: 'Poppins-Bold',
-    marginBottom: 10,
+    // marginBottom: 5,
     color: globalColors.darkBlue,
   },
   inputGroup: {
     marginVertical: 10,
-    width: '42%',
+    width: '45%',
   },
   label: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
     fontFamily: 'Poppins-Bold',
     color: globalColors.inputLabel,
@@ -1954,8 +2015,8 @@ const styles = StyleSheet.create({
   radioButton: {
     flex: 1,
     minWidth: width / 4 - 10,
-    margin: 4,
-    paddingVertical: 10,
+    margin: 3,
+    paddingVertical: 8,
     alignItems: 'center',
     borderRadius: 8,
     borderWidth: 1,
@@ -1967,7 +2028,7 @@ const styles = StyleSheet.create({
     borderColor: globalColors.blue,
   },
   radioText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '500',
     fontFamily: 'Poppins-Medium',
     color: globalColors.darkBlue,
@@ -2011,35 +2072,63 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Bold',
     marginLeft: 6,
   },
+  // totalContainer: {
+  //   flexDirection: 'row',
+  //   justifyContent: 'space-between',
+  //   // marginTop: 10,
+  //   padding: 5,
+  //   backgroundColor: globalColors.white,
+  //   borderRadius: 8,
+  //   borderWidth: 1,
+  //   borderColor: '#ddd',
+  // },
+  // totalItem: {
+  //   alignItems: 'center',
+  // },
+  // totalLabel: {
+  //   fontSize: 14,
+  //   fontFamily: 'Poppins-Bold',
+  //   color: '#555',
+  //   marginBottom: 5,
+  // },
+  // totalValue: {
+  //   fontSize: 16,
+  //   fontFamily: 'Poppins-Bold',
+  //   color: globalColors.darkBlue,
+  // },
   totalContainer: {
     flexDirection: 'row',
+    flexWrap: 'wrap', // Allow wrapping
     justifyContent: 'space-between',
-    marginTop: 10,
-    padding: 12,
+    padding: 10,
     backgroundColor: globalColors.white,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#ddd',
   },
   totalItem: {
+    // width: isSmallScreen ? '100%' : '30%', // Full width on small, 1/3 on larger
     alignItems: 'center',
+    // marginBottom: 5,
   },
   totalLabel: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: 'Poppins-Bold',
     color: '#555',
-    marginBottom: 5,
+    // marginBottom: 5,
+    textAlign: 'center',
   },
   totalValue: {
     fontSize: 16,
     fontFamily: 'Poppins-Bold',
     color: globalColors.darkBlue,
+    textAlign: 'center',
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    // marginBottom: 10,
   },
   halfWidthInput: {
     width: '48%',
@@ -2236,13 +2325,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '60%',
-    marginTop: 20,
+    marginTop: 10,
   },
   button: {
     borderWidth: 1,
     borderColor: 'blue',
     borderRadius: 5,
-    paddingVertical: 10,
+    paddingVertical: 5,
     paddingHorizontal: 15,
     alignItems: 'center',
     justifyContent: 'center',
@@ -2327,6 +2416,22 @@ const styles = StyleSheet.create({
   modalButtonText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+
+
+  // marquee 
+  marqueeWrapper: {
+    height: 50,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    backgroundColor: '#f0f0f0',
+    // marginHorizontal: 20,
+    borderRadius: 10,
+  },
+  marqueeText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
   },
 });
 

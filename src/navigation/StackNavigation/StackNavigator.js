@@ -29,6 +29,8 @@ import WithdrawBalanceScreen from '../../screens/MyWallet/WithdrawBalanceScreen'
 import ResultScreen from '../../screens/ResultScreen/ResultScreen';
 import BetterLuckScreen from '../../screens/ResultScreen/BetterLuckScreen';
 import DailyResultFormScreen from '../../screens/DailyResultFormScreen';
+import AddFundAccount from '../../screens/MyWallet/AddFundAccount';
+import LogoutAllDevicesScreen from '../../screens/Auth/LogoutAllDevicesScreen';
 
 const Stack = createStackNavigator();
 
@@ -36,6 +38,8 @@ const StackNavigator = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="Splash" component={SplashScreen} />
     <Stack.Screen name="Login" component={LoginScreen} />
+    <Stack.Screen name="LogoutAllDevices" component={LogoutAllDevicesScreen} />
+
     <Stack.Screen name="AgentList" component={AgentList} />
     <Stack.Screen name="StaffList" component={StaffListScreen} />
     <Stack.Screen name="DailyResultForm" component={DailyResultFormScreen} />
@@ -65,6 +69,8 @@ const StackNavigator = () => (
       name="Result"
       component={DailyResultFormScreen}
     />
+    {/* <Stack.Screen name="account Details" component={AddFundAccount} /> */}
+
     <Stack.Screen
       name="BetterLuck"
       component={BetterLuckScreen}

@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  ActivityIndicator,
+} from 'react-native';
 import { globalColors } from '../../Theme/globalColors';
 import { useTranslation } from 'react-i18next';
 import LinearGradient from 'react-native-linear-gradient';
@@ -14,21 +20,14 @@ const MarketCountdown = ({ marketData, selectedMarket, currentTime, selectedDate
   useEffect(() => {
     if (!currentTime) return;
 
-    setIsLoading(true);
-    const now = new Date();
-    const seconds = now.getSeconds();
-    setCurrentTimeWithSeconds(
-      `${currentTime}:${seconds.toString().padStart(2, '0')}`,
-    );
-
-    const interval = setInterval(() => {
+    const updateCurrentTime = () => {
       const now = new Date();
       const seconds = now.getSeconds();
-      setCurrentTimeWithSeconds(
-        `${currentTime}:${seconds.toString().padStart(2, '0')}`,
-      );
-    }, 1000);
+      setCurrentTimeWithSeconds(`${currentTime}:${seconds.toString().padStart(2, '0')}`);
+    };
 
+    updateCurrentTime();
+    const interval = setInterval(updateCurrentTime, 1000);
     return () => clearInterval(interval);
   }, [currentTime]);
 
@@ -39,65 +38,53 @@ const MarketCountdown = ({ marketData, selectedMarket, currentTime, selectedDate
     }
 
     setIsLoading(false);
+
     const marketTimes = marketData.filter(
-      time => time.market.toLowerCase() === selectedMarket.toLowerCase(),
+      time => time.market.toLowerCase() === selectedMarket.toLowerCase()
     );
 
-    // Check if selected date is today
     const today = new Date();
     const isToday = format(selectedDate, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd');
 
-    const timerObjects = marketTimes
-      .map(time => {
-        const [hours, minutes] = time.end_time.split(':').map(Number);
-        const [currentHours, currentMinutes, currentSeconds] =
-          currentTimeWithSeconds.split(':').map(Number);
+    const timerObjects = marketTimes.map(time => {
+      const [hours, minutes] = time.end_time.split(':').map(Number);
+      const [currentHours, currentMinutes, currentSeconds] = currentTimeWithSeconds.split(':').map(Number);
 
-        let timeDiffInSeconds;
-        let isMarketClosed;
+      let timeDiffInSeconds;
+      let isMarketClosed;
 
-        if (isToday) {
-          // For today, calculate time difference from current time
-          const endTimeInSeconds = hours * 3600 + minutes * 60;
-          const currentTimeInSeconds =
-            currentHours * 3600 + currentMinutes * 60 + currentSeconds;
-          timeDiffInSeconds = endTimeInSeconds - currentTimeInSeconds;
-          isMarketClosed = timeDiffInSeconds < 0 && currentHours < 24;
-        } else {
-          // For future dates, calculate time difference from start of day
-          const endTimeInSeconds = hours * 3600 + minutes * 60;
-          timeDiffInSeconds = endTimeInSeconds;
-          isMarketClosed = false;
-        }
+      if (isToday) {
+        const endTimeInSeconds = hours * 3600 + minutes * 60;
+        const currentTimeInSeconds = currentHours * 3600 + currentMinutes * 60 + currentSeconds;
+        timeDiffInSeconds = endTimeInSeconds - currentTimeInSeconds;
+        isMarketClosed = timeDiffInSeconds < 0 && currentHours < 24;
+      } else {
+        const endTimeInSeconds = hours * 3600 + minutes * 60;
+        timeDiffInSeconds = endTimeInSeconds;
+        isMarketClosed = false;
+      }
 
-        if (timeDiffInSeconds < 0) {
-          timeDiffInSeconds += 24 * 3600;
-        }
+      if (timeDiffInSeconds < 0) {
+        timeDiffInSeconds += 24 * 3600;
+      }
 
-        const hoursLeft = Math.floor(timeDiffInSeconds / 3600);
-        const minutesLeft = Math.floor((timeDiffInSeconds % 3600) / 60);
-        const secondsLeft = timeDiffInSeconds % 60;
+      const hoursLeft = Math.floor(timeDiffInSeconds / 3600);
+      const minutesLeft = Math.floor((timeDiffInSeconds % 3600) / 60);
+      const secondsLeft = timeDiffInSeconds % 60;
 
-        return {
-          type: time.type,
-          timeLeft: {
-            hours: hoursLeft,
-            minutes: minutesLeft,
-            seconds: secondsLeft,
-          },
-          endTime: time.end_time,
-          isClosed: isMarketClosed,
-          isFutureDate: !isToday,
-        };
-      })
-      .filter(timer => timer !== null);
+      return {
+        type: time.type,
+        timeLeft: { hours: hoursLeft, minutes: minutesLeft, seconds: secondsLeft },
+        endTime: time.end_time,
+        isClosed: isMarketClosed,
+        isFutureDate: !isToday,
+      };
+    });
 
     timerObjects.sort((a, b) => {
-      const aTotalSeconds =
-        a.timeLeft.hours * 3600 + a.timeLeft.minutes * 60 + a.timeLeft.seconds;
-      const bTotalSeconds =
-        b.timeLeft.hours * 3600 + b.timeLeft.minutes * 60 + b.timeLeft.seconds;
-      return aTotalSeconds - bTotalSeconds;
+      const aSeconds = a.timeLeft.hours * 3600 + a.timeLeft.minutes * 60 + a.timeLeft.seconds;
+      const bSeconds = b.timeLeft.hours * 3600 + b.timeLeft.minutes * 60 + b.timeLeft.seconds;
+      return aSeconds - bSeconds;
     });
 
     setTimers(timerObjects);
@@ -115,47 +102,42 @@ const MarketCountdown = ({ marketData, selectedMarket, currentTime, selectedDate
 
   return (
     <View style={styles.container}>
-      <View style={styles.timersRow}>
-        {timers.map((timer, index) => (
+      <View style={styles.row}>
+        {timers.slice(0, 2).map((timer, index) => (
           <LinearGradient
             key={index}
-            colors={timer.type === 'open' ? ['#2193b0', '#6dd5ed'] : ['#FF416C', '#FF4B2B']}
-            style={[styles.timerCard, index === 0 ? styles.rightBorder : null]}
+            colors={
+              timer.type === 'open'
+                ? ['#1e3c72', '#2a5298']
+                : ['#93291e', '#ed213a']
+            }
+            style={[
+              styles.card,
+              index === 0 ? styles.cardLeft : styles.cardRight,
+            ]}
           >
-            <View style={styles.contentContainer}>
+            <View style={styles.cardContent}>
               <Text style={styles.marketType}>
                 {timer.type === 'open' ? t('openMarket') : t('closeMarket')}
               </Text>
-              <View style={styles.timeContainer}>
-                {timer.isClosed ? (
-                  <Text style={styles.closedText}>{t('marketClosed')}</Text>
-                ) : (
-                  <View style={styles.timeRow}>
-                    <View style={styles.timeBlock}>
+
+              {timer.isClosed ? (
+                <Text style={styles.closedText}>{t('marketClosed')}</Text>
+              ) : (
+                <View style={styles.timeRow}>
+                  {['hours', 'minutes', 'seconds'].map((unit, idx) => (
+                    <View key={unit} style={styles.timeBlock}>
                       <Text style={styles.timeValue}>
-                        {timer.timeLeft.hours.toString().padStart(2, '0')}
+                        {timer.timeLeft[unit].toString().padStart(2, '0')}
                       </Text>
-                      <Text style={styles.timeLabel}>{t('hours')}</Text>
+                      <Text style={styles.timeLabel}>{t(unit)}</Text>
                     </View>
-                    <Text style={styles.timeSeparator}>:</Text>
-                    <View style={styles.timeBlock}>
-                      <Text style={styles.timeValue}>
-                        {timer.timeLeft.minutes.toString().padStart(2, '0')}
-                      </Text>
-                      <Text style={styles.timeLabel}>{t('minutes')}</Text>
-                    </View>
-                    <Text style={styles.timeSeparator}>:</Text>
-                    <View style={styles.timeBlock}>
-                      <Text style={styles.timeValue}>
-                        {timer.timeLeft.seconds.toString().padStart(2, '0')}
-                      </Text>
-                      <Text style={styles.timeLabel}>{t('seconds')}</Text>
-                    </View>
-                  </View>
-                )}
-              </View>
+                  ))}
+                </View>
+              )}
+
               {timer.isFutureDate && (
-                <Text style={styles.futureDateText}>
+                <Text style={styles.futureText}>
                   {format(selectedDate, 'dd MMM yyyy')}
                 </Text>
               )}
@@ -168,87 +150,88 @@ const MarketCountdown = ({ marketData, selectedMarket, currentTime, selectedDate
 };
 
 const { width } = Dimensions.get('window');
+const CARD_WIDTH = (width - 32 - 12) / 2; // 32px margin + 12px spacing
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 4,
-    marginHorizontal: 8,
+    paddingHorizontal: 5,
+    // paddingVertical: 0,
   },
   loadingContainer: {
-    height: 60,
+    height: 30,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  timersRow: {
+  row: {
     flexDirection: 'row',
-    gap: 4,
+    justifyContent: 'space-between',
   },
-  timerCard: {
-    flex: 1,
-    borderRadius: 8,
+  card: {
+    width: CARD_WIDTH,
+    borderRadius: 5,
     overflow: 'hidden',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
   },
-  contentContainer: {
-    padding: 6,
+  cardLeft: {
+    alignSelf: 'flex-start',
+  },
+  cardRight: {
+    alignSelf: 'flex-end',
+  },
+  cardContent: {
+    padding: 5,
+    alignItems: 'center',
   },
   marketType: {
-    fontSize: 8,
+    fontSize: 10,
     fontFamily: 'Poppins-Bold',
-    color: '#FFFFFF',
-    marginBottom: 2,
+    color: '#fff',
+    // marginBottom: 6,
     textTransform: 'uppercase',
-    letterSpacing: 0.3,
-  },
-  timeContainer: {
-    marginVertical: 2,
+    letterSpacing: 0.5,
   },
   timeRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 2,
+    justifyContent: 'space-between',
+    gap: 6,
   },
   timeBlock: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    // paddingVertical: 4,
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    borderRadius: 4,
-    paddingHorizontal: 4,
-    paddingVertical: 1,
-    minWidth: 22,
+    // minWidth: 40,
   },
   timeValue: {
     fontSize: 10,
+    color: '#fff',
     fontFamily: 'Poppins-Bold',
-    color: '#FFFFFF',
   },
   timeLabel: {
-    fontSize: 5,
-    fontFamily: 'Poppins-Medium',
-    color: 'rgba(255, 255, 255, 0.8)',
-    letterSpacing: 0.3,
-  },
-  timeSeparator: {
     fontSize: 10,
-    fontFamily: 'Poppins-Bold',
-    color: '#FFFFFF',
-    marginHorizontal: 2,
+    color: '#fff',
+    fontFamily: 'Poppins-Regular',
   },
   closedText: {
-    fontSize: 8,
+    fontSize: 10,
     fontFamily: 'Poppins-Bold',
-    color: '#FFFFFF',
+    color: '#fff',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    paddingHorizontal: 5,
+    paddingVertical: 4,
+    borderRadius: 6,
     textAlign: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
   },
-  futureDateText: {
-    fontSize: 6,
-    fontFamily: 'Poppins-Medium',
-    color: 'rgba(255, 255, 255, 0.9)',
-    textAlign: 'center',
-    marginTop: 2,
+  futureText: {
+    fontSize: 10,
+    fontFamily: 'Poppins-Regular',
+    color: '#fff',
+    // marginTop: 8,
   },
 });
 

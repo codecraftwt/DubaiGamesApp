@@ -12,10 +12,12 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { globalColors } from '../../Theme/globalColors';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+  clearWalletState,
   getWalletHistory,
 } from '../../Redux/Slices/walletSlice';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
+import { useFocusEffect } from '@react-navigation/native';
 
 const MyWallet = ({ navigation }) => {
   const { t } = useTranslation();
@@ -37,6 +39,17 @@ const MyWallet = ({ navigation }) => {
     setRefreshing(false);
   };
 
+  useFocusEffect(
+    React.useCallback(() => {
+      dispatch(getWalletHistory());
+
+      // Cleanup function
+      return () => {
+        dispatch(clearWalletState());
+      };
+    }, [dispatch])
+  );
+
   const formatDate = dateString => {
     const date = new Date(dateString);
     return format(date, 'dd-MMM-yyyy hh:mm a');
@@ -46,7 +59,7 @@ const MyWallet = ({ navigation }) => {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.fixedHeader}>
         <View style={styles.card}>
-          <Text style={styles.balance}>{balance.toLocaleString()} Rs</Text>
+          <Text style={styles.balance}>{balance} Rs</Text>
           <Text style={styles.name}>{user?.name || 'User'}</Text>
           <Text style={styles.cardNumber}>{user?.phone || ''}</Text>
           <Icon
