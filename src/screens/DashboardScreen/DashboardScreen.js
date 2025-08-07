@@ -12,6 +12,7 @@ import {
   Alert,
   Modal,
   RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Header from '../../components/Header/Header';
@@ -47,6 +48,7 @@ import { isTimeExceeded } from '../../utils/marketTime';
 import { useNavigation } from '@react-navigation/native';
 import { getWalletHistory, setWalletBalance, withdrawFromWallet } from '../../Redux/Slices/walletSlice';
 import { Marquee } from '@animatereactnative/marquee';
+import ModernMarquee from '../../utils/ModernMarquee';
 
 const DashboardScreen = ({ navigation }) => {
   const { t } = useTranslation();
@@ -76,6 +78,7 @@ const DashboardScreen = ({ navigation }) => {
   const dispatch = useDispatch();
 
   const { data, status } = useSelector(state => state.market);
+  const isEntriesLoadings = status === 'loading';
   const { agentInfo } = useSelector(state => state.autoComplete);
   const {
     loading: saralUltadelLoading,
@@ -90,6 +93,7 @@ const DashboardScreen = ({ navigation }) => {
   const [editAmount, setEditAmount] = useState('');
   const [editNumber, setEditNumber] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   console.log('market data 11 fetch------->', data);
 
@@ -101,6 +105,10 @@ const DashboardScreen = ({ navigation }) => {
   const [ultaGunuleEntries, setUltaGunuleEntries] = useState([]);
   const [isMarketOpen, setIsMarketOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState('');
+
+  const [declaredResults, setDeclaredResults] = useState([]);
+  const [isEntriesLoading, setIsEntriesLoading] = useState(true);
+
   const formatDate = date => {
     return date.toISOString().split('T')[0]; //
   };
@@ -166,26 +174,32 @@ const DashboardScreen = ({ navigation }) => {
     }
   }, [agent]);
 
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    fetchData().then(() => {
-      // Reset selected category if needed
-      const { categories: newFilteredCategories } = getFilteredCategories(
-        data?.results,
-        data?.role,
-        marketsTime,
-        currentTime,
-        market
-      );
 
-      if (!newFilteredCategories.includes(selectedCategory)) {
-        setSelectedCategory(newFilteredCategories[0]);
+  const fetchDeclaredResults = async () => {
+    try {
+      const formattedDate = formatDate(date);
+      const response = await axios.get(`${API_BASE_URL}/declared_result`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          date: formattedDate,
+        },
+      });
+
+      if (response.data.success) {
+        setDeclaredResults(response.data.result);
       }
-      setRefreshing(false);
-    });
-  }, [fetchData, getFilteredCategories, selectedCategory]);
+    } catch (error) {
+      console.error('Error fetching declared results:', error);
+    }
+  };
+
+
+
 
   const fetchData = async () => {
+    setIsEntriesLoading(true);
     try {
       console.log('Fetch Data Is reloading====');
       const dateFormated = formatDate(date);
@@ -200,6 +214,8 @@ const DashboardScreen = ({ navigation }) => {
       setResponse(response.data);
     } catch (error) {
       console.error('Error fetching data:', error);
+    } finally {
+      setIsEntriesLoading(false);
     }
   };
 
@@ -233,6 +249,26 @@ const DashboardScreen = ({ navigation }) => {
     const interval = setInterval(fetchCurrentTime, 60000);
     return () => clearInterval(interval);
   }, []);
+
+  const loadInitialData = async () => {
+    await dispatch(fetchCountdowns());
+    await fetchData();
+    await fetchDeclaredResults();
+  };
+
+
+  useEffect(() => {
+    loadInitialData();
+  }, [dispatch, id, market]);
+
+
+  useEffect(() => {
+    const loadData = async () => {
+      await fetchDeclaredResults();
+      await fetchData();
+    };
+    loadData();
+  }, [date, market]);
 
   useEffect(() => {
     // Fetch countdowns immediately when component mounts
@@ -345,7 +381,7 @@ const DashboardScreen = ({ navigation }) => {
         return { categories: filtered, bothResultsOut: false };
       }
     },
-    [date], // Add date to dependencies
+    [date, declaredResults], // Add date to dependencies
   );
 
   console.log('GGGGGGGGGGGG', data?.role);
@@ -398,7 +434,7 @@ const DashboardScreen = ({ navigation }) => {
         return value.length <= 10;
 
       default:
-        return true;
+        return value.length > 0; // At least something entered for other categories
     }
   };
 
@@ -544,134 +580,60 @@ const DashboardScreen = ({ navigation }) => {
   };
 
   const handleSubmit = async () => {
+    setIsSubmitting(true);
 
-    if (isPastDate(date)) {
-      Alert.alert('Error', 'Cannot submit entries for past dates');
-      return;
-    }
-
-    if (selectedCategory === 'SARAL_PAN') {
-      // Only check if there are entries, don't validate empty fields
-      if (saralPanEntries.length === 0 && gunuleEntries.length === 0) {
-        Alert.alert('Error', 'Please add at least one entry using the + button');
+    try {
+      if (isPastDate(date)) {
+        Alert.alert('Error', 'Cannot submit entries for past dates');
         return;
       }
-    } else if (selectedCategory === 'ULTA PAN') {
-      // Only check if there are entries, don't validate empty fields
-      if (ultaPanEntries.length === 0 && ultaGunuleEntries.length === 0) {
-        Alert.alert('Error', 'Please add at least one entry using the + button');
+
+      // if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+      //   Alert.alert('Error', 'Please enter a valid amount');
+      //   return;
+      // }
+      if (selectedCategory === 'SARAL_PAN') {
+        // Only check if there are entries, don't validate empty fields
+        if (saralPanEntries.length === 0 && gunuleEntries.length === 0) {
+          Alert.alert('Error', 'Please add at least one entry using the + button');
+          return;
+        }
+      } else if (selectedCategory === 'ULTA PAN') {
+        // Only check if there are entries, don't validate empty fields
+        if (ultaPanEntries.length === 0 && ultaGunuleEntries.length === 0) {
+          Alert.alert('Error', 'Please add at least one entry using the + button');
+          return;
+        }
+      } else if (!validateNumber(number, selectedCategory, selectedButton)) {
+        Alert.alert('Error', t('invalidNumber', { category: selectedCategory }));
         return;
       }
-    } else if (!validateNumber(number, selectedCategory, selectedButton)) {
-      Alert.alert('Error', t('invalidNumber', { category: selectedCategory }));
-      return;
-    }
 
-    if (
-      (selectedCategory === 'CYCLE' || selectedCategory === 'RUNNING_PAN') &&
-      !validateNumber(anotherNumber, selectedCategory)
-    ) {
-      alert(`Invalid another number format for ${selectedCategory} category`);
-      return;
-    }
+      if (
+        (selectedCategory === 'CYCLE' || selectedCategory === 'RUNNING_PAN') &&
+        !validateNumber(anotherNumber, selectedCategory)
+      ) {
+        alert(`Invalid another number format for ${selectedCategory} category`);
+        return;
+      }
 
-    let payload = {};
+      let payload = {};
 
-    console.log('Selected Category:', selectedCategory);
-    console.log(
-      'Selected Category in Lowercase:',
-      selectedCategory.toLowerCase(),
-    );
+      console.log('Selected Category:', selectedCategory);
+      console.log(
+        'Selected Category in Lowercase:',
+        selectedCategory.toLowerCase(),
+      );
 
-    if (
-      selectedCategory === 'OPEN' ||
-      selectedCategory === 'JODI' ||
-      selectedCategory === 'CHOKADA' ||
-      selectedCategory === 'BEERICH' ||
-      selectedCategory === 'FARAK' ||
-      selectedCategory === 'CLOSE'
-    ) {
-      console.log("@222222222222222222222222222222222222222222", id)
-      payload = {
-        agent_id: id.toString(),
-        agent_type: '1',
-        agentcode: agentId,
-        agentname: 'agentName',
-        amount: amount,
-        amount2: '',
-        filterDate: formatDate(date),
-        market: market,
-        market_msg: '',
-        msg: '',
-        number: '',
-        number2: '',
-        ocj: payloadString,
-        type: selectedCategory.toLowerCase(),
-        panType: 'undefined',
-      };
-      console.log("sssssssssssssssss", payload)
-    } else if (
-      selectedCategory === 'CYCLE' ||
-      selectedCategory === 'RUNNING_PAN'
-    ) {
-      payload = {
-        agent_id: id.toString(),
-        agent_type: '1',
-        agentcode: agentId,
-        agentname: 'agentName',
-        amount: amount,
-        amount2: '',
-        filterDate: formatDate(date),
-        market: market,
-        market_msg: '',
-        msg: '',
-        number: number,
-        number2: anotherNumber,
-        ocj: '',
-        type: selectedCategory.toLowerCase(),
-        panType: 'undefined',
-      };
-    } else if (selectedCategory === 'CUT') {
-      payload = {
-        agent_id: id.toString(),
-        agent_type: '1',
-        agentcode: agentId,
-        agentname: 'agentName',
-        amount: amount,
-        amount2: secAmount,
-        filterDate: formatDate(date),
-        market: market,
-        market_msg: '',
-        msg: '',
-        number: number,
-        number2: '',
-        ocj: '',
-        type: selectedCategory.toLowerCase(),
-        panType: 'undefined',
-      };
-    } else if (
-      selectedCategory === 'OPENPAN' ||
-      selectedCategory === 'CLOSEPAN'
-    ) {
-      if (selectedButton !== null) {
-        payload = {
-          agent_id: id.toString(),
-          agent_type: '1',
-          agentcode: agentId,
-          agentname: 'agentName',
-          amount: amount,
-          amount2: '',
-          filterDate: formatDate(date),
-          market: market,
-          market_msg: '',
-          msg: '',
-          number: number,
-          number2: '',
-          ocj: '',
-          type: selectedCategory.toLowerCase(),
-          panType: selectedButton.toLowerCase(),
-        };
-      } else {
+      if (
+        selectedCategory === 'OPEN' ||
+        selectedCategory === 'JODI' ||
+        selectedCategory === 'CHOKADA' ||
+        selectedCategory === 'BEERICH' ||
+        selectedCategory === 'FARAK' ||
+        selectedCategory === 'CLOSE'
+      ) {
+        console.log("@222222222222222222222222222222222222222222", id)
         payload = {
           agent_id: id.toString(),
           agent_type: '1',
@@ -687,100 +649,184 @@ const DashboardScreen = ({ navigation }) => {
           number2: '',
           ocj: payloadString,
           type: selectedCategory.toLowerCase(),
+          panType: 'undefined',
         };
-      }
-    } else if (selectedCategory === 'SARAL_PAN') {
-      const saralPanNumbers = [];
-      const saralPanAmounts = [];
-      const gunuleNumbers = [];
-      const gunuleAmounts = [];
-
-      // Add main entries
-      if (saralPanNumber && saralPanAmount) {
-        saralPanNumbers.push(saralPanNumber);
-        saralPanAmounts.push(saralPanAmount);
-      }
-
-      // Add gunule entries if they exist
-      if (saralPanGunule && saralPanGunuleAmount) {
-        gunuleNumbers.push(saralPanGunule);
-        gunuleAmounts.push(saralPanGunuleAmount);
-      }
-
-      // Add entries from the table
-      saralPanData.forEach(item => {
-        saralPanNumbers.push(item.number);
-        saralPanAmounts.push(item.amount);
-      });
-
-      payload = {
-        agent_id: id.toString(),
-        agent_type: '1',
-        agentcode: agentId,
-        agentname: agentName,
-        type: 'saral_pan',
-        market: market,
-        filterDate: formatDate(date),
-        number: number || '1',
-        amount: amount || '1',
-        saral_pan: saralPanEntries.map(entry => entry.number),
-        saral_pan_amount: saralPanEntries.map(entry => entry.amount),
-        gunule: gunuleEntries.map(entry => entry.number),
-        gunule_amount: gunuleEntries.map(entry => entry.amount),
-        msg: null,
-        market_msg: null,
-      };
-    } else if (selectedCategory === 'ULTA PAN') {
-      payload = {
-        agent_id: id.toString(),
-        agent_type: '1',
-        agentcode: agentId,
-        agentname: 'agentName',
-        type: 'ulta_pan',
-        market: market,
-        filterDate: formatDate(date),
-        number: number || '1',
-        amount: amount || '1',
-        gunule: ultaPanEntries.map(entry => entry.number),
-        gunule_amount: ultaPanEntries.map(entry => entry.amount),
-        saral_pan_amount: ultaGunuleEntries.map(entry => entry.amount),
-        saral_pan: ultaGunuleEntries.map(entry => entry.number),
-        msg: null,
-        market_msg: null,
-      };
-      // gunule_amount: ultaGunuleEntries.map(entry => entry.amount),
-      // saral_pan: ultaPanEntries.map(entry => entry.number),
-      // saral_pan_amount: ultaPanEntries.map(entry => entry.amount),
-      // gunule: ultaGunuleEntries.map(entry => entry.number),
-    }
-
-    console.log('Payload before dispatch:', payload);
-
-    if (Object.keys(payload).length === 0) {
-      console.error('Payload is empty, check your conditions and variables.');
-    } else {
-      try {
-        const response = await dispatch(submitEntry({ payload, token }));
-        if (submitEntry?.fulfilled?.match(response)) {
-          if (response.payload.success) {
-            // Update wallet balance from the response
-            if (response.payload.wallet_balance) {
-              dispatch(setWalletBalance(response.payload.wallet_balance));
-            }
-            // Refresh wallet history
-            dispatch(getWalletHistory());
-
-            resetFormStates();
-            fetchData();
-          }
+        console.log("sssssssssssssssss", payload)
+      } else if (
+        selectedCategory === 'CYCLE' ||
+        selectedCategory === 'RUNNING_PAN'
+      ) {
+        payload = {
+          agent_id: id.toString(),
+          agent_type: '1',
+          agentcode: agentId,
+          agentname: 'agentName',
+          amount: amount,
+          amount2: '',
+          filterDate: formatDate(date),
+          market: market,
+          market_msg: '',
+          msg: '',
+          number: number,
+          number2: anotherNumber,
+          ocj: '',
+          type: selectedCategory.toLowerCase(),
+          panType: 'undefined',
+        };
+      } else if (selectedCategory === 'CUT') {
+        payload = {
+          agent_id: id.toString(),
+          agent_type: '1',
+          agentcode: agentId,
+          agentname: 'agentName',
+          amount: amount,
+          amount2: secAmount,
+          filterDate: formatDate(date),
+          market: market,
+          market_msg: '',
+          msg: '',
+          number: number,
+          number2: '',
+          ocj: '',
+          type: selectedCategory.toLowerCase(),
+          panType: 'undefined',
+        };
+      } else if (
+        selectedCategory === 'OPENPAN' ||
+        selectedCategory === 'CLOSEPAN'
+      ) {
+        if (selectedButton !== null) {
+          payload = {
+            agent_id: id.toString(),
+            agent_type: '1',
+            agentcode: agentId,
+            agentname: 'agentName',
+            amount: amount,
+            amount2: '',
+            filterDate: formatDate(date),
+            market: market,
+            market_msg: '',
+            msg: '',
+            number: number,
+            number2: '',
+            ocj: '',
+            type: selectedCategory.toLowerCase(),
+            panType: selectedButton.toLowerCase(),
+          };
         } else {
-          console.error('submitEntry failed:', response);
+          payload = {
+            agent_id: id.toString(),
+            agent_type: '1',
+            agentcode: agentId,
+            agentname: 'agentName',
+            amount: amount,
+            amount2: '',
+            filterDate: formatDate(date),
+            market: market,
+            market_msg: '',
+            msg: '',
+            number: '',
+            number2: '',
+            ocj: payloadString,
+            type: selectedCategory.toLowerCase(),
+          };
         }
-      } catch (error) {
-        console.error('Error during dispatch:', error);
-      }
-    }
+      } else if (selectedCategory === 'SARAL_PAN') {
+        const saralPanNumbers = [];
+        const saralPanAmounts = [];
+        const gunuleNumbers = [];
+        const gunuleAmounts = [];
 
+        // Add main entries
+        if (saralPanNumber && saralPanAmount) {
+          saralPanNumbers.push(saralPanNumber);
+          saralPanAmounts.push(saralPanAmount);
+        }
+
+        // Add gunule entries if they exist
+        if (saralPanGunule && saralPanGunuleAmount) {
+          gunuleNumbers.push(saralPanGunule);
+          gunuleAmounts.push(saralPanGunuleAmount);
+        }
+
+        // Add entries from the table
+        saralPanData.forEach(item => {
+          saralPanNumbers.push(item.number);
+          saralPanAmounts.push(item.amount);
+        });
+
+        payload = {
+          agent_id: id.toString(),
+          agent_type: '1',
+          agentcode: agentId,
+          agentname: agentName,
+          type: 'saral_pan',
+          market: market,
+          filterDate: formatDate(date),
+          number: number || '1',
+          amount: amount || '1',
+          saral_pan: saralPanEntries.map(entry => entry.number),
+          saral_pan_amount: saralPanEntries.map(entry => entry.amount),
+          gunule: gunuleEntries.map(entry => entry.number),
+          gunule_amount: gunuleEntries.map(entry => entry.amount),
+          msg: null,
+          market_msg: null,
+        };
+      } else if (selectedCategory === 'ULTA PAN') {
+        payload = {
+          agent_id: id.toString(),
+          agent_type: '1',
+          agentcode: agentId,
+          agentname: 'agentName',
+          type: 'ulta_pan',
+          market: market,
+          filterDate: formatDate(date),
+          number: number || '1',
+          amount: amount || '1',
+          gunule: ultaPanEntries.map(entry => entry.number),
+          gunule_amount: ultaPanEntries.map(entry => entry.amount),
+          saral_pan_amount: ultaGunuleEntries.map(entry => entry.amount),
+          saral_pan: ultaGunuleEntries.map(entry => entry.number),
+          msg: null,
+          market_msg: null,
+        };
+        // gunule_amount: ultaGunuleEntries.map(entry => entry.amount),
+        // saral_pan: ultaPanEntries.map(entry => entry.number),
+        // saral_pan_amount: ultaPanEntries.map(entry => entry.amount),
+        // gunule: ultaGunuleEntries.map(entry => entry.number),
+      }
+
+      console.log('Payload before dispatch:', payload);
+
+      if (Object.keys(payload).length === 0) {
+        console.error('Payload is empty, check your conditions and variables.');
+      } else {
+        try {
+          const response = await dispatch(submitEntry({ payload, token }));
+          if (submitEntry?.fulfilled?.match(response)) {
+            if (response.payload.success) {
+              // Update wallet balance from the response
+              if (response.payload.wallet_balance) {
+                dispatch(setWalletBalance(response.payload.wallet_balance));
+              }
+              // Refresh wallet history
+              dispatch(getWalletHistory());
+
+              resetFormStates();
+              fetchData();
+            }
+          } else {
+            console.error('submitEntry failed:', response);
+          }
+        } catch (error) {
+          console.error('Error during dispatch:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Error during dispatch:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
     console.log('Token:', token);
   };
 
@@ -1141,6 +1187,32 @@ const DashboardScreen = ({ navigation }) => {
     setSelectedButton(null);
   }, [selectedCategory]);
 
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchData().then(() => {
+      // Reset selected category if needed
+      const { categories: newFilteredCategories } = getFilteredCategories(
+        data?.results,
+        data?.role,
+        marketsTime,
+        currentTime,
+        market
+      );
+
+      if (!newFilteredCategories.includes(selectedCategory)) {
+        setSelectedCategory(newFilteredCategories[0]);
+      }
+      fetchDeclaredResults();
+      fetchData()
+      loadInitialData()
+      getFilteredCategories()
+      setRefreshing(false);
+    });
+  }, [fetchData, getFilteredCategories, selectedCategory]);
+
+
+
   const ButtonGroup = ({ onSelect }) => {
     return (
       <View style={styles.buttonContainer}>
@@ -1254,7 +1326,7 @@ const DashboardScreen = ({ navigation }) => {
         />
       )}
       {/* <Text style={styles.sectionTitle}>{t('agentDetails')}</Text> */}
-      <View style={styles.marqueeWrapper}>
+      {/* <View style={styles.marqueeWrapper}>
         <Marquee
           speed={0.5} // control speed here
           spacing={20} // spacing between repetitions
@@ -1262,11 +1334,18 @@ const DashboardScreen = ({ navigation }) => {
           repeat={true} // keep it scrolling forever
         >
           <Text style={styles.marqueeText}>
-            🔥 This is scrolling marquee text using @animatereactnative/marquee! 💫 Welcome to the app. 🎉
+            {declaredResults.length > 0 ? (
+              console.log("declaredResults", declaredResults),
+              declaredResults.map(result => (
+                `🔥 ${result.market} ${result.type.replace('-', ' ').toUpperCase()} Result: ${result.number} (PAN: ${result.pannumber}) 💫  `
+              ))
+            ) : (
+              '🔥 No results declared yet. Check back later! 💫'
+            )}
           </Text>
         </Marquee>
-      </View>
-
+      </View> */}
+      <ModernMarquee results={declaredResults} />
       <View style={styles.formContainer}>
         {user?.role !== 'online_customer' && user?.role !== 'agent' ? (
           <View style={styles.row}>
@@ -1819,9 +1898,17 @@ const DashboardScreen = ({ navigation }) => {
             />
             <View style={styles.buttonGroup}>
               <TouchableOpacity
-                style={styles.submitButton}
-                onPress={handleSubmit}>
-                <Text style={styles.submitButtonText}>{t('submit')}</Text>
+                style={[
+                  styles.submitButton,
+                  isSubmitting && styles.submitButtonDisabled
+                ]}
+                onPress={handleSubmit}
+                disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <ActivityIndicator color={globalColors.white} />
+                ) : (
+                  <Text style={styles.submitButtonText}>{t('submit')}</Text>
+                )}
               </TouchableOpacity>
               {/* <TouchableOpacity
                 style={styles.deleteAllButton}
@@ -1862,6 +1949,7 @@ const DashboardScreen = ({ navigation }) => {
         userRole={data?.role}
         marketResults={data?.results}
         onSelectionChange={handleEntrySelection}
+        isLoading={isEntriesLoadings}
       />
 
       {
@@ -2431,7 +2519,7 @@ const styles = StyleSheet.create({
   marqueeText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: '#4CAF50',
   },
 });
 

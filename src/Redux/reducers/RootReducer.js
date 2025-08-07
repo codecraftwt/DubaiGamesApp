@@ -13,6 +13,7 @@ import saralUltadelReducer from "../Slices/saralUltadelSlice"
 import onlineCustomersReducer from "../Slices/onlineCustomersSlice";
 import countdownSlice from "../Slices/countdownSlice"
 import walletReducer from '../Slices/walletSlice';
+import fundAccount from '../Slices/fundAccountSlice'
 // import galleryReducer from '../Slices/gallerySlice';
 // import webSocketReducer from '../Slices/webSocketSlice';
 // import websiteReducer from '../Slices/websiteSlice';
@@ -32,6 +33,8 @@ const rootReducer = combineReducers({
     onlineCustomers: onlineCustomersReducer,
     countdown: countdownSlice,
     wallet: walletReducer,
+    fundAccount: fundAccount,
+
     // gallery: galleryReducer,
     // webSocket: webSocketReducer,
     // webSite: websiteReducer,

@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useState } from 'react';
 
@@ -12,8 +12,19 @@ const EntriesList = ({
   userRole,
   marketResults,
   onSelectionChange,
+  isLoading
 }) => {
   const [selectedEntries, setSelectedEntries] = useState([]);
+
+
+  if (isLoading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text style={styles.loadingText}>Loading entries...</Text>
+      </View>
+    );
+  }
 
   if (!reversedGroupedEntries) return null;
 
@@ -395,6 +406,17 @@ const styles = StyleSheet.create({
     width: '100%',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#666',
   },
 });
 

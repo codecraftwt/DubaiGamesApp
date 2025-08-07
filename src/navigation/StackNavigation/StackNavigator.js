@@ -65,6 +65,7 @@ const StackNavigator = () => (
     <Stack.Screen name="MyWallet" component={MyWallet} />
     <Stack.Screen name="AddBalance" component={AddBalanceScreen} />
     <Stack.Screen name="WithdrawBalance" component={WithdrawBalanceScreen} />
+    <Stack.Screen name="AddFundAccount" component={AddFundAccount} />
     <Stack.Screen
       name="Result"
       component={DailyResultFormScreen}

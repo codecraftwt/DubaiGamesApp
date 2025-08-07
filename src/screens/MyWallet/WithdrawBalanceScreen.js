@@ -17,6 +17,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { globalColors } from '../../Theme/globalColors';
 import { useDispatch, useSelector } from 'react-redux';
 import { getWalletHistory, getWithdrawHistory, withdrawFromWallet } from '../../Redux/Slices/walletSlice';
+import { fetchFundAccount } from '../../Redux/Slices/fundAccountSlice';
 
 const WithdrawBalanceScreen = () => {
   const navigation = useNavigation();
@@ -27,6 +28,9 @@ const WithdrawBalanceScreen = () => {
     loading: state.wallet.loading,
     error: state.wallet.error
   }));
+  const fundAccount = useSelector((state) => state.fundAccount.data);
+  const token = useSelector((state) => state.auth.token);
+
   const [amount, setAmount] = useState('');
   const [selectedAmount, setSelectedAmount] = useState(null);
   const [showAllHistory, setShowAllHistory] = useState(false);
@@ -36,6 +40,8 @@ const WithdrawBalanceScreen = () => {
   useEffect(() => {
     dispatch(getWithdrawHistory());
     dispatch(getWalletHistory());
+    dispatch(fetchFundAccount(token));
+
   }, [dispatch]);
 
   const handleQuickAmountPress = (quickAmount) => {
@@ -54,6 +60,23 @@ const WithdrawBalanceScreen = () => {
   const handleWithdraw = async () => {
     if (!amount && selectedAmount === null) {
       Alert.alert('Error', 'Please enter an amount');
+      return;
+    }
+
+    if (!fundAccount) {
+      Alert.alert(
+        'Error',
+        'Fund account details not found. Please add your fund account details first.',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              // Navigate to the Add Fund Account page if no fund account exists
+              navigation.navigate('AddFundAccount');
+            }
+          }
+        ]
+      );
       return;
     }
 
@@ -194,14 +217,22 @@ const WithdrawBalanceScreen = () => {
                             <Text style={styles.historyItemAmount}>₹{item?.amount?.toLocaleString('en-IN')}</Text>
                             {getStatusIcon(item.status)}
                           </View>
-                          <Text style={styles.historyItemDate}>
-                            {(item.created_at).toLocaleString('en-IN', {
-                              day: 'numeric',
-                              month: 'short',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
+                          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <Text style={styles.historyItemDate}>
+                              {(item.created_at).toLocaleString('en-IN', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </Text>
+                            <Text>
+                              {item.status}
+                            </Text>
+                          </View>
+                          <Text style={styles.historyItemNote}>
+                            {(item.admin_note === "—" ? "No note" : item.admin_note)}
                           </Text>
                         </View>
                       ))}
@@ -417,6 +448,11 @@ const styles = StyleSheet.create({
   historyItemDate: {
     fontSize: 14,
     color: globalColors.grey,
+  },
+  historyItemNote: {
+    fontSize: 14,
+    color: globalColors.grey,
+    marginTop: 2
   },
   noHistoryText: {
     textAlign: 'center',

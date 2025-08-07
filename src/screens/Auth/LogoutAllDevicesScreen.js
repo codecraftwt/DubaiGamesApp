@@ -3,10 +3,12 @@ import { View, TextInput, Button, Alert, StyleSheet, Text, TouchableOpacity } fr
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import axios from 'axios';
 import { API_BASE_URL } from '../../utils/Api';
+import { useNavigation } from '@react-navigation/native';
 
 const LogoutAllDevicesScreen = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const navigation = useNavigation();
 
     const handleLogoutAllDevices = async () => {
         try {
@@ -15,6 +17,15 @@ const LogoutAllDevicesScreen = () => {
                 password,
             });
             console.log("response", response)
+            Alert.alert('Success', 'You have been logged out from all devices.', [
+                {
+                    text: 'OK',
+                    onPress: () => {
+                        // Navigate back after showing the success alert
+                        navigation.goBack();
+                    },
+                },
+            ]);
             Alert.alert('Success', 'You have been logged out from all devices.');
         } catch (error) {
             console.error(error);
