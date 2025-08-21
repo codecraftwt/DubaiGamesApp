@@ -22,6 +22,8 @@ const SettingsScreen = ({ navigation }) => {
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [OldPassword, setOldPassword] = useState('');
+    const [OldPasswordVisible, setOldPasswordVisible] = useState(false);
 
     const handleLogout = async () => {
         Alert.alert(
@@ -96,6 +98,7 @@ const SettingsScreen = ({ navigation }) => {
                     phone: user?.phone,
                     password: password,
                     password_confirmation: passwordConfirmation,
+                    old_password: OldPassword
                 },
                 {
                     headers: {
@@ -283,6 +286,29 @@ const SettingsScreen = ({ navigation }) => {
 
                         <View style={styles.passwordForm}>
                             {/* New Password Field */}
+                            <View style={styles.inputContainer}>
+                                <View style={styles.passwordContainer}>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder={t('OldPassword')}
+                                        value={OldPassword}
+                                        onChangeText={setOldPassword}
+                                        secureTextEntry={!OldPasswordVisible}
+                                        placeholderTextColor={globalColors.grey}
+                                    />
+                                    <TouchableOpacity
+                                        style={styles.eyeIcon}
+                                        onPress={() => setOldPasswordVisible(!OldPasswordVisible)}
+                                    >
+                                        <Icon
+                                            name={OldPasswordVisible ? 'eye-outline' : 'eye-off-outline'}
+                                            size={20}
+                                            color={globalColors.darkBlue}
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+
                             <View style={styles.inputContainer}>
                                 <View style={styles.passwordContainer}>
                                     <TextInput
