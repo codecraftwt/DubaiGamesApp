@@ -35,6 +35,7 @@ const TabNavigator = () => {
                     fontSize: 12,
                     fontFamily: 'Poppins-Medium',
                 },
+                tabBarHideOnKeyboard: true,
             })}
         >
             <Tab.Screen

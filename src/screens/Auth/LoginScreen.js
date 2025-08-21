@@ -18,6 +18,7 @@ import LanguageSelector from '../LanguageSelector/LanguageSelector';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import Toast from 'react-native-toast-message';
+import { API_BASE_URL } from '../../utils/Api';
 
 const LoginScreen = ({ navigation }) => {
     const dispatch = useDispatch();
@@ -70,7 +71,7 @@ const LoginScreen = ({ navigation }) => {
         setIsForgotLoading(true);
         try {
             const response = await axios.post(
-                'http://staging.rdnidhi.com/api/forgot-password',
+                `${API_BASE_URL}/forgot-password`,
                 {
                     email: forgotPasswordEmail,
                 },
@@ -95,17 +96,19 @@ const LoginScreen = ({ navigation }) => {
             setIsForgotLoading(false);
             console.error('Forgot password error:', error.response?.data || error.message);
 
-            let errorMessage = t('forgotPasswordFailed');
-            if (error.response?.data?.message) {
-                errorMessage = error.response.data.message;
-            } else if (error.response?.data?.status) {
-                errorMessage = error.response.data.status;
-            }
+            // let errorMessage = t('forgotPasswordFailed');
+            // if (error.response?.data?.message) {
+            //     errorMessage = error.response.data.message;
+            // } else if (error.response?.data?.status) {
+            //     errorMessage = error.response.data.status;
+            // }
 
             Toast.show({
                 type: 'error',
                 text1: t('error'),
-                text2: errorMessage,
+                text2: error.response?.data?.message || error.message || t('forgotPasswordFailed'),
+
+                text2: error.response.data.message,
             });
         }
     };
@@ -131,7 +134,7 @@ const LoginScreen = ({ navigation }) => {
         if (!password.trim()) {
             newErrors.password = t('passwordRequired');
             valid = false;
-        } else if (password.length < 8) {
+        } else if (password.length < 5) {
             newErrors.password = t('passwordTooShort');
             valid = false;
         }

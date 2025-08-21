@@ -593,16 +593,84 @@ const DashboardScreen = ({ navigation }) => {
       //   return;
       // }
       if (selectedCategory === 'SARAL_PAN') {
-        // Only check if there are entries, don't validate empty fields
+        // Check if all mandatory fields are filled
         if (saralPanEntries.length === 0 && gunuleEntries.length === 0) {
           Alert.alert('Error', 'Please add at least one entry using the + button');
           return;
+        } else if (gunuleEntries.length === 0) {
+          Alert.alert('Error', 'Please add gunule and number entry using the + button');
+          return
+        } else if (saralPanEntries.length === 0) {
+          Alert.alert('Error', 'Please add saral pan and number entry using the + button');
+          return
+        }
+
+        // Validate all entries have required fields
+        if (saralPanEntries.length > 0) {
+          for (let entry of saralPanEntries) {
+            if (!entry.number || !entry.amount) {
+              Alert.alert('Error', 'All SARAL PAN entries must have both number and amount');
+              return;
+            }
+            if (entry.number.length !== 3) {
+              Alert.alert('Error', 'SARAL PAN numbers must be exactly 3 digits');
+              return;
+            }
+          }
+        }
+
+        if (gunuleEntries.length > 0) {
+          for (let entry of gunuleEntries) {
+            if (!entry.number || !entry.amount) {
+              Alert.alert('Error', 'All gunule entries must have both number and amount');
+              return;
+            }
+            if (!/^[0-9]$/.test(entry.number)) {
+              Alert.alert('Error', 'Gunule numbers must be exactly 1 digit (0-9)');
+              return;
+            }
+          }
         }
       } else if (selectedCategory === 'ULTA PAN') {
-        // Only check if there are entries, don't validate empty fields
+        // Check if all mandatory fields are filled
         if (ultaPanEntries.length === 0 && ultaGunuleEntries.length === 0) {
           Alert.alert('Error', 'Please add at least one entry using the + button');
           return;
+        } else if (ultaPanEntries.length === 0) {
+          Alert.alert('Error', 'Please add ulta pan and Amount entry using the + button');
+          return;
+
+        } else if (ultaGunuleEntries.length === 0) {
+          Alert.alert('Error', 'Please add ulta gunule and Amount entry using the + button');
+          return;
+
+        }
+
+        // Validate all entries have required fields
+        if (ultaPanEntries.length > 0) {
+          for (let entry of ultaPanEntries) {
+            if (!entry.number || !entry.amount) {
+              Alert.alert('Error', 'All ULTA PAN entries must have both number and amount');
+              return;
+            }
+            if (entry.number.length !== 3) {
+              Alert.alert('Error', 'ULTA PAN numbers must be exactly 3 digits');
+              return;
+            }
+          }
+        }
+
+        if (ultaGunuleEntries.length > 0) {
+          for (let entry of ultaGunuleEntries) {
+            if (!entry.number || !entry.amount) {
+              Alert.alert('Error', 'All gunule entries must have both number and amount');
+              return;
+            }
+            if (!/^[0-9]$/.test(entry.number)) {
+              Alert.alert('Error', 'Gunule numbers must be exactly 1 digit (0-9)');
+              return;
+            }
+          }
         }
       } else if (!validateNumber(number, selectedCategory, selectedButton)) {
         Alert.alert('Error', t('invalidNumber', { category: selectedCategory }));

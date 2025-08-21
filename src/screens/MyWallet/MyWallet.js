@@ -115,9 +115,11 @@ const MyWallet = ({ navigation }) => {
               </View>
               <View style={styles.transactionDetails}>
                 <Text style={styles.transactionType}>
-                  {transaction.transaction_type === 'credit'
-                    ? t('moneyAdded')
-                    : t('moneyWithdrawn')}
+                  {transaction.trans_head ? transaction.trans_head : transaction.transaction_type}
+
+                  {console.log("transaction888", transaction?.trans_head
+                  )
+                  }
                 </Text>
                 <Text style={styles.transactionDate}>
                   {formatDate(transaction.created_at)}
@@ -247,6 +249,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Poppins-Medium',
     color: globalColors.darkBlue,
+    textTransform: 'capitalize',
   },
   transactionDate: {
     fontSize: 12,
