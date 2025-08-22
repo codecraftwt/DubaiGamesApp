@@ -50,6 +50,7 @@ import { getWalletHistory, setWalletBalance, withdrawFromWallet } from '../../Re
 import { Marquee } from '@animatereactnative/marquee';
 import ModernMarquee from '../../utils/ModernMarquee';
 
+
 const DashboardScreen = ({ navigation }) => {
   const { t } = useTranslation();
   const [agentId, setAgentId] = useState(agent?.id);
@@ -588,6 +589,21 @@ const DashboardScreen = ({ navigation }) => {
         return;
       }
 
+      // Validation for OPEN category - both number and amount are required
+      if (selectedCategory === 'OPEN' ||
+        selectedCategory === 'JODI' ||
+        selectedCategory === 'CHOKADA' ||
+        selectedCategory === 'BEERICH' ||
+        selectedCategory === 'FARAK' ||
+        selectedCategory === 'CLOSE') {
+        if (numbersList.length === 0 && (!number || number.trim() === '')) {
+          Alert.alert('Error', `Please enter a valid number for ${selectedCategory}`);
+          return;
+        }
+        // if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+        //   Alert.alert('Error', 'Please enter a valid amount for OPEN category');
+        // }
+      }
       // if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
       //   Alert.alert('Error', 'Please enter a valid amount');
       //   return;

@@ -27,6 +27,7 @@ import './src/utils/i18n';
 import { I18nextProvider, useTranslation } from 'react-i18next';
 import i18n from './src/utils/i18n';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import GlobalNetworkWrapperAdvanced from './src/components/NetworkStatus/GlobalNetworkWrapperAdvanced';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -111,13 +112,12 @@ function App(): React.JSX.Element {
   }, [i18n]);
 
   return (
-
-
     <Provider store={store}>
       <I18nextProvider i18n={i18n}>
-
         <PersistGate loading={null} persistor={persistor}>
-          <AppNavigator />
+          <GlobalNetworkWrapperAdvanced>
+            <AppNavigator />
+          </GlobalNetworkWrapperAdvanced>
         </PersistGate>
         <Toast config={customToastConfig} />
       </I18nextProvider>
