@@ -41,10 +41,11 @@ const MarketResultMarquee = ({ results }) => {
 
     if (markets.length === 0) {
         return (
-            <View style={styles.emptyContainer}>
-                <Icon name="info" size={20} color="#4a8cff" />
-                <Text style={styles.emptyText}>No results declared yet !</Text>
-            </View>
+            // <View style={styles.emptyContainer}>
+            //     <Icon name="info" size={20} color="#4a8cff" />
+            //     <Text style={styles.emptyText}>No results declared yet !</Text>
+            // </View>
+            ''
         );
     }
 
@@ -59,7 +60,7 @@ const MarketResultMarquee = ({ results }) => {
             style={styles.container}
         >
             <Icon name="notifications" size={20} color="white" style={styles.icon} />
-            <Text style={styles.marketText}>{currentMarket.toUpperCase()}</Text>
+            <Text style={styles.marketText}>{currentMarket?.toUpperCase()}</Text>
             <Animated.View style={[styles.marketContainer, { opacity: fadeAnim }]}>
 
 
@@ -84,11 +85,14 @@ const MarketResultMarquee = ({ results }) => {
 };
 
 const ResultItem = ({ type, result }) => (
-    <View style={styles.resultItem}>
-        <Text style={styles.typeText}>{type}</Text>
+    <View style={{flexDirection:'row',alignItems:'center'}}>
+        <View style={styles.resultItem}>
+            <Text style={styles.typeText}>{type}</Text>
         <View style={styles.numberBadge}>
             <Text style={styles.numberText}>{result.number}</Text>
         </View>
+            </View>
+        
         <Text style={styles.panText}>PAN: {result.pannumber}</Text>
     </View>
 );
@@ -148,7 +152,9 @@ const styles = StyleSheet.create({
     },
     resultItem: {
         alignItems: 'center',
-        // marginHorizontal: 10,
+        marginHorizontal: 10,
+        marginVertical:5,
+        // gap:5
     },
     typeText: {
         color: 'white',
@@ -176,8 +182,15 @@ const styles = StyleSheet.create({
     panText: {
         color: 'white',
         fontWeight: '500',
-        fontSize: 8,
+        fontSize: 12,
         opacity: 0.8,
+    },
+    sideText: {
+        color: 'white',
+        fontWeight: '600',
+        fontSize: 10,
+        marginBottom: 2,
+        opacity: 0.9,
     },
 });
 

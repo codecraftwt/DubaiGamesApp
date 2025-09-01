@@ -44,6 +44,11 @@ const TabNavigator = () => {
                 options={{
                     animation: 'none',
                 }}
+                listeners={({ navigation, route }) => ({
+                    tabPress: e => {
+                        navigation.navigate('Dashboard', { screen: 'Dashboard' });
+                    },
+                })}
             />
             <Tab.Screen
                 name="Setting"

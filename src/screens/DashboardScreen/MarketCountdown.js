@@ -11,11 +11,14 @@ import { useTranslation } from 'react-i18next';
 import LinearGradient from 'react-native-linear-gradient';
 import { format } from 'date-fns';
 
-const MarketCountdown = ({ marketData, selectedMarket, currentTime, selectedDate }) => {
+const MarketCountdown = ({ marketData, selectedMarket, currentTime, selectedDate, compact = false, rotateMarkets = false, alternateOpenClose = false }) => {
   const { t } = useTranslation();
   const [timers, setTimers] = useState([]);
   const [currentTimeWithSeconds, setCurrentTimeWithSeconds] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [markets, setMarkets] = useState([]);
+  const [currentMarketIndex, setCurrentMarketIndex] = useState(0);
+  const [showOpen, setShowOpen] = useState(true);
 
   useEffect(() => {
     if (!currentTime) return;
@@ -32,6 +35,34 @@ const MarketCountdown = ({ marketData, selectedMarket, currentTime, selectedDate
   }, [currentTime]);
 
   useEffect(() => {
+    if (marketData && Array.isArray(marketData)) {
+      const uniqueMarkets = Array.from(new Set(marketData.map(m => (m.market || '').toLowerCase())));
+      setMarkets(uniqueMarkets);
+      // initialize current market
+      if (uniqueMarkets.length > 0) {
+        const initialIndex = selectedMarket ? Math.max(0, uniqueMarkets.indexOf(selectedMarket.toLowerCase())) : 0;
+        setCurrentMarketIndex(initialIndex === -1 ? 0 : initialIndex);
+      }
+    }
+  }, [marketData, selectedMarket]);
+
+  useEffect(() => {
+    if (!rotateMarkets || markets.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentMarketIndex(prev => (prev + 1) % markets.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [rotateMarkets, markets]);
+
+  useEffect(() => {
+    if (!alternateOpenClose) return;
+    const interval = setInterval(() => {
+      setShowOpen(prev => !prev);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [alternateOpenClose]);
+
+  useEffect(() => {
     if (!marketData || !selectedMarket || !currentTimeWithSeconds) {
       setIsLoading(true);
       return;
@@ -39,8 +70,9 @@ const MarketCountdown = ({ marketData, selectedMarket, currentTime, selectedDate
 
     setIsLoading(false);
 
+    const effectiveMarket = rotateMarkets && markets.length > 0 ? markets[currentMarketIndex] : selectedMarket?.toLowerCase();
     const marketTimes = marketData.filter(
-      time => time.market.toLowerCase() === selectedMarket.toLowerCase()
+      time => time.market.toLowerCase() === effectiveMarket
     );
 
     const today = new Date();
@@ -100,10 +132,19 @@ const MarketCountdown = ({ marketData, selectedMarket, currentTime, selectedDate
 
   if (!timers.length) return null;
 
+  const listToRender = (() => {
+    if (alternateOpenClose) {
+      const desiredType = showOpen ? 'open' : 'close';
+      const found = timers.find(t => t.type === desiredType);
+      return found ? [found] : [];
+    }
+    return compact ? timers.slice(0, 1) : timers.slice(0, 2);
+  })();
+
   return (
     <View style={styles.container}>
       <View style={styles.row}>
-        {timers.slice(0, 2).map((timer, index) => (
+        {listToRender.map((timer, index) => (
           <LinearGradient
             key={index}
             colors={
@@ -113,7 +154,7 @@ const MarketCountdown = ({ marketData, selectedMarket, currentTime, selectedDate
             }
             style={[
               styles.card,
-              index === 0 ? styles.cardLeft : styles.cardRight,
+              (alternateOpenClose || compact) ? styles.cardFull : (index === 0 ? styles.cardLeft : styles.cardRight),
             ]}
           >
             <View style={styles.cardContent}>
@@ -125,7 +166,7 @@ const MarketCountdown = ({ marketData, selectedMarket, currentTime, selectedDate
                 <Text style={styles.closedText}>{t('marketClosed')}</Text>
               ) : (
                 <View style={styles.timeRow}>
-                  {['hours', 'minutes', 'seconds'].map((unit, idx) => (
+                  {['hours', 'minutes', 'seconds'].map((unit) => (
                     <View key={unit} style={styles.timeBlock}>
                       <Text style={styles.timeValue}>
                         {timer.timeLeft[unit].toString().padStart(2, '0')}
@@ -175,6 +216,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
+  },
+  cardFull: {
+    width: '100%',
   },
   cardLeft: {
     alignSelf: 'flex-start',

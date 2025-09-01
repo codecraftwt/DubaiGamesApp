@@ -1402,12 +1402,21 @@ const DashboardScreen = ({ navigation }) => {
       }
     >
       {marketsTime && currentTime && (
-        <MarketCountdown
-          marketData={marketsTime}
-          selectedMarket={market}
-          currentTime={currentTime}
-          selectedDate={date}
-        />
+        <View style={{ flexDirection: 'row', alignItems: 'stretch' }}>
+          <View style={{ flex: 1 }}>
+            <MarketCountdown
+              marketData={marketsTime}
+              selectedMarket={market}
+              currentTime={currentTime}
+              selectedDate={date}
+              alternateOpenClose
+            />
+          </View>
+          <View style={{ flex: 1, backgroundColor: '#f8fafc', borderRadius: 6, alignItems: 'center', justifyContent: 'center', height: 60, marginRight: 6 }}>
+            <Text style={{ fontFamily: 'Poppins-Bold', color: '#1e293b' }}>rrrr</Text>
+          </View>
+
+        </View>
       )}
       {/* <Text style={styles.sectionTitle}>{t('agentDetails')}</Text> */}
       {/* <View style={styles.marqueeWrapper}>

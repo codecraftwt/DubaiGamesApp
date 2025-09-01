@@ -37,6 +37,48 @@ const EntriesList = ({
     result => result.market === 'Mumbai',
   );
 
+  // New helpers: detect open/close result declarations per market
+  const isOpenResultDeclaredForMarket = (market) => {
+    return marketResults?.some(r => r.market === market && (r.type === 'open-pan' || r.type === 'openpan'));
+  };
+
+  const isCloseResultDeclaredForMarket = (market) => {
+    return marketResults?.some(r => r.market === market && (r.type === 'close-pan' || r.type === 'closepan'));
+  };
+
+  const openRestrictedTypes = new Set([
+    'open',
+    'jodi',
+    'chokada',
+    'cycle',
+    'cut',
+    'running_pan',
+    'saral_pan',
+    'ulta_pan',
+    'beerich',
+    'farak',
+    'openpan',
+  ]);
+
+  const closeRestrictedTypes = new Set([
+    'closepan',
+    'close',
+  ]);
+
+  const shouldHideActions = (entry) => {
+    const type = (entry?.type || '').toLowerCase();
+    const market = entry?.market;
+    const openDeclared = isOpenResultDeclaredForMarket(market);
+    const closeDeclared = isCloseResultDeclaredForMarket(market);
+
+    const isOpenRestricted = openRestrictedTypes.has(type) || type.startsWith('openpan');
+    const isCloseRestricted = closeRestrictedTypes.has(type) || type.startsWith('closepan');
+
+    if (openDeclared && isOpenRestricted) return true;
+    if (closeDeclared && isCloseRestricted) return true;
+    return false;
+  };
+
   const handleEntrySelection = entry => {
     const isSelected = selectedEntries.some(e => e.id === entry.id);
     let newSelectedEntries;
@@ -117,6 +159,8 @@ const EntriesList = ({
 
       const isSelected = selectedEntries.some(e => e.id === entry.id);
 
+      const hideActions = shouldHideActions(entry);
+
       return (
         <View
           key={`normal-${entry.id}-${index}`}
@@ -144,21 +188,20 @@ const EntriesList = ({
             </Text>
             <Text style={styles.amount}>₹ {entry.amount}</Text>
           </View>
-          {entry.verified_by === 0 &&
-            (userRole === 'admin' || !isResultOut) && (
-              <View style={styles.cardActions}>
-                <TouchableOpacity
-                  style={styles.actionButton}
-                  onPress={() => handleEdit(entry.id)}>
-                  <Icon name="edit" size={20} color="#0066FF" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.actionButton}
-                  onPress={() => Delete(entry.id)}>
-                  <Icon name="trash" size={20} color="#FF0000" />
-                </TouchableOpacity>
-              </View>
-            )}
+          {entry.verified_by === 0 && !hideActions && (
+            <View style={styles.cardActions}>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => handleEdit(entry.id)}>
+                <Icon name="edit" size={20} color="#0066FF" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => Delete(entry.id)}>
+                <Icon name="trash" size={20} color="#FF0000" />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       );
     });
@@ -207,6 +250,10 @@ const EntriesList = ({
               : market === 'Mumbai'
                 ? isMumbaiResultOut
                 : false;
+
+          const openDeclared = isOpenResultDeclaredForMarket(market);
+          // saral_pan and ulta_pan are restricted on open result
+          const hideActions = openDeclared;
 
           let parentContent = [];
           let childContent = [];
@@ -263,16 +310,15 @@ const EntriesList = ({
                 {parentContent}
                 {childContent}
               </View>
-              {parents[parentIds[0]]?.verified_by === 0 &&
-                (userRole === 'admin' || !isResultOut) && (
-                  <View style={styles.cardActions}>
-                    <TouchableOpacity
-                      style={styles.actionButton}
-                      onPress={() => Delete(JSON.stringify(mergedIds))}>
-                      <Icon name="trash" size={20} color="#FF0000" />
-                    </TouchableOpacity>
-                  </View>
-                )}
+              {parents[parentIds[0]]?.verified_by === 0 && !hideActions && (
+                <View style={styles.cardActions}>
+                  <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={() => Delete(JSON.stringify(mergedIds))}>
+                    <Icon name="trash" size={20} color="#FF0000" />
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
           );
         })}
