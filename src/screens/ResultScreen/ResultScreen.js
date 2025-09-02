@@ -1,11 +1,11 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  Image,
   Dimensions,
+  ScrollView,
 } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -14,7 +14,6 @@ import Animated, {
   withSequence,
   withDelay,
   withTiming,
-  Easing,
 } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { globalColors } from '../../Theme/globalColors';
@@ -29,49 +28,56 @@ const ResultScreen = ({ navigation, route }) => {
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(50);
 
+  const result = route?.params?.result;
+  const openResult = result?.open_result;
+  const closeResult = result?.close_result;
+
   useFocusEffect(
     useCallback(() => {
-      // Reset values first
       scale.value = 0;
       opacity.value = 0;
       translateY.value = 50;
 
-      // Trigger animations
-      scale.value = withSpring(1, {
-        damping: 10,
-        stiffness: 100,
-      });
-      opacity.value = withSequence(
-        withDelay(500, withTiming(1, { duration: 1000 })),
-      );
-      translateY.value = withSequence(
-        withDelay(1000, withSpring(0, { damping: 10, stiffness: 100 })),
-      );
+      scale.value = withSpring(1, { damping: 12, stiffness: 120 });
+      opacity.value = withSequence(withDelay(500, withTiming(1, { duration: 800 })));
+      translateY.value = withSequence(withDelay(800, withSpring(0, { damping: 12, stiffness: 120 })));
 
       return () => {
-        // Optional: Reset on blur if you want it to animate again on next focus
         scale.value = 0;
         opacity.value = 0;
         translateY.value = 50;
       };
-    }, []),
+    }, [])
   );
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: scale.value }],
-    };
-  });
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
 
-  const contentStyle = useAnimatedStyle(() => {
-    return {
-      opacity: opacity.value,
-      transform: [{ translateY: translateY.value }],
-    };
-  });
+  const contentStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  const renderBadge = (label, value, color) => (
+    <View style={[styles.badge, { backgroundColor: color }]}>
+      <Text style={styles.badgeText}>{label}: {value}</Text>
+    </View>
+  );
+
+  // Handle back button press
+  const handleBackPress = () => {
+    navigation.goBack();
+  };
 
   return (
     <View style={styles.container}>
+      {/* Back Button */}
+      <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
+        <Icon name="arrow-back" size={30} color={globalColors.primary} />
+      </TouchableOpacity>
+
+      {/* Background Circles */}
       <View style={styles.background}>
         <View style={styles.circle1} />
         <View style={styles.circle2} />
@@ -83,51 +89,56 @@ const ResultScreen = ({ navigation, route }) => {
       </Animated.View>
 
       <Animated.View style={[styles.contentContainer, contentStyle]}>
-        <Text style={styles.congratsText}>{t('congratulations')}</Text>
-        <Text style={styles.winText}>{t('youWon')}</Text>
-        <Text style={styles.amountText}>₹{route.params?.amount || '0'}</Text>
+        <ScrollView contentContainerStyle={{ alignItems: 'center', paddingBottom: 40 }}>
+          <Text style={styles.congratsText}>{t('congratulations')}</Text>
+          <Text style={styles.winText}>{t('youWon')}</Text>
+          <Text style={styles.amountText}>₹{route.params?.amount || '0'}</Text>
 
-        <View style={styles.detailsContainer}>
-          <View style={styles.detailItem}>
-            <Icon
-              name="calendar-outline"
-              size={24}
-              color={globalColors.primary}
-            />
-            <Text style={styles.detailText}>
-              {new Date(route?.params?.data?.date).toLocaleDateString('en-IN', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-              })}
-            </Text>
+          {/* Details Card */}
+          <View style={styles.card}>
+            {/* Date */}
+            <View style={styles.detailItem}>
+              <Icon name="calendar-outline" size={24} color={globalColors.primary} />
+              <Text style={styles.detailText}>
+                {new Date(route?.params?.data?.date).toLocaleDateString('en-IN', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                })}
+              </Text>
+            </View>
+
+            {/* Time */}
+            <View style={styles.detailItem}>
+              <Icon name="time-outline" size={24} color={globalColors.primary} />
+              <Text style={styles.detailText}>
+                {new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+              </Text>
+            </View>
+
+            {/* Open Result */}
+            {openResult && (
+              <View style={styles.badgesContainer}>
+                {renderBadge('Open Number', openResult.number, '#FFD700')}
+                {renderBadge('Type', openResult.type, '#FF7F50')}
+              </View>
+            )}
+
+            {/* Close Result */}
+            {closeResult && (
+              <View style={styles.badgesContainer}>
+                {renderBadge('Close Number', closeResult.number, '#00CED1')}
+                {renderBadge('Type', closeResult.type, '#FF69B4')}
+              </View>
+            )}
+
+            {/* Market */}
+            <View style={styles.detailItem}>
+              <Icon name="storefront-outline" size={24} color={globalColors.primary} />
+              <Text style={styles.detailText}>{route?.params?.data?.market}</Text>
+            </View>
           </View>
-          <View style={styles.detailItem}>
-            <Icon name="time-outline" size={24} color={globalColors.primary} />
-            <Text style={styles.detailText}>
-              {new Date().toLocaleTimeString('en-IN', {
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </Text>
-          </View>
-          {/* <View>
-            <Text>Market {route?.params?.data?.market}</Text>
-          </View> */}
-
-        </View>
-        <View style={styles.detailItem}>
-          <Icon name="storefront-outline" size={24} color={globalColors.primary} />
-          <Text style={styles.detailText}>
-            {route?.params?.data?.market}
-          </Text>
-        </View>
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.goBack()}>
-          <Text style={styles.buttonText}>{t('continue')}</Text>
-        </TouchableOpacity>
+        </ScrollView>
       </Animated.View>
     </View>
   );
@@ -137,8 +148,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: globalColors.white,
-    alignItems: 'center',
-    justifyContent: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    zIndex: 100, // Ensure it's above other components
+    padding: 10,
   },
   background: {
     ...StyleSheet.absoluteFillObject,
@@ -172,60 +188,73 @@ const styles = StyleSheet.create({
     right: -width * 0.2,
   },
   trophyContainer: {
-    marginBottom: 30,
+    marginTop: 50,
+    alignItems: 'center',
   },
   contentContainer: {
-    alignItems: 'center',
-    paddingHorizontal: 20,
+    flex: 1,
   },
   congratsText: {
     fontSize: 32,
     fontFamily: 'Poppins-Bold',
     color: globalColors.darkBlue,
-    marginBottom: 10,
+    marginBottom: 8,
+    textAlign: 'center',
   },
   winText: {
-    fontSize: 24,
+    fontSize: 20,
     fontFamily: 'Poppins-Medium',
     color: globalColors.grey,
-    marginBottom: 20,
+    marginBottom: 16,
+    textAlign: 'center',
   },
   amountText: {
-    fontSize: 48,
+    fontSize: 44,
     fontFamily: 'Poppins-Bold',
     color: '#FFD700',
-    marginBottom: 40,
+    marginBottom: 20,
+    textAlign: 'center',
   },
-  detailsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-    marginBottom: 40,
+  card: {
+    width: '90%',
+    backgroundColor: globalColors.white,
+    padding: 20,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 8,
+    marginBottom: 20,
   },
   detailItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    padding: 10,
-    borderRadius: 10,
+    marginBottom: 12,
   },
   detailText: {
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: 'Poppins-Medium',
     color: globalColors.darkBlue,
-    marginLeft: 8,
+    marginLeft: 12,
   },
-  button: {
-    backgroundColor: globalColors.Charcoal,
-    paddingHorizontal: 40,
-    paddingVertical: 15,
-    borderRadius: 30,
-    marginTop: 20,
+  badgesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginVertical: 8,
+    justifyContent: 'flex-start',
   },
-  buttonText: {
-    color: globalColors.white,
-    fontSize: 18,
-    fontFamily: 'Poppins-Bold',
+  badge: {
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    marginRight: 10,
+    marginBottom: 10,
+  },
+  badgeText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 14,
   },
 });
 

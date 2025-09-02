@@ -66,9 +66,9 @@ const DailyResultFormScreen = ({ navigation }) => {
         if (result?.meta?.requestStatus === 'fulfilled') {
             const totalWinnings = (result.payload.totalOpenWin || 0) + (result.payload.totalCloseWin || 0);
             if (totalWinnings > 0) {
-                navigation.navigate('ResultPage', { amount: totalWinnings, data: result?.meta?.arg });
+                navigation.navigate('ResultPage', { amount: totalWinnings, data: result?.meta?.arg, result: result?.payload });
             } else {
-                navigation.navigate('BetterLuck', { amount: 0, data: result?.meta?.arg });
+                navigation.navigate('BetterLuck', { amount: 0, data: result?.meta?.arg, result: result?.payload });
             }
         } else {
             console.log("result api0000", result)

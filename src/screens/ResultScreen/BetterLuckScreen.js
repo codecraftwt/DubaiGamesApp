@@ -26,7 +26,7 @@ const BetterLuckScreen = ({ navigation, route }) => {
     const scale = useSharedValue(0);
     const opacity = useSharedValue(0);
     const translateY = useSharedValue(50);
-
+    console.log("route", route)
     useFocusEffect(
         useCallback(() => {
             // Reset values first
