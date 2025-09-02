@@ -70,6 +70,8 @@ const DailyResultFormScreen = ({ navigation }) => {
             } else {
                 navigation.navigate('BetterLuck', { amount: 0, data: result?.meta?.arg });
             }
+        } else {
+            console.log("result api0000", result)
         }
     };
 

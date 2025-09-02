@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -23,7 +23,7 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import axios from 'axios';
+import api from '../../utils/Api';
 import DynamicDropdown from '../DynamicDropdown';
 import { Dropdown } from 'react-native-element-dropdown';
 import { useDispatch, useSelector } from 'react-redux';
@@ -51,7 +51,8 @@ import { Marquee } from '@animatereactnative/marquee';
 import ModernMarquee from '../../utils/ModernMarquee';
 
 
-const DashboardScreen = ({ navigation }) => {
+const DashboardScreen = ({ navigation: propNavigation }) => {
+  const navigation = useNavigation();
   const { t } = useTranslation();
   const [agentId, setAgentId] = useState(agent?.id);
   const [agentName, setAgentName] = useState(agent?.role);
@@ -67,6 +68,23 @@ const DashboardScreen = ({ navigation }) => {
   const [secAmount, setsecAmount] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('JODI');
   const [anotherNumber, setAnotherNumber] = useState('');
+
+  // Add refs for auto-focus functionality
+  const numberInputRef = useRef(null);
+  const anotherNumberInputRef = useRef(null);
+  const amountInputRef = useRef(null);
+
+  // Add refs for SARAL_PAN and ULTA PAN fields
+  const saralPanNumberInputRef = useRef(null);
+  const saralPanAmountInputRef = useRef(null);
+  const saralPanGunuleInputRef = useRef(null);
+  const saralPanGunuleAmountInputRef = useRef(null);
+
+  // Add refs for ULTA PAN fields
+  const ultaPanGunuleInputRef = useRef(null);
+  const ultaPanGunuleAmountInputRef = useRef(null);
+  const ultaPanNumberInputRef = useRef(null);
+  const ultaPanAmountInputRef = useRef(null);
   const [saralPanNumber, setSaralPanNumber] = useState('');
   const [saralPanAmount, setSaralPanAmount] = useState('');
   const [saralPanData, setSaralPanData] = useState([]);
@@ -109,6 +127,53 @@ const DashboardScreen = ({ navigation }) => {
 
   const [declaredResults, setDeclaredResults] = useState([]);
   const [isEntriesLoading, setIsEntriesLoading] = useState(true);
+  const [sureRecords, setSureRecords] = useState(null);
+  const [loadingSureRecords, setLoadingSureRecords] = useState(false);
+
+  const fetchSureRecords = async () => {
+    try {
+      setLoadingSureRecords(true);
+      console.log("token", token)
+      setSureRecords(null)
+      const formattedDate = formatDate(date);
+      const response = await api.get(`${API_BASE_URL}/sure-records`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          market: market,
+          date: date,
+        },
+      });
+      console.log("wwwwww", response)
+      if (response.data.success) {
+        setSureRecords(response.data.data); // Adjust based on your API response structure
+      }
+    } catch (error) {
+      if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+        Alert.alert(
+          'Session Expired',
+          'Your session has expired. Please login again.',
+          [
+            {
+              text: 'OK',
+              onPress: () => navigation.reset({ index: 0, routes: [{ name: 'Login' }] }),
+            },
+          ],
+          { cancelable: false }
+        );
+      }
+      console.error('Error fetching sure records:', error);
+    } finally {
+      setLoadingSureRecords(false);
+    }
+  };
+
+  useEffect(() => {
+    if (market && date && token) {
+      fetchSureRecords();
+    }
+  }, [market, date]);
 
   const formatDate = date => {
     return date.toISOString().split('T')[0]; //
@@ -179,7 +244,7 @@ const DashboardScreen = ({ navigation }) => {
   const fetchDeclaredResults = async () => {
     try {
       const formattedDate = formatDate(date);
-      const response = await axios.get(`${API_BASE_URL}/declared_result`, {
+      const response = await api.get(`${API_BASE_URL}/declared_result`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -192,6 +257,19 @@ const DashboardScreen = ({ navigation }) => {
         setDeclaredResults(response.data.result);
       }
     } catch (error) {
+      if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+        Alert.alert(
+          'Session Expired',
+          'Your session has expired. Please login again.',
+          [
+            {
+              text: 'OK',
+              onPress: () => navigation.reset({ index: 0, routes: [{ name: 'Login' }] }),
+            },
+          ],
+          { cancelable: false }
+        );
+      }
       console.error('Error fetching declared results:', error);
     }
   };
@@ -223,7 +301,7 @@ const DashboardScreen = ({ navigation }) => {
   useEffect(() => {
     const fetchCurrentTime = async () => {
       try {
-        const response = await axios.get(
+        const response = await api.get(
           'https://timeapi.io/api/time/current/zone?timeZone=Asia%2FKolkata',
         );
         const { hour, minute } = response.data;
@@ -405,6 +483,26 @@ const DashboardScreen = ({ navigation }) => {
       setSelectedCategory(filteredCategories[0]);
     }
   }, [filteredCategories]);
+
+  // Auto-focus first field when RunningPan category is selected
+  useEffect(() => {
+    if (selectedCategory === 'RUNNING_PAN') {
+      // Small delay to ensure the component is rendered
+      setTimeout(() => {
+        numberInputRef.current?.focus();
+      }, 100);
+    } else if (selectedCategory === 'SARAL_PAN') {
+      // Auto-focus first field for SARAL_PAN
+      setTimeout(() => {
+        saralPanNumberInputRef.current?.focus();
+      }, 100);
+    } else if (selectedCategory === 'ULTA PAN') {
+      // Auto-focus first field for ULTA PAN
+      setTimeout(() => {
+        ultaPanGunuleInputRef.current?.focus();
+      }, 100);
+    }
+  }, [selectedCategory]);
 
   const validateNumber = (value, category, panType) => {
     if (!value) return true;
@@ -937,6 +1035,30 @@ const DashboardScreen = ({ navigation }) => {
     setSaralPanAmount('');
   };
 
+  // Handle SARAL PAN number input with auto-focus
+  const handleSaralPanNumberChange = (text) => {
+    const numericValue = text.replace(/[^0-9]/g, '');
+    const truncatedValue = numericValue.slice(0, 3); // SARAL PAN is exactly 3 digits
+    setSaralPanNumber(truncatedValue);
+
+    // Auto-focus to amount field when valid number is entered
+    if (truncatedValue.length === 3) {
+      saralPanAmountInputRef.current?.focus();
+    }
+  };
+
+  // Handle SARAL PAN gunule input with auto-focus
+  const handleSaralPanGunuleChange = (text) => {
+    const numericValue = text.replace(/[^0-9]/g, '');
+    const truncatedValue = numericValue.slice(0, 1); // Gunule is exactly 1 digit
+    setsaralPanGunule(truncatedValue);
+
+    // Auto-focus to amount field when valid number is entered
+    if (truncatedValue.length === 1) {
+      saralPanGunuleAmountInputRef.current?.focus();
+    }
+  };
+
   const handleAddGunule = () => {
     if (!saralPanGunule || !saralPanGunuleAmount) {
       Alert.alert('Error', 'Please enter both gunule and amount');
@@ -1013,7 +1135,7 @@ const DashboardScreen = ({ navigation }) => {
   const handleEdit = async id => {
     //handle Edit Inside change numbers.
     try {
-      const response = await axios.get(`${API_BASE_URL}/entries/${id}/edit`, {
+      const response = await api.get(`${API_BASE_URL}/entries/${id}/edit`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -1068,6 +1190,19 @@ const DashboardScreen = ({ navigation }) => {
       setEditNumber(displayNumber);
       setIsEditModalVisible(true);
     } catch (error) {
+      if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+        Alert.alert(
+          'Session Expired',
+          'Your session has expired. Please login again.',
+          [
+            {
+              text: 'OK',
+              onPress: () => navigation.reset({ index: 0, routes: [{ name: 'Login' }] }),
+            },
+          ],
+          { cancelable: false }
+        );
+      }
       console.error('Error fetching entry data:', error);
       Alert.alert('Error', 'Failed to fetch entry data');
     }
@@ -1149,7 +1284,7 @@ const DashboardScreen = ({ navigation }) => {
 
       console.log('Final payload for handleSaveEdit:', payload);
 
-      const response = await axios.put(
+      const response = await api.put(
         `${API_BASE_URL}/entries/${editingEntry.id}`,
         payload,
         {
@@ -1164,6 +1299,19 @@ const DashboardScreen = ({ navigation }) => {
       fetchData();
       Alert.alert('Success', 'Entry updated successfully');
     } catch (error) {
+      if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+        Alert.alert(
+          'Session Expired',
+          'Your session has expired. Please login again.',
+          [
+            {
+              text: 'OK',
+              onPress: () => navigation.reset({ index: 0, routes: [{ name: 'Login' }] }),
+            },
+          ],
+          { cancelable: false }
+        );
+      }
       console.error('Error updating entry:', error);
       let errorMessage = error.message || 'Your wallet balance is too low to place this entry. Please add funds to your wallet.';
       if (
@@ -1183,6 +1331,11 @@ const DashboardScreen = ({ navigation }) => {
     const truncatedValue = numericValue.slice(0, maxLength);
 
     setNumber(truncatedValue);
+
+    // Auto-focus to next field for RunningPan category
+    if (selectedCategory === 'RUNNING_PAN' && truncatedValue.length === maxLength) {
+      anotherNumberInputRef.current?.focus();
+    }
   };
 
   const handleNumberChangeAnother = text => {
@@ -1191,6 +1344,11 @@ const DashboardScreen = ({ navigation }) => {
     const truncatedValue = numericValue.slice(0, maxLength);
 
     setAnotherNumber(truncatedValue);
+
+    // Auto-focus to amount field for RunningPan category
+    if (selectedCategory === 'RUNNING_PAN' && truncatedValue.length === maxLength) {
+      amountInputRef.current?.focus();
+    }
   };
 
   const handleAddNumber = () => {
@@ -1231,6 +1389,30 @@ const DashboardScreen = ({ navigation }) => {
     setUltaPanEntries([...ultaPanEntries, newEntry]);
     setUltaPanNumber('');
     setUltaPanAmount('');
+  };
+
+  // Handle ULTA PAN gunule input with auto-focus
+  const handleUltaPanGunuleChange = (text) => {
+    const numericValue = text.replace(/[^0-9]/g, '');
+    const truncatedValue = numericValue.slice(0, 1); // Gunule is exactly 1 digit
+    setUltaPanGunule(truncatedValue);
+
+    // Auto-focus to amount field when valid number is entered
+    if (truncatedValue.length === 1) {
+      ultaPanGunuleAmountInputRef.current?.focus();
+    }
+  };
+
+  // Handle ULTA PAN number input with auto-focus
+  const handleUltaPanNumberChange = (text) => {
+    const numericValue = text.replace(/[^0-9]/g, '');
+    const truncatedValue = numericValue.slice(0, 3); // ULTA PAN is exactly 3 digits
+    setUltaPanNumber(truncatedValue);
+
+    // Auto-focus to amount field when valid number is entered
+    if (truncatedValue.length === 3) {
+      ultaPanAmountInputRef.current?.focus();
+    }
   };
 
   const handleAddUltaGunule = () => {
@@ -1412,8 +1594,39 @@ const DashboardScreen = ({ navigation }) => {
               alternateOpenClose
             />
           </View>
-          <View style={{ flex: 1, backgroundColor: '#f8fafc', borderRadius: 6, alignItems: 'center', justifyContent: 'center', height: 60, marginRight: 6 }}>
-            <Text style={{ fontFamily: 'Poppins-Bold', color: '#1e293b' }}>rrrr</Text>
+          <View style={{
+            flex: 1,
+            // backgroundColor: '#f8fafc',
+            borderRadius: 6,
+            alignItems: 'center',
+            justifyContent: 'center',
+            // height: 60,
+            marginRight: 6
+          }}>
+            {Array.isArray(sureRecords) && sureRecords?.length > 0 ? (
+              <Text style={{ fontFamily: 'Poppins-Bold', color: '#1e293b' }}>
+                {(() => {
+                  // Find open-pan and close-pan records
+                  const openPanRecord = sureRecords.find(record => record?.type === 'open-pan');
+                  const closePanRecord = sureRecords.find(record => record?.type === 'close-pan');
+
+                  // Format the display text
+                  if (openPanRecord && closePanRecord) {
+                    return `${openPanRecord.pannumber}-${openPanRecord.number}${closePanRecord.number}-${closePanRecord.pannumber}`;
+                  } else if (openPanRecord) {
+                    return `${openPanRecord.pannumber}-${openPanRecord.number}`;
+                  } else if (closePanRecord) {
+                    return `${closePanRecord.pannumber}-${closePanRecord.number}`;
+                  } else {
+                    return 'No Data';
+                  }
+                })()}
+              </Text>
+            ) : (
+              <Text style={{ fontFamily: 'Poppins-Bold', color: '#1e293b' }}>
+                No Data
+              </Text>
+            )}
           </View>
 
         </View>
@@ -1544,6 +1757,7 @@ const DashboardScreen = ({ navigation }) => {
                     <View style={styles.inputGroup}>
                       <Text style={styles.label}>{t('enterNumber')}</Text>
                       <TextInput
+                        ref={numberInputRef}
                         style={[
                           styles.input,
                           !validateNumber(number, selectedCategory) &&
@@ -1556,6 +1770,7 @@ const DashboardScreen = ({ navigation }) => {
                         onChangeText={text =>
                           handleNumberChange(text, setNumber, selectedCategory)
                         }
+                        maxLength={getMaxLength(selectedCategory)}
                       />
                       {!validateNumber(number, selectedCategory) &&
                         number.length > 0 && (
@@ -1568,6 +1783,7 @@ const DashboardScreen = ({ navigation }) => {
                     <View style={styles.inputGroup}>
                       <Text style={styles.label}>{t('anotherNumber')}</Text>
                       <TextInput
+                        ref={anotherNumberInputRef}
                         style={[
                           styles.input,
                           !validateNumber(anotherNumber, selectedCategory) &&
@@ -1584,6 +1800,7 @@ const DashboardScreen = ({ navigation }) => {
                             selectedCategory,
                           )
                         }
+                        maxLength={getMaxLength(selectedCategory)}
                       />
                       {!validateNumber(anotherNumber, selectedCategory) &&
                         anotherNumber.length > 0 && (
@@ -1596,6 +1813,7 @@ const DashboardScreen = ({ navigation }) => {
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>{t('enterAmount')}</Text>
                     <TextInput
+                      ref={amountInputRef}
                       style={styles.input}
                       placeholder="Enter Amount"
                       keyboardType="numeric"
@@ -1764,17 +1982,20 @@ const DashboardScreen = ({ navigation }) => {
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>{t('saralPanNumber')}</Text>
                     <TextInput
+                      ref={saralPanNumberInputRef}
                       style={styles.input}
                       placeholder={t('saralPanNumber')}
                       value={saralPanNumber}
-                      onChangeText={setSaralPanNumber}
+                      onChangeText={handleSaralPanNumberChange}
                       keyboardType="numeric"
+                      maxLength={3}
                     />
                   </View>
 
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>{t('amount')}</Text>
                     <TextInput
+                      ref={saralPanAmountInputRef}
                       style={styles.input}
                       placeholder={t('enterAmount')}
                       value={saralPanAmount}
@@ -1814,16 +2035,19 @@ const DashboardScreen = ({ navigation }) => {
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>{t('gunule')}</Text>
                     <TextInput
+                      ref={saralPanGunuleInputRef}
                       style={styles.input}
                       placeholder={t('enterGunule')}
                       value={saralPanGunule}
-                      onChangeText={setsaralPanGunule}
+                      onChangeText={handleSaralPanGunuleChange}
                       keyboardType="numeric"
+                      maxLength={1}
                     />
                   </View>
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>{t('enterAmount')}</Text>
                     <TextInput
+                      ref={saralPanGunuleAmountInputRef}
                       style={styles.input}
                       placeholder={t('enterAmount')}
                       value={saralPanGunuleAmount}
@@ -1869,17 +2093,20 @@ const DashboardScreen = ({ navigation }) => {
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>GUNULE</Text>
                     <TextInput
+                      ref={ultaPanGunuleInputRef}
                       style={styles.input}
                       placeholder="Enter Gunule"
                       value={ultaPanGunule}
-                      onChangeText={setUltaPanGunule}
+                      onChangeText={handleUltaPanGunuleChange}
                       keyboardType="numeric"
+                      maxLength={1}
                     />
                   </View>
 
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>{t('enterAmount')}</Text>
                     <TextInput
+                      ref={ultaPanGunuleAmountInputRef}
                       style={styles.input}
                       placeholder="Enter Amount"
                       value={ultaPanGunuleAmount}
@@ -1922,17 +2149,20 @@ const DashboardScreen = ({ navigation }) => {
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>ULTA PAN NUMBER</Text>
                     <TextInput
+                      ref={ultaPanNumberInputRef}
                       style={styles.input}
                       placeholder="Enter Saral-Pan No"
                       value={ultaPanNumber}
-                      onChangeText={setUltaPanNumber}
+                      onChangeText={handleUltaPanNumberChange}
                       keyboardType="numeric"
+                      maxLength={3}
                     />
                   </View>
 
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>{t('enterAmount')}</Text>
                     <TextInput
+                      ref={ultaPanAmountInputRef}
                       style={styles.input}
                       placeholder="Enter Amount"
                       value={ultaPanAmount}

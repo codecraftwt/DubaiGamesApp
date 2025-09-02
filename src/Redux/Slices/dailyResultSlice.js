@@ -19,7 +19,7 @@ export const fetchDailyResult = createAsyncThunk(
                 }
             },
         );
-        console.log("fetchDailyResult===>", response.data)
+        console.log("fetchDailyResult===>", response)
         return response.data;
     }
 );

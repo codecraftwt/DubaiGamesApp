@@ -4,6 +4,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '../../utils/Api';
 import Toast from 'react-native-toast-message';
+import api from '../../utils/Api';
 
 const initialState = {
   isAuthenticated: false,
@@ -80,7 +81,7 @@ export const loginUser = (username, password, code) => async dispatch => {
   try {
     console.log('api starting', username, password, code);
     console.log('');
-    const response = await axios.post(`${API_BASE_URL}/login`, {
+    const response = await api.post(`${API_BASE_URL}/login`, {
       email: username,
       password,
       code: code,
@@ -123,7 +124,7 @@ export const logoutUser = () => async (dispatch, getState) => {
 
     if (!token) throw new Error('No authentication token found');
 
-    const response = await axios.post(
+    const response = await api.post(
       `${API_BASE_URL}/logout`,
       {},
       {
@@ -149,7 +150,7 @@ export const registerUser = userData => async dispatch => {
   try {
     console.log('Sending registration data:', userData);
 
-    const response = await axios.post(
+    const response = await api.post(
       `${API_BASE_URL}/register`,
       {
         name: userData?.name,

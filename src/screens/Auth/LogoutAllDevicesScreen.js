@@ -4,29 +4,36 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import axios from 'axios';
 import { API_BASE_URL } from '../../utils/Api';
 import { useNavigation } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
+import { logoutUser } from '../../Redux/Slices/authSlice';
+import api from '../../utils/Api';
 
 const LogoutAllDevicesScreen = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigation = useNavigation();
+    const dispatch = useDispatch();
 
     const handleLogoutAllDevices = async () => {
         try {
-            const response = await axios.post(`${API_BASE_URL}/logout-all-devices`, {
+            const response = await api.post(`/logout-all-devices`, {
                 email,
                 password,
             });
             console.log("response", response)
+            // Show custom message, then logout and navigate
             Alert.alert('Success', 'You have been logged out from all devices.', [
                 {
                     text: 'OK',
-                    onPress: () => {
-                        // Navigate back after showing the success alert
-                        navigation.goBack();
+                    onPress: async () => {
+                        await dispatch(logoutUser());
+                        navigation.reset({
+                            index: 0,
+                            routes: [{ name: 'Login' }],
+                        });
                     },
                 },
             ]);
-            Alert.alert('Success', 'You have been logged out from all devices.');
         } catch (error) {
             console.error(error);
             Alert.alert('Error', error.response?.data?.message || 'Something went wrong.');
