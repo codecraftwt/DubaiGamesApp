@@ -13,6 +13,9 @@ import {
   Modal,
   RefreshControl,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Header from '../../components/Header/Header';
@@ -115,6 +118,38 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   console.log('market data 11 fetch------->', data);
+
+  // Keyboard handling to ensure submit button remains visible
+  const [keyboardOffset, setKeyboardOffset] = useState(0);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const onShow = e => {
+      setIsKeyboardVisible(true);
+      const height = e?.endCoordinates?.height || 0;
+      setKeyboardOffset(height);
+      // Give layout time to settle then scroll to end
+      // setTimeout(() => {
+      //   scrollRef.current?.scrollToEnd({ animated: true });
+      // }, 10);
+    };
+    const onHide = () => {
+      setIsKeyboardVisible(false);
+      setKeyboardOffset(0);
+    };
+
+    const showSub = Keyboard.addListener(showEvent, onShow);
+    const hideSub = Keyboard.addListener(hideEvent, onHide);
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   const [ultaPanNumber, setUltaPanNumber] = useState('');
   const [ultaPanAmount, setUltaPanAmount] = useState('');
@@ -1573,66 +1608,80 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
   };
 
   return (
-    <ScrollView style={styles.container}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          colors={[globalColors.blue]} // Customize the loading indicator color
-          tintColor={globalColors.blue} // Customize the loading indicator color (iOS)
-        />
-      }
-    >
-      {marketsTime && currentTime && (
-        <View style={{ flexDirection: 'row', alignItems: 'stretch' }}>
-          <View style={{ flex: 1 }}>
-            <MarketCountdown
-              marketData={marketsTime}
-              selectedMarket={market}
-              currentTime={currentTime}
-              selectedDate={date}
-              alternateOpenClose
-            />
-          </View>
-          <View style={{
-            flex: 1,
-            // backgroundColor: '#f8fafc',
-            borderRadius: 6,
-            alignItems: 'center',
-            justifyContent: 'center',
-            // height: 60,
-            marginRight: 6
-          }}>
-            {Array.isArray(sureRecords) && sureRecords?.length > 0 ? (
-              <Text style={{ fontFamily: 'Poppins-Bold', color: '#1e293b' }}>
-                {(() => {
-                  // Find open-pan and close-pan records
-                  const openPanRecord = sureRecords.find(record => record?.type === 'open-pan');
-                  const closePanRecord = sureRecords.find(record => record?.type === 'close-pan');
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <ScrollView
+        ref={scrollRef}
+        style={styles.container}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets={true}
+        onContentSizeChange={() => {
+          if (isKeyboardVisible) {
+            // keep the focused input or bottom content in view
+            // setTimeout(() => {
+            //   scrollRef.current?.scrollToEnd({ animated: true });
+            // }, 0);
+          }
+        }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[globalColors.blue]} // Customize the loading indicator color
+            tintColor={globalColors.blue} // Customize the loading indicator color (iOS)
+          />
+        }
+      >
+        {marketsTime && currentTime && (
+          <View style={{ flexDirection: 'row', alignItems: 'stretch' }}>
+            <View style={{ flex: 1 }}>
+              <MarketCountdown
+                marketData={marketsTime}
+                selectedMarket={market}
+                currentTime={currentTime}
+                selectedDate={date}
+                alternateOpenClose
+              />
+            </View>
+            <View style={{
+              flex: 1,
+              // backgroundColor: '#f8fafc',
+              borderRadius: 6,
+              alignItems: 'center',
+              justifyContent: 'center',
+              // height: 60,
+              marginRight: 6
+            }}>
+              {Array.isArray(sureRecords) && sureRecords?.length > 0 ? (
+                <Text style={{ fontFamily: 'Poppins-Bold', color: '#1e293b' }}>
+                  {(() => {
+                    // Find open-pan and close-pan records
+                    const openPanRecord = sureRecords.find(record => record?.type === 'open-pan');
+                    const closePanRecord = sureRecords.find(record => record?.type === 'close-pan');
 
-                  // Format the display text
-                  if (openPanRecord && closePanRecord) {
-                    return `${openPanRecord.pannumber}-${openPanRecord.number}${closePanRecord.number}-${closePanRecord.pannumber}`;
-                  } else if (openPanRecord) {
-                    return `${openPanRecord.pannumber}-${openPanRecord.number}`;
-                  } else if (closePanRecord) {
-                    return `${closePanRecord.pannumber}-${closePanRecord.number}`;
-                  } else {
-                    return 'No Data';
-                  }
-                })()}
-              </Text>
-            ) : (
-              <Text style={{ fontFamily: 'Poppins-Bold', color: '#1e293b' }}>
-                No Data
-              </Text>
-            )}
-          </View>
+                    // Format the display text
+                    if (openPanRecord && closePanRecord) {
+                      return `${openPanRecord.pannumber}-${openPanRecord.number}${closePanRecord.number}-${closePanRecord.pannumber}`;
+                    } else if (openPanRecord) {
+                      return `${openPanRecord.pannumber}-${openPanRecord.number}`;
+                    } else if (closePanRecord) {
+                      return `${closePanRecord.pannumber}-${closePanRecord.number}`;
+                    } else {
+                      return 'No Data';
+                    }
+                  })()}
+                </Text>
+              ) : (
+                <Text style={{ fontFamily: 'Poppins-Bold', color: '#1e293b' }}>
+                  No Data
+                </Text>
+              )}
+            </View>
 
-        </View>
-      )}
-      {/* <Text style={styles.sectionTitle}>{t('agentDetails')}</Text> */}
-      {/* <View style={styles.marqueeWrapper}>
+          </View>
+        )}
+        {/* <Text style={styles.sectionTitle}>{t('agentDetails')}</Text> */}
+        {/* <View style={styles.marqueeWrapper}>
         <Marquee
           speed={0.5} // control speed here
           spacing={20} // spacing between repetitions
@@ -1651,113 +1700,185 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
           </Text>
         </Marquee>
       </View> */}
-      <ModernMarquee results={declaredResults} />
-      <View style={styles.formContainer}>
-        {user?.role !== 'online_customer' && user?.role !== 'agent' ? (
+        <ModernMarquee results={declaredResults} />
+        <View style={styles.formContainer}>
+          {user?.role !== 'online_customer' && user?.role !== 'agent' ? (
+            <View style={styles.row}>
+              <View style={styles.halfWidthInput}>
+                <Text style={styles.label}>{t('agentId')}</Text>
+                <DynamicDropdown
+                  onSelect={handleSelectByCode}
+                  placeholder={t('agentId')}
+                  searchType="code"
+                  value={agentId}
+                  setAgentId={setAgentId}
+                />
+              </View>
+              <View style={styles.halfWidthInput}>
+                <Text style={styles.label}>{t('agentName')}</Text>
+                <DynamicDropdown
+                  onSelect={handleSelectByName}
+                  placeholder={t('agentName')}
+                  searchType="name"
+                  value={agentName}
+                />
+              </View>
+            </View>
+          ) : null}
+
           <View style={styles.row}>
             <View style={styles.halfWidthInput}>
-              <Text style={styles.label}>{t('agentId')}</Text>
-              <DynamicDropdown
-                onSelect={handleSelectByCode}
-                placeholder={t('agentId')}
-                searchType="code"
-                value={agentId}
-                setAgentId={setAgentId}
+              <Text style={styles.label}>{t('market')}</Text>
+              <Dropdown
+                data={[
+                  { label: 'Kalyan', value: 'Kalyan' },
+                  { label: 'Mumbai', value: 'Mumbai' },
+                ]}
+                value={market}
+                labelField="label"
+                valueField="value"
+                style={styles.dropdown}
+                onChange={item => setMarket(item.value)}
               />
             </View>
             <View style={styles.halfWidthInput}>
-              <Text style={styles.label}>{t('agentName')}</Text>
-              <DynamicDropdown
-                onSelect={handleSelectByName}
-                placeholder={t('agentName')}
-                searchType="name"
-                value={agentName}
-              />
+              <Text style={styles.label}>{t('date')}</Text>
+              <TouchableOpacity
+                onPress={() => setShowPicker(true)}
+                style={styles.datePicker}>
+                <Text>{format(date, 'dd-MM-yyyy')}</Text>
+              </TouchableOpacity>
+              {showPicker && (
+                <DateTimePicker
+                  value={date}
+                  mode="date"
+                  display="default"
+                  onChange={(event, selectedDate) => {
+                    setShowPicker(false);
+                    if (selectedDate) {
+                      setDate(selectedDate);
+                      console.log('Selected Date:', formatDate(selectedDate));
+                    }
+                  }}
+                />
+              )}
             </View>
           </View>
-        ) : null}
-
-        <View style={styles.row}>
-          <View style={styles.halfWidthInput}>
-            <Text style={styles.label}>{t('market')}</Text>
-            <Dropdown
-              data={[
-                { label: 'Kalyan', value: 'Kalyan' },
-                { label: 'Mumbai', value: 'Mumbai' },
-              ]}
-              value={market}
-              labelField="label"
-              valueField="value"
-              style={styles.dropdown}
-              onChange={item => setMarket(item.value)}
-            />
-          </View>
-          <View style={styles.halfWidthInput}>
-            <Text style={styles.label}>{t('date')}</Text>
-            <TouchableOpacity
-              onPress={() => setShowPicker(true)}
-              style={styles.datePicker}>
-              <Text>{format(date, 'dd-MM-yyyy')}</Text>
-            </TouchableOpacity>
-            {showPicker && (
-              <DateTimePicker
-                value={date}
-                mode="date"
-                display="default"
-                onChange={(event, selectedDate) => {
-                  setShowPicker(false);
-                  if (selectedDate) {
-                    setDate(selectedDate);
-                    console.log('Selected Date:', formatDate(selectedDate));
-                  }
-                }}
-              />
-            )}
-          </View>
-        </View>
-        {!bothResultsOut && (
-          <Text style={styles.sectionTitle}>{t('selectCategory')}</Text>
-        )}
-
-        <FlatList
-          data={filteredCategories}
-          numColumns={3}
-          showsVerticalScrollIndicator={false}
-          keyExtractor={item => item}
-          renderItem={({ item, index }) => (
-            <TouchableOpacity
-              style={[
-                styles.radioButton,
-                selectedCategory === item && styles.selectedRadioButton,
-                {
-                  flex: 1,
-                  marginRight: (index + 1) % 3 === 0 ? 0 : 10,
-                },
-              ]}
-              onPress={() => setSelectedCategory(item)}>
-              <Text
-                style={[
-                  styles.radioText,
-                  selectedCategory === item && styles.selectedRadioText,
-                ]}>
-                {categoryDisplayNames[item]}
-              </Text>
-            </TouchableOpacity>
+          {!bothResultsOut && (
+            <Text style={styles.sectionTitle}>{t('selectCategory')}</Text>
           )}
-        />
 
-        {/* Action Buttons */}
+          <FlatList
+            data={filteredCategories}
+            numColumns={3}
+            showsVerticalScrollIndicator={false}
+            keyExtractor={item => item}
+            renderItem={({ item, index }) => (
+              <TouchableOpacity
+                style={[
+                  styles.radioButton,
+                  selectedCategory === item && styles.selectedRadioButton,
+                  {
+                    flex: 1,
+                    marginRight: (index + 1) % 3 === 0 ? 0 : 10,
+                  },
+                ]}
+                onPress={() => setSelectedCategory(item)}>
+                <Text
+                  style={[
+                    styles.radioText,
+                    selectedCategory === item && styles.selectedRadioText,
+                  ]}>
+                  {categoryDisplayNames[item]}
+                </Text>
+              </TouchableOpacity>
+            )}
+          />
 
-        {!bothResultsOut && (
-          <>
-            {(selectedCategory === 'CYCLE' ||
-              selectedCategory === 'RUNNING_PAN') && (
+          {/* Action Buttons */}
+
+          {!bothResultsOut && (
+            <>
+              {(selectedCategory === 'CYCLE' ||
+                selectedCategory === 'RUNNING_PAN') && (
+                  <>
+                    <View style={styles.row}>
+                      <View style={styles.inputGroup}>
+                        <Text style={styles.label}>{t('enterNumber')}</Text>
+                        <TextInput
+                          ref={numberInputRef}
+                          style={[
+                            styles.input,
+                            !validateNumber(number, selectedCategory) &&
+                            number.length > 0 &&
+                            styles.invalidInput,
+                          ]}
+                          placeholder="Enter Number"
+                          value={number}
+                          keyboardType="numeric"
+                          onChangeText={text =>
+                            handleNumberChange(text, setNumber, selectedCategory)
+                          }
+                          maxLength={getMaxLength(selectedCategory)}
+                        />
+                        {!validateNumber(number, selectedCategory) &&
+                          number.length > 0 && (
+                            <Text style={styles.errorText}>
+                              {getValidationMessage(selectedCategory)}
+                            </Text>
+                          )}
+                      </View>
+
+                      <View style={styles.inputGroup}>
+                        <Text style={styles.label}>{t('anotherNumber')}</Text>
+                        <TextInput
+                          ref={anotherNumberInputRef}
+                          style={[
+                            styles.input,
+                            !validateNumber(anotherNumber, selectedCategory) &&
+                            anotherNumber.length > 0 &&
+                            styles.invalidInput,
+                          ]}
+                          placeholder="Enter Another No"
+                          value={anotherNumber}
+                          keyboardType="numeric"
+                          onChangeText={text =>
+                            handleNumberChangeAnother(
+                              text,
+                              setAnotherNumber,
+                              selectedCategory,
+                            )
+                          }
+                          maxLength={getMaxLength(selectedCategory)}
+                        />
+                        {!validateNumber(anotherNumber, selectedCategory) &&
+                          anotherNumber.length > 0 && (
+                            <Text style={styles.errorText}>
+                              {getValidationMessage(selectedCategory)}
+                            </Text>
+                          )}
+                      </View>
+                    </View>
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.label}>{t('enterAmount')}</Text>
+                      <TextInput
+                        ref={amountInputRef}
+                        style={styles.input}
+                        placeholder="Enter Amount"
+                        keyboardType="numeric"
+                        value={amount}
+                        onChangeText={setAmount}
+                      />
+                    </View>
+                  </>
+                )}
+
+              {selectedCategory === 'CUT' && (
                 <>
                   <View style={styles.row}>
                     <View style={styles.inputGroup}>
                       <Text style={styles.label}>{t('enterNumber')}</Text>
                       <TextInput
-                        ref={numberInputRef}
                         style={[
                           styles.input,
                           !validateNumber(number, selectedCategory) &&
@@ -1765,12 +1886,11 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
                           styles.invalidInput,
                         ]}
                         placeholder="Enter Number"
-                        value={number}
                         keyboardType="numeric"
+                        value={number}
                         onChangeText={text =>
                           handleNumberChange(text, setNumber, selectedCategory)
                         }
-                        maxLength={getMaxLength(selectedCategory)}
                       />
                       {!validateNumber(number, selectedCategory) &&
                         number.length > 0 && (
@@ -1781,554 +1901,485 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
                     </View>
 
                     <View style={styles.inputGroup}>
-                      <Text style={styles.label}>{t('anotherNumber')}</Text>
-                      <TextInput
-                        ref={anotherNumberInputRef}
-                        style={[
-                          styles.input,
-                          !validateNumber(anotherNumber, selectedCategory) &&
-                          anotherNumber.length > 0 &&
-                          styles.invalidInput,
-                        ]}
-                        placeholder="Enter Another No"
-                        value={anotherNumber}
-                        keyboardType="numeric"
-                        onChangeText={text =>
-                          handleNumberChangeAnother(
-                            text,
-                            setAnotherNumber,
-                            selectedCategory,
-                          )
-                        }
-                        maxLength={getMaxLength(selectedCategory)}
-                      />
-                      {!validateNumber(anotherNumber, selectedCategory) &&
-                        anotherNumber.length > 0 && (
-                          <Text style={styles.errorText}>
-                            {getValidationMessage(selectedCategory)}
-                          </Text>
-                        )}
-                    </View>
-                  </View>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>{t('enterAmount')}</Text>
-                    <TextInput
-                      ref={amountInputRef}
-                      style={styles.input}
-                      placeholder="Enter Amount"
-                      keyboardType="numeric"
-                      value={amount}
-                      onChangeText={setAmount}
-                    />
-                  </View>
-                </>
-              )}
-
-            {selectedCategory === 'CUT' && (
-              <>
-                <View style={styles.row}>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>{t('enterNumber')}</Text>
-                    <TextInput
-                      style={[
-                        styles.input,
-                        !validateNumber(number, selectedCategory) &&
-                        number.length > 0 &&
-                        styles.invalidInput,
-                      ]}
-                      placeholder="Enter Number"
-                      keyboardType="numeric"
-                      value={number}
-                      onChangeText={text =>
-                        handleNumberChange(text, setNumber, selectedCategory)
-                      }
-                    />
-                    {!validateNumber(number, selectedCategory) &&
-                      number.length > 0 && (
-                        <Text style={styles.errorText}>
-                          {getValidationMessage(selectedCategory)}
-                        </Text>
-                      )}
-                  </View>
-
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>{t('enterAmount')}</Text>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Enter Amount"
-                      keyboardType="numeric"
-                      value={amount}
-                      onChangeText={setAmount}
-                    />
-                  </View>
-                </View>
-                <View style={styles.inputGroup}>
-                  <Text style={styles.label}>{t('amountSecond')}</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Enter Amount"
-                    value={secAmount}
-                    onChangeText={setsecAmount}
-                    keyboardType="numeric"
-                  />
-                </View>
-              </>
-            )}
-
-            {selectedCategory !== 'CYCLE' &&
-              selectedCategory !== 'RUNNING_PAN' &&
-              selectedCategory !== 'CUT' &&
-              selectedCategory !== 'SARAL_PAN' &&
-              selectedCategory !== 'ULTA PAN' &&
-              selectedCategory !== 'OPENPAN' &&
-              selectedCategory !== 'CLOSEPAN' && (
-                <>
-                  <View style={styles.row}>
-                    <View style={styles.inputGroup}>
-                      <Text style={styles.label}>{t('enterNumber')}</Text>
-                      <TextInput
-                        style={[
-                          styles.input,
-                          !validateNumber(number, selectedCategory) &&
-                          number.length > 0 &&
-                          styles.invalidInput,
-                        ]}
-                        keyboardType="numeric"
-                        placeholder="Enter Number"
-                        value={number}
-                        onChangeText={handleNumberChange2}
-                        maxLength={getMaxLength(selectedCategory)}
-                      // onBlur={handleAddNumber
-                      />
-                      {errorMessage ? (
-                        <Text style={styles.errorText}>{errorMessage}</Text>
-                      ) : null}
-                    </View>
-
-                    <View style={styles.inputGroup}>
                       <Text style={styles.label}>{t('enterAmount')}</Text>
                       <TextInput
                         style={styles.input}
-                        keyboardType="numeric"
                         placeholder="Enter Amount"
+                        keyboardType="numeric"
                         value={amount}
                         onChangeText={setAmount}
                       />
                     </View>
                   </View>
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.label}>{t('amountSecond')}</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Enter Amount"
+                      value={secAmount}
+                      onChangeText={setsecAmount}
+                      keyboardType="numeric"
+                    />
+                  </View>
                 </>
               )}
 
-            {(selectedCategory === 'OPENPAN' ||
-              selectedCategory === 'CLOSEPAN') && (
-                <>
-                  <ButtonGroup onSelect={type => setSelectedButton(type)} />
+              {selectedCategory !== 'CYCLE' &&
+                selectedCategory !== 'RUNNING_PAN' &&
+                selectedCategory !== 'CUT' &&
+                selectedCategory !== 'SARAL_PAN' &&
+                selectedCategory !== 'ULTA PAN' &&
+                selectedCategory !== 'OPENPAN' &&
+                selectedCategory !== 'CLOSEPAN' && (
+                  <>
+                    <View style={styles.row}>
+                      <View style={styles.inputGroup}>
+                        <Text style={styles.label}>{t('enterNumber')}</Text>
+                        <TextInput
+                          style={[
+                            styles.input,
+                            !validateNumber(number, selectedCategory) &&
+                            number.length > 0 &&
+                            styles.invalidInput,
+                          ]}
+                          keyboardType="numeric"
+                          placeholder="Enter Number"
+                          value={number}
+                          onChangeText={handleNumberChange2}
+                          maxLength={getMaxLength(selectedCategory)}
+                        // onBlur={handleAddNumber
+                        />
+                        {errorMessage ? (
+                          <Text style={styles.errorText}>{errorMessage}</Text>
+                        ) : null}
+                      </View>
+
+                      <View style={styles.inputGroup}>
+                        <Text style={styles.label}>{t('enterAmount')}</Text>
+                        <TextInput
+                          style={styles.input}
+                          keyboardType="numeric"
+                          placeholder="Enter Amount"
+                          value={amount}
+                          onChangeText={setAmount}
+                        />
+                      </View>
+                    </View>
+                  </>
+                )}
+
+              {(selectedCategory === 'OPENPAN' ||
+                selectedCategory === 'CLOSEPAN') && (
+                  <>
+                    <ButtonGroup onSelect={type => setSelectedButton(type)} />
+                    <View style={styles.row}>
+                      <View style={styles.inputGroup}>
+                        <Text style={styles.label}>{t('enterNumber')}</Text>
+                        <TextInput
+                          style={[
+                            styles.input,
+                            !validateNumber(
+                              number,
+                              selectedCategory,
+                              selectedButton,
+                            ) &&
+                            number.length > 0 &&
+                            styles.invalidInput,
+                          ]}
+                          keyboardType="numeric"
+                          placeholder="Enter Number"
+                          value={number}
+                          onChangeText={handleNumberChange2}
+                          maxLength={getMaxLength(selectedCategory, selectedButton)}
+                        // onBlur={handleAddNumber
+                        />
+                        {errorMessage ? (
+                          <Text style={styles.errorText}>{errorMessage}</Text>
+                        ) : null}
+                        {!validateNumber(
+                          number,
+                          selectedCategory,
+                          selectedButton,
+                        ) &&
+                          number.length > 0 && (
+                            <Text style={styles.errorText}>
+                              {selectedButton
+                                ? 'Please enter exactly 1 digit'
+                                : 'Please enter exactly 3 digits'}
+                            </Text>
+                          )}
+                      </View>
+
+                      <View style={styles.inputGroup}>
+                        <Text style={styles.label}>{t('enterAmount')}</Text>
+                        <TextInput
+                          style={styles.input}
+                          keyboardType="numeric"
+                          placeholder="Enter Amount"
+                          value={amount}
+                          onChangeText={setAmount}
+                        />
+                      </View>
+                    </View>
+                  </>
+                )}
+
+              {/* vlidation remains */}
+              {selectedCategory === 'SARAL_PAN' && (
+                <View>
                   <View style={styles.row}>
                     <View style={styles.inputGroup}>
-                      <Text style={styles.label}>{t('enterNumber')}</Text>
+                      <Text style={styles.label}>{t('saralPanNumber')}</Text>
                       <TextInput
-                        style={[
-                          styles.input,
-                          !validateNumber(
-                            number,
-                            selectedCategory,
-                            selectedButton,
-                          ) &&
-                          number.length > 0 &&
-                          styles.invalidInput,
-                        ]}
+                        ref={saralPanNumberInputRef}
+                        style={styles.input}
+                        placeholder={t('saralPanNumber')}
+                        value={saralPanNumber}
+                        onChangeText={handleSaralPanNumberChange}
                         keyboardType="numeric"
-                        placeholder="Enter Number"
-                        value={number}
-                        onChangeText={handleNumberChange2}
-                        maxLength={getMaxLength(selectedCategory, selectedButton)}
-                      // onBlur={handleAddNumber
+                        maxLength={3}
                       />
-                      {errorMessage ? (
-                        <Text style={styles.errorText}>{errorMessage}</Text>
-                      ) : null}
-                      {!validateNumber(
-                        number,
-                        selectedCategory,
-                        selectedButton,
-                      ) &&
-                        number.length > 0 && (
-                          <Text style={styles.errorText}>
-                            {selectedButton
-                              ? 'Please enter exactly 1 digit'
-                              : 'Please enter exactly 3 digits'}
-                          </Text>
-                        )}
+                    </View>
+
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.label}>{t('amount')}</Text>
+                      <TextInput
+                        ref={saralPanAmountInputRef}
+                        style={styles.input}
+                        placeholder={t('enterAmount')}
+                        value={saralPanAmount}
+                        onChangeText={setSaralPanAmount}
+                        keyboardType="numeric"
+                      />
+                    </View>
+                    <TouchableOpacity style={styles.addButton}
+                      onPress={handleAddSaralPan}>
+
+                      <Text style={styles.addButtonText}>+</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {saralPanEntries.length > 0 && (
+                    <View style={styles.table}>
+                      <View style={styles.tableHeader}>
+                        <Text style={styles.tableHeaderText}>{t('number')}</Text>
+                        <Text style={styles.tableHeaderText}>{t('amount')}</Text>
+                        <Text style={styles.tableHeaderText}>{t('action')}</Text>
+                      </View>
+                      {saralPanEntries.map((entry, index) => (
+                        <View key={`saral-${index}`} style={styles.tableRow}>
+                          <Text style={styles.tableCell}>{entry.number}</Text>
+                          <Text style={styles.tableCell}>{entry.amount}</Text>
+                          <TouchableOpacity
+                            style={styles.deleteButton}
+                            onPress={() => handleRemoveSaralPan(index)}>
+                            <Icon name="trash" size={18} color="red" />
+                          </TouchableOpacity>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+
+                  <View style={styles.row}>
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.label}>{t('gunule')}</Text>
+                      <TextInput
+                        ref={saralPanGunuleInputRef}
+                        style={styles.input}
+                        placeholder={t('enterGunule')}
+                        value={saralPanGunule}
+                        onChangeText={handleSaralPanGunuleChange}
+                        keyboardType="numeric"
+                        maxLength={1}
+                      />
+                    </View>
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.label}>{t('enterAmount')}</Text>
+                      <TextInput
+                        ref={saralPanGunuleAmountInputRef}
+                        style={styles.input}
+                        placeholder={t('enterAmount')}
+                        value={saralPanGunuleAmount}
+                        onChangeText={setsaralPanGunuleAmount}
+                        keyboardType="numeric"
+                      />
+                    </View>
+                    <TouchableOpacity
+                      style={styles.addButton}
+                      onPress={handleAddGunule}>
+                      <Text style={styles.addButtonText}>+</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {gunuleEntries.length !== 0 ? (
+                    <View style={styles.table}>
+                      <View style={styles.tableHeader}>
+                        <Text style={styles.tableHeaderText}>Gunule</Text>
+                        <Text style={styles.tableHeaderText}>Amount</Text>
+                        <Text style={styles.tableHeaderText}>Action</Text>
+                      </View>
+                      {gunuleEntries.map((entry, index) => (
+                        <View key={`gunule-${index}`} style={styles.tableRow}>
+                          <Text style={styles.tableCell}>{entry.number}</Text>
+                          <Text style={styles.tableCell}>{entry.amount}</Text>
+                          <TouchableOpacity
+                            style={styles.deleteButton}
+                            onPress={() => handleRemoveGunule(index)}>
+                            <Icon name="trash" size={18} color="red" />
+                          </TouchableOpacity>
+                        </View>
+                      ))}
+                    </View>
+                  ) : (
+                    ''
+                  )}
+                </View>
+              )}
+
+              {selectedCategory === 'ULTA PAN' && (
+                <View>
+                  <View style={styles.row}>
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.label}>GUNULE</Text>
+                      <TextInput
+                        ref={ultaPanGunuleInputRef}
+                        style={styles.input}
+                        placeholder="Enter Gunule"
+                        value={ultaPanGunule}
+                        onChangeText={handleUltaPanGunuleChange}
+                        keyboardType="numeric"
+                        maxLength={1}
+                      />
                     </View>
 
                     <View style={styles.inputGroup}>
                       <Text style={styles.label}>{t('enterAmount')}</Text>
                       <TextInput
+                        ref={ultaPanGunuleAmountInputRef}
                         style={styles.input}
-                        keyboardType="numeric"
                         placeholder="Enter Amount"
-                        value={amount}
-                        onChangeText={setAmount}
+                        value={ultaPanGunuleAmount}
+                        onChangeText={setUltaPanGunuleAmount}
+                        keyboardType="numeric"
                       />
                     </View>
-                  </View>
-                </>
-              )}
 
-            {/* vlidation remains */}
-            {selectedCategory === 'SARAL_PAN' && (
-              <View>
-                <View style={styles.row}>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>{t('saralPanNumber')}</Text>
-                    <TextInput
-                      ref={saralPanNumberInputRef}
-                      style={styles.input}
-                      placeholder={t('saralPanNumber')}
-                      value={saralPanNumber}
-                      onChangeText={handleSaralPanNumberChange}
-                      keyboardType="numeric"
-                      maxLength={3}
-                    />
+                    <TouchableOpacity
+                      style={styles.addButton}
+                      onPress={handleAddUltaGunule}>
+                      <Text style={styles.addButtonText}>+</Text>
+                    </TouchableOpacity>
                   </View>
 
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>{t('amount')}</Text>
-                    <TextInput
-                      ref={saralPanAmountInputRef}
-                      style={styles.input}
-                      placeholder={t('enterAmount')}
-                      value={saralPanAmount}
-                      onChangeText={setSaralPanAmount}
-                      keyboardType="numeric"
-                    />
-                  </View>
-                  <TouchableOpacity style={styles.addButton}
-                    onPress={handleAddSaralPan}>
-
-                    <Text style={styles.addButtonText}>+</Text>
-                  </TouchableOpacity>
-                </View>
-
-                {saralPanEntries.length > 0 && (
-                  <View style={styles.table}>
-                    <View style={styles.tableHeader}>
-                      <Text style={styles.tableHeaderText}>{t('number')}</Text>
-                      <Text style={styles.tableHeaderText}>{t('amount')}</Text>
-                      <Text style={styles.tableHeaderText}>{t('action')}</Text>
-                    </View>
-                    {saralPanEntries.map((entry, index) => (
-                      <View key={`saral-${index}`} style={styles.tableRow}>
-                        <Text style={styles.tableCell}>{entry.number}</Text>
-                        <Text style={styles.tableCell}>{entry.amount}</Text>
-                        <TouchableOpacity
-                          style={styles.deleteButton}
-                          onPress={() => handleRemoveSaralPan(index)}>
-                          <Icon name="trash" size={18} color="red" />
-                        </TouchableOpacity>
+                  {ultaGunuleEntries.length > 0 && (
+                    <View style={styles.table}>
+                      <View style={styles.tableHeader}>
+                        <Text style={styles.tableHeaderText}>Gunule</Text>
+                        <Text style={styles.tableHeaderText}>Amount</Text>
+                        <Text style={styles.tableHeaderText}>Action</Text>
                       </View>
-                    ))}
-                  </View>
-                )}
-
-                <View style={styles.row}>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>{t('gunule')}</Text>
-                    <TextInput
-                      ref={saralPanGunuleInputRef}
-                      style={styles.input}
-                      placeholder={t('enterGunule')}
-                      value={saralPanGunule}
-                      onChangeText={handleSaralPanGunuleChange}
-                      keyboardType="numeric"
-                      maxLength={1}
-                    />
-                  </View>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>{t('enterAmount')}</Text>
-                    <TextInput
-                      ref={saralPanGunuleAmountInputRef}
-                      style={styles.input}
-                      placeholder={t('enterAmount')}
-                      value={saralPanGunuleAmount}
-                      onChangeText={setsaralPanGunuleAmount}
-                      keyboardType="numeric"
-                    />
-                  </View>
-                  <TouchableOpacity
-                    style={styles.addButton}
-                    onPress={handleAddGunule}>
-                    <Text style={styles.addButtonText}>+</Text>
-                  </TouchableOpacity>
-                </View>
-
-                {gunuleEntries.length !== 0 ? (
-                  <View style={styles.table}>
-                    <View style={styles.tableHeader}>
-                      <Text style={styles.tableHeaderText}>Gunule</Text>
-                      <Text style={styles.tableHeaderText}>Amount</Text>
-                      <Text style={styles.tableHeaderText}>Action</Text>
+                      {ultaGunuleEntries.map((entry, index) => (
+                        <View
+                          key={`ulta-gunule-${index}`}
+                          style={styles.tableRow}>
+                          <Text style={styles.tableCell}>{entry.number}</Text>
+                          <Text style={styles.tableCell}>{entry.amount}</Text>
+                          <TouchableOpacity
+                            style={styles.deleteButton}
+                            onPress={() => handleRemoveUltaGunule(index)}>
+                            <Icon name="trash" size={18} color="red" />
+                          </TouchableOpacity>
+                        </View>
+                      ))}
                     </View>
-                    {gunuleEntries.map((entry, index) => (
-                      <View key={`gunule-${index}`} style={styles.tableRow}>
-                        <Text style={styles.tableCell}>{entry.number}</Text>
-                        <Text style={styles.tableCell}>{entry.amount}</Text>
-                        <TouchableOpacity
-                          style={styles.deleteButton}
-                          onPress={() => handleRemoveGunule(index)}>
-                          <Icon name="trash" size={18} color="red" />
-                        </TouchableOpacity>
-                      </View>
-                    ))}
-                  </View>
-                ) : (
-                  ''
-                )}
-              </View>
-            )}
+                  )}
 
-            {selectedCategory === 'ULTA PAN' && (
-              <View>
-                <View style={styles.row}>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>GUNULE</Text>
-                    <TextInput
-                      ref={ultaPanGunuleInputRef}
-                      style={styles.input}
-                      placeholder="Enter Gunule"
-                      value={ultaPanGunule}
-                      onChangeText={handleUltaPanGunuleChange}
-                      keyboardType="numeric"
-                      maxLength={1}
-                    />
-                  </View>
-
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>{t('enterAmount')}</Text>
-                    <TextInput
-                      ref={ultaPanGunuleAmountInputRef}
-                      style={styles.input}
-                      placeholder="Enter Amount"
-                      value={ultaPanGunuleAmount}
-                      onChangeText={setUltaPanGunuleAmount}
-                      keyboardType="numeric"
-                    />
-                  </View>
-
-                  <TouchableOpacity
-                    style={styles.addButton}
-                    onPress={handleAddUltaGunule}>
-                    <Text style={styles.addButtonText}>+</Text>
-                  </TouchableOpacity>
-                </View>
-
-                {ultaGunuleEntries.length > 0 && (
-                  <View style={styles.table}>
-                    <View style={styles.tableHeader}>
-                      <Text style={styles.tableHeaderText}>Gunule</Text>
-                      <Text style={styles.tableHeaderText}>Amount</Text>
-                      <Text style={styles.tableHeaderText}>Action</Text>
+                  <View style={styles.row}>
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.label}>ULTA PAN NUMBER</Text>
+                      <TextInput
+                        ref={ultaPanNumberInputRef}
+                        style={styles.input}
+                        placeholder="Enter Saral-Pan No"
+                        value={ultaPanNumber}
+                        onChangeText={handleUltaPanNumberChange}
+                        keyboardType="numeric"
+                        maxLength={3}
+                      />
                     </View>
-                    {ultaGunuleEntries.map((entry, index) => (
-                      <View
-                        key={`ulta-gunule-${index}`}
-                        style={styles.tableRow}>
-                        <Text style={styles.tableCell}>{entry.number}</Text>
-                        <Text style={styles.tableCell}>{entry.amount}</Text>
-                        <TouchableOpacity
-                          style={styles.deleteButton}
-                          onPress={() => handleRemoveUltaGunule(index)}>
-                          <Icon name="trash" size={18} color="red" />
-                        </TouchableOpacity>
-                      </View>
-                    ))}
-                  </View>
-                )}
 
-                <View style={styles.row}>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>ULTA PAN NUMBER</Text>
-                    <TextInput
-                      ref={ultaPanNumberInputRef}
-                      style={styles.input}
-                      placeholder="Enter Saral-Pan No"
-                      value={ultaPanNumber}
-                      onChangeText={handleUltaPanNumberChange}
-                      keyboardType="numeric"
-                      maxLength={3}
-                    />
-                  </View>
-
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>{t('enterAmount')}</Text>
-                    <TextInput
-                      ref={ultaPanAmountInputRef}
-                      style={styles.input}
-                      placeholder="Enter Amount"
-                      value={ultaPanAmount}
-                      onChangeText={setUltaPanAmount}
-                      keyboardType="numeric"
-                    />
-                  </View>
-
-                  <TouchableOpacity
-                    style={styles.addButton}
-                    onPress={handleAddUltaPan}>
-                    <Text style={styles.addButtonText}>+</Text>
-                  </TouchableOpacity>
-                </View>
-
-                {ultaPanEntries.length > 0 && (
-                  <View style={styles.table}>
-                    <View style={styles.tableHeader}>
-                      <Text style={styles.tableHeaderText}>Number</Text>
-                      <Text style={styles.tableHeaderText}>Amount</Text>
-                      <Text style={styles.tableHeaderText}>Action</Text>
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.label}>{t('enterAmount')}</Text>
+                      <TextInput
+                        ref={ultaPanAmountInputRef}
+                        style={styles.input}
+                        placeholder="Enter Amount"
+                        value={ultaPanAmount}
+                        onChangeText={setUltaPanAmount}
+                        keyboardType="numeric"
+                      />
                     </View>
-                    {ultaPanEntries.map((entry, index) => (
-                      <View key={`ulta-${index}`} style={styles.tableRow}>
-                        <Text style={styles.tableCell}>{entry.number}</Text>
-                        <Text style={styles.tableCell}>{entry.amount}</Text>
-                        <TouchableOpacity
-                          style={styles.deleteButton}
-                          onPress={() => handleRemoveUltaPan(index)}>
-                          <Icon name="trash" size={18} color="red" />
-                        </TouchableOpacity>
-                      </View>
-                    ))}
-                  </View>
-                )}
-              </View>
-            )}
-          </>
-        )}
 
-        {/* isMarketOpen && */}
-        {!bothResultsOut && (
-          <>
-            <FlatList
-              data={numbersList}
-              keyExtractor={(item, index) => index.toString()}
-              horizontal
-              renderItem={({ item }) => (
-                <View style={styles.numberContainer}>
-                  <Text style={styles.numberText}>{item}</Text>
-                  <TouchableOpacity onPress={() => handleRemoveNumber(item)}>
-                    <Text style={styles.removeText}>X</Text>
-                  </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.addButton}
+                      onPress={handleAddUltaPan}>
+                      <Text style={styles.addButtonText}>+</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {ultaPanEntries.length > 0 && (
+                    <View style={styles.table}>
+                      <View style={styles.tableHeader}>
+                        <Text style={styles.tableHeaderText}>Number</Text>
+                        <Text style={styles.tableHeaderText}>Amount</Text>
+                        <Text style={styles.tableHeaderText}>Action</Text>
+                      </View>
+                      {ultaPanEntries.map((entry, index) => (
+                        <View key={`ulta-${index}`} style={styles.tableRow}>
+                          <Text style={styles.tableCell}>{entry.number}</Text>
+                          <Text style={styles.tableCell}>{entry.amount}</Text>
+                          <TouchableOpacity
+                            style={styles.deleteButton}
+                            onPress={() => handleRemoveUltaPan(index)}>
+                            <Icon name="trash" size={18} color="red" />
+                          </TouchableOpacity>
+                        </View>
+                      ))}
+                    </View>
+                  )}
                 </View>
               )}
-            />
-            <View style={styles.buttonGroup}>
-              <TouchableOpacity
-                style={[
-                  styles.submitButton,
-                  isSubmitting && styles.submitButtonDisabled
-                ]}
-                onPress={handleSubmit}
-                disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <ActivityIndicator color={globalColors.white} />
-                ) : (
-                  <Text style={styles.submitButtonText}>{t('submit')}</Text>
+            </>
+          )}
+
+          {/* isMarketOpen && */}
+          {!bothResultsOut && (
+            <>
+              <FlatList
+                data={numbersList}
+                keyExtractor={(item, index) => index.toString()}
+                horizontal
+                renderItem={({ item }) => (
+                  <View style={styles.numberContainer}>
+                    <Text style={styles.numberText}>{item}</Text>
+                    <TouchableOpacity onPress={() => handleRemoveNumber(item)}>
+                      <Text style={styles.removeText}>X</Text>
+                    </TouchableOpacity>
+                  </View>
                 )}
-              </TouchableOpacity>
-              {/* <TouchableOpacity
+              />
+              <View style={styles.buttonGroup}>
+                <TouchableOpacity
+                  style={[
+                    styles.submitButton,
+                    isSubmitting && styles.submitButtonDisabled
+                  ]}
+                  onPress={handleSubmit}
+                  disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <ActivityIndicator color={globalColors.white} />
+                  ) : (
+                    <Text style={styles.submitButtonText}>{t('submit')}</Text>
+                  )}
+                </TouchableOpacity>
+                {/* <TouchableOpacity
                 style={styles.deleteAllButton}
                 onPress={handlePayment}>
                 <Text style={styles.deleteAllButtonText}>{t('payment')}</Text>
               </TouchableOpacity> */}
-            </View>
-            {!bothResultsOut && (
-              <View style={styles.totalContainer}>
-                <View style={styles.totalItem}>
-                  <Text style={styles.totalLabel}>{t('totalAmount')}</Text>
-                  <Text style={styles.totalValue}>
-                    {data?.totalAmount || 0}
-                  </Text>
-                </View>
-                <View style={styles.totalItem}>
-                  <Text style={styles.totalLabel}>{t('openAmount')}</Text>
-                  <Text style={styles.totalValue}>
-                    {data?.totalOpenAmount || 0}
-                  </Text>
-                </View>
-                <View style={styles.totalItem}>
-                  <Text style={styles.totalLabel}>{t('closeAmount')}</Text>
-                  <Text style={styles.totalValue}>
-                    {data?.totalCloseAmount || 0}
-                  </Text>
-                </View>
               </View>
-            )}
-          </>
-        )}
-      </View>
+              {!bothResultsOut && (
+                <View style={styles.totalContainer}>
 
-      <EntriesList
-        reversedGroupedEntries={data?.reversedGroupedEntries}
-        Delete={handleDelete}
-        handleEdit={handleEdit}
-        userRole={data?.role}
-        marketResults={data?.results}
-        onSelectionChange={handleEntrySelection}
-        isLoading={isEntriesLoadings}
-      />
+                  <View style={styles.totalItem}>
+                    <Text style={styles.totalLabel}>{t('openAmount')}</Text>
+                    <Text style={styles.totalValue}>
+                      {data?.totalOpenAmount || 0}
+                    </Text>
+                  </View>
+                  <View style={styles.totalItem}>
+                    <Text style={styles.totalLabel}>{t('closeAmount')}</Text>
+                    <Text style={styles.totalValue}>
+                      {data?.totalCloseAmount || 0}
+                    </Text>
+                  </View>
+                  <View style={styles.totalItem}>
+                    <Text style={styles.totalLabel}>{t('totalAmount')}</Text>
+                    <Text style={styles.totalValue}>
+                      {data?.totalAmount || 0}
+                    </Text>
+                  </View>
+                </View>
+              )}
+            </>
+          )}
+        </View>
 
-      {
-        selectedEntries?.length > 0 && (
-          <View style={styles.paymentContainer}>
-            <Text style={styles.totalAmount}>
-              {t('totalAmount')}: ₹{calculateTotalAmount()}
-            </Text>
-            <TouchableOpacity style={styles.payButton} onPress={handlePayment}>
-              <Text style={styles.payButtonText}>{t('payNow')}</Text>
-            </TouchableOpacity>
-          </View>
-        )
-      }
+        <EntriesList
+          reversedGroupedEntries={data?.reversedGroupedEntries}
+          Delete={handleDelete}
+          handleEdit={handleEdit}
+          userRole={data?.role}
+          marketResults={data?.results}
+          onSelectionChange={handleEntrySelection}
+          isLoading={isEntriesLoadings}
+        />
 
-      <Modal
-        visible={showPaymentModal}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowPaymentModal(false)}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{t('confirmPayment')}</Text>
-            <Text style={styles.modalText}>
-              {t('paymentMessage', {
-                amount: calculateTotalAmount(),
-                count: selectedEntries.length,
-              })}
-            </Text>
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => setShowPaymentModal(false)}>
-                <Text style={styles.modalButtonText}>{t('cancel')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.confirmButton]}
-                onPress={handlePaymentConfirm}>
-                <Text style={styles.modalButtonText}>{t('submit')}</Text>
+        {
+          selectedEntries?.length > 0 && (
+            <View style={styles.paymentContainer}>
+              <Text style={styles.totalAmount}>
+                {t('totalAmount')}: ₹{calculateTotalAmount()}
+              </Text>
+              <TouchableOpacity style={styles.payButton} onPress={handlePayment}>
+                <Text style={styles.payButtonText}>{t('payNow')}</Text>
               </TouchableOpacity>
             </View>
-          </View>
-        </View>
-      </Modal>
+          )
+        }
 
-      <EditEntryModal
-        visible={isEditModalVisible}
-        entry={editingEntry}
-        onClose={() => setIsEditModalVisible(false)}
-        onSave={handleSaveEdit}
-        editNumber={editNumber}
-        setEditNumber={setEditNumber}
-        editAmount={editAmount}
-        setEditAmount={setEditAmount}
-      />
-    </ScrollView >
+        <Modal
+          visible={showPaymentModal}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowPaymentModal(false)}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>{t('confirmPayment')}</Text>
+              <Text style={styles.modalText}>
+                {t('paymentMessage', {
+                  amount: calculateTotalAmount(),
+                  count: selectedEntries.length,
+                })}
+              </Text>
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.cancelButton]}
+                  onPress={() => setShowPaymentModal(false)}>
+                  <Text style={styles.modalButtonText}>{t('cancel')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.confirmButton]}
+                  onPress={handlePaymentConfirm}>
+                  <Text style={styles.modalButtonText}>{t('submit')}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        <EditEntryModal
+          visible={isEditModalVisible}
+          entry={editingEntry}
+          onClose={() => setIsEditModalVisible(false)}
+          onSave={handleSaveEdit}
+          editNumber={editNumber}
+          setEditNumber={setEditNumber}
+          editAmount={editAmount}
+          setEditAmount={setEditAmount}
+        />
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -2354,7 +2405,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: globalColors.LightWhite,
-    height: '50%',
     padding: 10,
   },
   header: {

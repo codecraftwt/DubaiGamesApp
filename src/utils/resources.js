@@ -133,7 +133,7 @@ export const resources = {
             "agentList": "Agent List",
             "clientList": "Client List",
             "customerlist": "Customer List",
-            "mywallet": "My Wallet",
+            "wallet": "Wallet",
 
             // Dashboard Screen Additional Translations
             "enterGunule": "Enter Gunule",
@@ -166,7 +166,7 @@ export const resources = {
             "passwordChangedSuccessfully": "Password changed successfully",
             "passwordChangeFailed": "Failed to change password",
             "allFieldsRequired": "All fields are required",
-
+            "editDetails": "Edit Details",
             // Registration validation messages
             "registrationFailed": "Registration failed. Please try again.",
 
@@ -185,6 +185,23 @@ export const resources = {
             "accountdetails": "Account Details",
             "OldPassword": "Old Password",
             "sendResetLink": "Reset Password Link",
+
+            "addFundAccountInfo": "Add Fund Account",
+            "fundAccountUpdatedSuccessfully": "Fund Account Updated Successfully",
+            "validUpiIdRequired": "valid Upi Id Required",
+            "accountNumberMinLength": "Account Number is invalid",
+            "ifscCodeLength": "ifsc Code Length is Incorrect",
+            "accountHolderNameRequired": "Account Holder Name is Required",
+            "fundAccountDetails": "fund Account Details",
+
+            "fundAccountUpdateFailed": "Fund Account Update Failed",
+            "editDetails": "Edit Details",
+
+            "confirmLogout": "Confirm Logout",
+            "confirmLogoutMessage": "Are you sure you want to logout?",
+
+            "LogoutallDevicesText": "Log out all Devices",
+
         }
     },
     hi: {
@@ -320,7 +337,7 @@ export const resources = {
             "agentList": "एजेंट सूची",
             "clientList": "क्लाइंट सूची",
             "customerlist": "ग्राहक सूची",
-            "mywallet": "मेरा वॉलेट",
+            "wallet": "मेरा वॉलेट",
 
             // Dashboard Screen Additional Translations
             "enterGunule": "गुनुले दर्ज करें",
@@ -353,7 +370,7 @@ export const resources = {
             "passwordChangedSuccessfully": "पासवर्ड सफलतापूर्वक बदल दिया गया है",
             "passwordChangeFailed": "पासवर्ड बदलने में विफल",
             "allFieldsRequired": "सभी फ़ील्ड आवश्यक हैं",
-
+            "editDetails": "विवरण संपादित करें",
             // Registration validation messages
             "registrationFailed": "पंजीकरण विफल हुआ। कृपया पुन: प्रयास करें।",
 
@@ -372,6 +389,21 @@ export const resources = {
             "accountdetails": "खाता विवरण",
             "OldPassword": "पुराना पासवर्ड",
             "sendResetLink": "पासवर्ड रीसेट लिंक",
+
+            "addFundAccountInfo": "फंड खाता जोड़ें",
+            "fundAccountUpdatedSuccessfully": "निधि खाता सफलतापूर्वक अपडेट किया गया",
+            "validUpiIdRequired": "वैध UpiId आवश्यक",
+            "accountNumberMinLength": "खाता संख्या न्यूनतम अवधि 12",
+            "ifscCodeLength": "आईएफएससी कोड की लंबाई 11",
+            "accountHolderNameRequired": "खाताधारक का नाम आवश्यक",
+            "fundAccountDetails": "फंड खाता विवरण",
+            "fundAccountUpdateFailed": "फंड खाता अपडेट विफल",
+            "editDetails": "विवरण संपादित करें",
+
+            "confirmLogout": "लॉगआउट की पुष्टि करें",
+            "confirmLogoutMessage": "क्या आप वाकई लॉगआउट करना चाहते हैं?",
+
+            "LogoutallDevicesText": "सभी डिवाइस से लॉग आउट करें",
 
         }
     },
@@ -508,7 +540,7 @@ export const resources = {
             "agentList": "एजंट यादी",
             "clientList": "क्लायंट यादी",
             "customerlist": "ग्राहक यादी",
-            "mywallet": "माझे वॉलेट",
+            "wallet": "वॉलेट",
 
             // Dashboard Screen Additional Translations
             "enterGunule": "गुनुले प्रविष्ट करा",
@@ -541,6 +573,7 @@ export const resources = {
             "passwordChangedSuccessfully": "पासवर्ड यशस्वीरित्या बदलला",
             "passwordChangeFailed": "पासवर्ड बदलण्यात अयशस्वी",
             "allFieldsRequired": "सर्व फील्ड आवश्यक आहेत",
+            "editDetails": "तपशील संपादित करा",
 
             // Registration validation messages
             "registrationFailed": "नोंदणी अयशस्वी झाली. कृपया पुन्हा प्रयत्न करा.",
@@ -560,6 +593,23 @@ export const resources = {
             "accountdetails": "खाते तपशील",
             "OldPassword": "जुना पासवर्ड",
             "sendResetLink": "पासवर्ड लिंक रीसेट करा",
+
+            "addFundAccountInfo": "निधी खाते जोडा",
+            "fundAccountUpdatedSuccessfully": "निधी खाते यशस्वीरित्या अपडेट केले",
+            "validUpiIdRequired": "वैध UPID आवश्यक आहे",
+            "accountNumberMinLength": "खाते क्रमांक किमान लांबी १२",
+            "ifscCodeLength": "ifsc कोड लांबी ११",
+
+            "accountHolderNameRequired": "खातेधारकाचे नाव आवश्यक आहे",
+            "fundAccountDetails": "निधी खाते तपशील",
+            "fundAccountUpdateFailed": "फंड खाते अद्यतन अयशस्वी",
+            "editDetails": "तपशील संपादित करा",
+
+            "confirmLogout": "लॉगआउटची पुष्टी करा",
+            "confirmLogoutMessage": "आपण खरंच लॉगआउट करू इच्छिता का?",
+
+            "LogoutallDevicesText": "सर्व डिव्हाइसेस लॉगआउट करा",
+
         }
     },
     kn: {
@@ -695,7 +745,7 @@ export const resources = {
             "agentList": "ಏಜೆಂಟ್ ಪಟ್ಟಿ",
             "clientList": "ಕ್ಲೈಂಟ್ ಪಟ್ಟಿ",
             "customerlist": "ಗ್ರಾಹಕ ಪಟ್ಟಿ",
-            "mywallet": "ನನ್ನ ವಾಲೆಟ್",
+            "wallet": "ವಾಲೆಟ್",
 
             // Dashboard Screen Additional Translations
             "enterGunule": "ಗುನುಲೆ ನಮೂದಿಸಿ",
@@ -747,8 +797,21 @@ export const resources = {
             "accountdetails": "ಖಾತೆ ವಿವರಗಳು",
             "OldPassword": "ಹಳೆಯ ಪಾಸ್ವರ್ಡ್",
 
-            "sendResetLink": "ಪಾಸ್ವರ್ಡ್ ಲಿಂಕ್ ಅನ್ನು ಮರುಹೊಂದಿಸಿ"
+            "sendResetLink": "ಪಾಸ್ವರ್ಡ್ ಲಿಂಕ್ ಅನ್ನು ಮರುಹೊಂದಿಸಿ",
+            "addFundAccountInfo": "ನಿಧಿ ಖಾತೆಯನ್ನು ಸೇರಿಸಿ",
+            "fundAccountUpdatedSuccessfully": 'ನಿಧಿ ಖಾತೆಯನ್ನು ಯಶಸ್ವಿಯಾಗಿ ನವೀಕರಿಸಲಾಗಿದೆ.',
+            "validUpiIdRequired": "ಮಾನ್ಯವಾದ UPId ಅಗತ್ಯವಿದೆ",
+            "accountNumberMinLength": "ಖಾತೆ ಸಂಖ್ಯೆ ಕನಿಷ್ಠ ಉದ್ದ 12",
+            "ifscCodeLength": "ifsc ಕೋಡ್ ಉದ್ದ 11",
+            "accountHolderNameRequired": "ಖಾತೆದಾರರ ಹೆಸರು ಕಡ್ಡಾಯವಾಗಿದೆ",
+            "fundAccountDetails": "ನಿಧಿಖಾತೆ ವಿವರಗಳು",
+            "editDetails": "ವಿವರಗಳನ್ನು ಸಂಪಾದಿಸಿ",
+            "fundAccountUpdateFailed": "ಫಂಡ್ ಖಾತೆ ನವೀಕರಣ ವಿಫಲವಾಗಿದೆ",
 
+            "confirmLogout": "ಲಾಗ್‌ಔಟ್ ದೃಢೀಕರಿಸಿ",
+            "confirmLogoutMessage": "ನೀವು ಖಚಿತವಾಗಿ ಲಾಗ್‌ಔಟ್ ಆಗಲು ಬಯಸುವಿರಾ?",
+
+            "LogoutallDevicesText": "ಎಲ್ಲಾ ಸಾಧನಗಳನ್ನು ಲಾಗ್ ಔಟ್ ಮಾಡಿ"
         }
     }
 };

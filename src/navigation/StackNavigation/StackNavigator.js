@@ -31,6 +31,7 @@ import BetterLuckScreen from '../../screens/ResultScreen/BetterLuckScreen';
 import DailyResultFormScreen from '../../screens/DailyResultFormScreen';
 import AddFundAccount from '../../screens/MyWallet/AddFundAccount';
 import LogoutAllDevicesScreen from '../../screens/Auth/LogoutAllDevicesScreen';
+import LanguageSettings from '../../screens/LanguageSettings/LanguageSettings';
 
 const Stack = createStackNavigator();
 
@@ -40,6 +41,10 @@ const StackNavigator = () => (
     <Stack.Screen name="Login" component={LoginScreen} />
     <Stack.Screen name="LogoutAllDevices" component={LogoutAllDevicesScreen} />
 
+    {/* Main App with Tab Navigation */}
+    <Stack.Screen name="MainApp" component={TabNavigator} />
+
+    {/* Additional Screens accessible from tabs */}
     <Stack.Screen name="AgentList" component={AgentList} />
     <Stack.Screen name="StaffList" component={StaffListScreen} />
     <Stack.Screen name="DailyResultForm" component={DailyResultFormScreen} />
@@ -48,34 +53,27 @@ const StackNavigator = () => (
     <Stack.Screen name="EntryDelete" component={EntryDelete} />
     <Stack.Screen name="AddPayment" component={AddPayment} />
     <Stack.Screen name="StaffAttendance" component={StaffAttendance} />
-    <Stack.Screen name="MainApp" component={TabNavigator} />
     <Stack.Screen name="Dashboard" component={DashboardScreen} />
 
+    {/* Report Screens */}
     <Stack.Screen name="AddButtonReport" component={AddButtonReport} />
     <Stack.Screen name="AddPaymentReport" component={AddPaymentReport} />
     <Stack.Screen name="VerifyReport" component={VerifyReport} />
     <Stack.Screen name="WeeklyReport" component={WeeklyReport} />
     <Stack.Screen name="PaymentReport" component={PaymentReport} />
-
     <Stack.Screen name="OldPaymentReport" component={OldPaymentReport} />
     <Stack.Screen name="BusinessReport" component={BusinessReport} />
     <Stack.Screen name="PaymentLedger" component={PaymentLedger} />
+
+    {/* Auth and User Screens */}
     <Stack.Screen name="Register" component={RegistrationForm} />
     <Stack.Screen name="CustomerList" component={CustomerList} />
-    <Stack.Screen name="MyWallet" component={MyWallet} />
     <Stack.Screen name="AddBalance" component={AddBalanceScreen} />
     <Stack.Screen name="WithdrawBalance" component={WithdrawBalanceScreen} />
-    <Stack.Screen name="AddFundAccount" component={AddFundAccount} />
-    <Stack.Screen
-      name="Result"
-      component={DailyResultFormScreen}
-    />
-    {/* <Stack.Screen name="account Details" component={AddFundAccount} /> */}
-
-    <Stack.Screen
-      name="BetterLuck"
-      component={BetterLuckScreen}
-    />
+    <Stack.Screen name="Result" component={DailyResultFormScreen} />
+    <Stack.Screen name="BetterLuck" component={BetterLuckScreen} />
+    <Stack.Screen name="LanguageSettings" component={LanguageSettings} />
+    <Stack.Screen name="Account" component={AddFundAccount} />
   </Stack.Navigator>
 );
 

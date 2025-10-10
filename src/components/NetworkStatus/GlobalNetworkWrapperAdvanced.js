@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, StatusBar, Platform, SafeAreaView } from 'react-native';
+import { View, StyleSheet, StatusBar, Platform } from 'react-native';
 import { NetworkStatusAdvanced } from './index';
 
 const GlobalNetworkWrapperAdvanced = ({ children, showNetworkStatus = true }) => {
@@ -7,7 +7,7 @@ const GlobalNetworkWrapperAdvanced = ({ children, showNetworkStatus = true }) =>
         <View style={styles.container}>
             {/* Status Bar */}
             <StatusBar
-                barStyle="light-content"
+                barStyle="dark-content"
                 backgroundColor="transparent"
                 translucent={true}
             />
@@ -15,12 +15,10 @@ const GlobalNetworkWrapperAdvanced = ({ children, showNetworkStatus = true }) =>
             {/* Network Status Banner - appears above everything when enabled */}
             {showNetworkStatus && <NetworkStatusAdvanced />}
 
-            {/* Main app content with SafeAreaView for better compatibility */}
-            <SafeAreaView style={styles.safeArea}>
-                <View style={styles.content}>
-                    {children}
-                </View>
-            </SafeAreaView>
+            {/* Main app content */}
+            <View style={styles.content}>
+                {children}
+            </View>
         </View>
     );
 };
@@ -29,9 +27,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff', // Fallback background
-    },
-    safeArea: {
-        flex: 1,
     },
     content: {
         flex: 1,

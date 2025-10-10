@@ -4,7 +4,10 @@ import Feather from 'react-native-vector-icons/Feather';
 import { useTranslation } from 'react-i18next';
 import DashboardScreen from '../../screens/DashboardScreen/DashboardScreen';
 import SettingsScreen from '../../screens/Setting/Settings';
-import DrawerNavigator from '../DrawerNavigation/DrawerNavigator';
+import DailyResultFormScreen from '../../screens/DailyResultFormScreen';
+import MyWallet from '../../screens/MyWallet/MyWallet';
+import AddFundAccount from '../../screens/MyWallet/AddFundAccount';
+import { globalColors } from '../../Theme/globalColors';
 
 const Tab = createBottomTabNavigator();
 
@@ -16,23 +19,30 @@ const TabNavigator = () => {
             screenOptions={({ route }) => ({
                 headerShown: false,
                 animation: 'none',
-                tabBarLabel: route.name === 'Dashboard' ? t('dashboard') : t('setting'),
+                tabBarLabel: route.name === 'Dashboard' ? t('dashboard') :
+                    route.name === 'Result' ? t('result') :
+                        route.name === 'Wallet' ? t('wallet') : t('setting'),
                 tabBarIcon: ({ color, size }) => {
                     let iconName;
                     if (route.name === 'Dashboard') iconName = 'home';
+                    else if (route.name === 'Result') iconName = 'clipboard';
+                    else if (route.name === 'Wallet') iconName = 'credit-card';
                     else if (route.name === 'Setting') iconName = 'settings';
 
                     return <Feather name={iconName} size={size} color={color} />;
                 },
-                tabBarActiveTintColor: '#1e293b',
+                tabBarActiveTintColor: globalColors.blue || '#1e293b',
                 tabBarInactiveTintColor: 'gray',
                 tabBarStyle: {
                     backgroundColor: '#f8fafc',
                     borderTopWidth: 1,
                     borderTopColor: '#e2e8f0',
+                    height: 55,
+                    paddingBottom: 5,
+                    paddingTop: 5,
                 },
                 tabBarLabelStyle: {
-                    fontSize: 12,
+                    fontSize: 10,
                     fontFamily: 'Poppins-Medium',
                 },
                 tabBarHideOnKeyboard: true,
@@ -40,15 +50,24 @@ const TabNavigator = () => {
         >
             <Tab.Screen
                 name="Dashboard"
-                component={DrawerNavigator}
+                component={DashboardScreen}
                 options={{
                     animation: 'none',
                 }}
-                listeners={({ navigation, route }) => ({
-                    tabPress: e => {
-                        navigation.navigate('Dashboard', { screen: 'Dashboard' });
-                    },
-                })}
+            />
+            <Tab.Screen
+                name="Result"
+                component={DailyResultFormScreen}
+                options={{
+                    animation: 'none',
+                }}
+            />
+            <Tab.Screen
+                name="Wallet"
+                component={MyWallet}
+                options={{
+                    animation: 'none',
+                }}
             />
             <Tab.Screen
                 name="Setting"

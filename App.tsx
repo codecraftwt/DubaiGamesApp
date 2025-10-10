@@ -3,7 +3,6 @@ import React, { useEffect } from 'react';
 import type { PropsWithChildren } from 'react';
 import {
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   useColorScheme,
@@ -28,6 +27,8 @@ import { I18nextProvider, useTranslation } from 'react-i18next';
 import i18n from './src/utils/i18n';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import GlobalNetworkWrapperAdvanced from './src/components/NetworkStatus/GlobalNetworkWrapperAdvanced';
+import GlobalStatusBar from './src/components/GlobalStatusBar';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -115,9 +116,14 @@ function App(): React.JSX.Element {
     <Provider store={store}>
       <I18nextProvider i18n={i18n}>
         <PersistGate loading={null} persistor={persistor}>
-          <GlobalNetworkWrapperAdvanced>
-            <AppNavigator />
-          </GlobalNetworkWrapperAdvanced>
+          <SafeAreaProvider>
+            <GlobalStatusBar />
+            <SafeAreaView style={{ flex: 1 }}>
+              <GlobalNetworkWrapperAdvanced>
+                <AppNavigator />
+              </GlobalNetworkWrapperAdvanced>
+            </SafeAreaView>
+          </SafeAreaProvider>
         </PersistGate>
         <Toast config={customToastConfig} />
       </I18nextProvider>

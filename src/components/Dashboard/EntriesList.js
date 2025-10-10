@@ -52,6 +52,8 @@ const EntriesList = ({
     'chokada',
     'cycle',
     'cut',
+    'cut_open',
+    'cut_close',
     'running_pan',
     'saral_pan',
     'ulta_pan',

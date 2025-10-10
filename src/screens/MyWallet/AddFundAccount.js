@@ -12,13 +12,17 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchFundAccount, storeFundAccount, clearFundAccountErrors } from '../../Redux/Slices/fundAccountSlice';
 import { API_BASE_URL } from '../../utils/Api';
+import { globalColors } from '../../Theme/globalColors';
+import { useTranslation } from 'react-i18next';
 
 const AddFundAccount = () => {
     const navigation = useNavigation();
+    const { t } = useTranslation();
     const [formData, setFormData] = useState({
         upi_id: '',
         account_no: '',
@@ -46,19 +50,19 @@ const AddFundAccount = () => {
 
     const validateForm = () => {
         if (!formData.upi_id || !formData.upi_id.includes('@')) {
-            Alert.alert('Error', 'Please enter a valid UPI ID');
+            Alert.alert(t('error'), t('validUpiIdRequired'));
             return false;
         }
         if (!formData.account_no || formData.account_no.length < 12) {
-            Alert.alert('Error', 'Account number must be at least 12 digits');
+            Alert.alert(t('error'), t('accountNumberMinLength'));
             return false;
         }
         if (!formData.ifsc || formData.ifsc.length !== 11) {
-            Alert.alert('Error', 'IFSC code must be 11 characters');
+            Alert.alert(t('error'), t('ifscCodeLength'));
             return false;
         }
         if (!formData.acc_holder_name) {
-            Alert.alert('Error', 'Please enter account holder name');
+            Alert.alert(t('error'), t('accountHolderNameRequired'));
             return false;
         }
         return true;
@@ -70,9 +74,9 @@ const AddFundAccount = () => {
         try {
             await dispatch(storeFundAccount({ token, formData }));
             setModalVisible(false);
-            Alert.alert('Success', 'Fund account details updated successfully!');
+            Alert.alert(t('success'), t('fundAccountUpdatedSuccessfully'));
         } catch (err) {
-            Alert.alert('Error', err.message || 'Failed to update fund account');
+            Alert.alert(t('error'), err.message || t('fundAccountUpdateFailed'));
         }
     };
 
@@ -89,7 +93,7 @@ const AddFundAccount = () => {
                         style={styles.addAccountButton}
                         onPress={() => setModalVisible(true)}
                     >
-                        <Text style={styles.addAccountButtonText}>Add Fund Account info</Text>
+                        <Text style={styles.addAccountButtonText}>{t('addFundAccountInfo')}</Text>
                     </TouchableOpacity>
                 </View>
             );
@@ -98,28 +102,28 @@ const AddFundAccount = () => {
         if (fundAccount) {
             return (
                 <View style={styles.fundAccountDetails}>
-                    <Text style={styles.sectionTitle}>Fund Account Details</Text>
+                    <Text style={styles.sectionTitle}>{t('fundAccountDetails')}</Text>
                     <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>UPI ID: </Text>
+                        <Text style={styles.detailLabel}>{t('upiId')}: </Text>
                         <Text style={styles.detailText}>{fundAccount.upi_id}</Text>
                     </View>
                     <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Account Number: </Text>
+                        <Text style={styles.detailLabel}>{t('accountNumber')}: </Text>
                         <Text style={styles.detailText}>{fundAccount.account_no}</Text>
                     </View>
                     <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>IFSC Code: </Text>
+                        <Text style={styles.detailLabel}>{t('ifscCode')}: </Text>
                         <Text style={styles.detailText}>{fundAccount.ifsc}</Text>
                     </View>
                     <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Account Holder Name: </Text>
+                        <Text style={styles.detailLabel}>{t('accountHolderName')}: </Text>
                         <Text style={styles.detailText}>{fundAccount.acc_holder_name}</Text>
                     </View>
                     <TouchableOpacity
                         style={styles.editButton}
                         onPress={() => setModalVisible(true)}
                     >
-                        <Text style={styles.editButtonText}>Edit Details</Text>
+                        <Text style={styles.editButtonText}>{t('editDetails')}</Text>
                     </TouchableOpacity>
                 </View>
             );
@@ -131,7 +135,14 @@ const AddFundAccount = () => {
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Add Account</Text>
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => navigation.goBack()}
+                >
+                    <Icon name="arrow-back" size={24} color={globalColors.black} />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>{t('account')}</Text>
+                <View style={styles.headerRight} />
             </View>
 
             {/* Render Fund Account or loading/error message */}
@@ -147,12 +158,12 @@ const AddFundAccount = () => {
                 <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
                     <View style={styles.modalOverlay}>
                         <View style={styles.modalContent}>
-                            <Text style={styles.modalTitle}>Edit Account Details</Text>
+                            <Text style={styles.modalTitle}>{t('editAccountDetails')}</Text>
 
                             {/* UPI ID Field */}
                             <TextInput
                                 style={styles.input}
-                                placeholder="UPI ID (e.g., name@upi)"
+                                placeholder={t('upiIdPlaceholder')}
                                 value={formData.upi_id}
                                 onChangeText={(text) => handleChange('upi_id', text)}
                                 keyboardType="email-address"
@@ -163,7 +174,7 @@ const AddFundAccount = () => {
                             {/* Account Number Field */}
                             <TextInput
                                 style={styles.input}
-                                placeholder="Account Number"
+                                placeholder={t('accountNumber')}
                                 value={formData.account_no}
                                 onChangeText={(text) => handleChange('account_no', text)}
                                 keyboardType="numeric"
@@ -174,7 +185,7 @@ const AddFundAccount = () => {
                             {/* IFSC Code Field */}
                             <TextInput
                                 style={styles.input}
-                                placeholder="IFSC Code"
+                                placeholder={t('ifscCode')}
                                 value={formData.ifsc}
                                 onChangeText={(text) => handleChange('ifsc', text.toUpperCase())}
                                 maxLength={11}
@@ -184,7 +195,7 @@ const AddFundAccount = () => {
                             {/* Account Holder Name Field */}
                             <TextInput
                                 style={styles.input}
-                                placeholder="Account Holder Name"
+                                placeholder={t('accountHolderName')}
                                 value={formData.acc_holder_name}
                                 onChangeText={(text) => handleChange('acc_holder_name', text)}
                             />
@@ -201,7 +212,7 @@ const AddFundAccount = () => {
                                 {loading ? (
                                     <ActivityIndicator color="#fff" />
                                 ) : (
-                                    <Text style={styles.submitButtonText}>Save Changes</Text>
+                                    <Text style={styles.submitButtonText}>{t('saveChanges')}</Text>
                                 )}
                             </TouchableOpacity>
 
@@ -210,7 +221,7 @@ const AddFundAccount = () => {
                                 style={styles.closeButton}
                                 onPress={() => setModalVisible(false)}
                             >
-                                <Text style={styles.closeButtonText}>Close</Text>
+                                <Text style={styles.closeButtonText}>{t('close')}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -231,14 +242,25 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: 15,
-        backgroundColor: '#fff',
+        // backgroundColor: globalColors.commonpink,
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
+        // paddingTop: 50,
+    },
+    backButton: {
+        padding: 8,
+        borderRadius: 20,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
     },
     headerTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#333',
+        fontSize: 20,
+        fontFamily: 'Poppins-Bold',
+        color: globalColors.black,
+        flex: 1,
+        textAlign: 'center',
+    },
+    headerRight: {
+        width: 40,
     },
     fundAccountDetails: {
         margin: 20,

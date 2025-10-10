@@ -7,6 +7,7 @@ import {
   ScrollView,
   SafeAreaView,
   RefreshControl,
+  ActivityIndicator, // Import ActivityIndicator
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { globalColors } from '../../Theme/globalColors';
@@ -22,12 +23,9 @@ import { useFocusEffect } from '@react-navigation/native';
 const MyWallet = ({ navigation }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { balance, history } = useSelector(state => state.wallet);
+  const { balance, history, loading } = useSelector(state => state.wallet); // Add loading to the selector
   const { user } = useSelector(state => state.auth);
   const [refreshing, setRefreshing] = useState(false);
-
-  console.log('History ------>', history);
-  console.log("balance", balance)
 
   useEffect(() => {
     dispatch(getWalletHistory());
@@ -43,7 +41,6 @@ const MyWallet = ({ navigation }) => {
     React.useCallback(() => {
       dispatch(getWalletHistory());
 
-      // Cleanup function
       return () => {
         dispatch(clearWalletState());
       };
@@ -68,7 +65,6 @@ const MyWallet = ({ navigation }) => {
             color="#fff"
             style={styles.walletIcon}
           />
-
           <TouchableOpacity
             onPress={() => navigation.navigate('AddBalance')}
             style={styles.addButton}>
@@ -96,50 +92,55 @@ const MyWallet = ({ navigation }) => {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }>
         <View style={styles.transactionsList}>
-          {history?.map((transaction, index) => (
-            <View key={transaction.id} style={styles.transactionItem}>
-              <View style={styles.transactionIcon}>
-                <Icon
-                  name={
-                    transaction.transaction_type === 'credit'
-                      ? 'arrow-down'
-                      : 'arrow-up'
-                  }
-                  size={20}
-                  color={
-                    transaction.transaction_type === 'credit'
-                      ? '#4CAF50'
-                      : '#F44336'
-                  }
-                />
-              </View>
-              <View style={styles.transactionDetails}>
-                <Text style={styles.transactionType}>
-                  {transaction.trans_head ? transaction.trans_head : transaction.transaction_type}
-
-                  {console.log("transaction888", transaction?.trans_head
-                  )
-                  }
-                </Text>
-                <Text style={styles.transactionDate}>
-                  {formatDate(transaction.created_at)}
-                </Text>
-              </View>
-              <Text
-                style={[
-                  styles.transactionAmount,
-                  {
-                    color:
+          {/* Show loader while loading data */}
+          {loading ? (
+            <View style={styles.loaderContainer}>
+              <ActivityIndicator size="large" color={globalColors.primary} />
+            </View>
+          ) : (
+            history?.map((transaction, index) => (
+              <View key={transaction.id} style={styles.transactionItem}>
+                <View style={styles.transactionIcon}>
+                  <Icon
+                    name={
+                      transaction.transaction_type === 'credit'
+                        ? 'arrow-down'
+                        : 'arrow-up'
+                    }
+                    size={20}
+                    color={
                       transaction.transaction_type === 'credit'
                         ? '#4CAF50'
-                        : '#F44336',
-                  },
-                ]}>
-                {transaction.transaction_type === 'credit' ? '+' : '-'}
-                {parseInt(transaction.amount).toLocaleString()} Rs
-              </Text>
-            </View>
-          ))}
+                        : '#F44336'
+                    }
+                  />
+                </View>
+                <View style={styles.transactionDetails}>
+                  <Text style={styles.transactionType}>
+                    {transaction.trans_head
+                      ? transaction.trans_head
+                      : transaction.transaction_type}
+                  </Text>
+                  <Text style={styles.transactionDate}>
+                    {formatDate(transaction.created_at)}
+                  </Text>
+                </View>
+                <Text
+                  style={[
+                    styles.transactionAmount,
+                    {
+                      color:
+                        transaction.transaction_type === 'credit'
+                          ? '#4CAF50'
+                          : '#F44336',
+                    },
+                  ]}>
+                  {transaction.transaction_type === 'credit' ? '+' : '-'}
+                  {parseInt(transaction.amount).toLocaleString()} Rs
+                </Text>
+              </View>
+            ))
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -260,6 +261,12 @@ const styles = StyleSheet.create({
   transactionAmount: {
     fontSize: 16,
     fontFamily: 'Poppins-Bold',
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 200,
   },
 });
 

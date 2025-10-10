@@ -117,20 +117,33 @@ const ResultScreen = ({ navigation, route }) => {
             </View>
 
             {/* Open Result */}
-            {openResult && (
-              <View style={styles.badgesContainer}>
-                {renderBadge('Open Number', openResult.number, '#FFD700')}
-                {renderBadge('Type', openResult.type, '#FF7F50')}
+            {openResult && !closeResult && (
+              <View style={styles.resultRow}>
+                <Text style={styles.resultLabel}>OPEN RESULT</Text>
+                <Text style={styles.resultValue}>
+                  {openResult.pannumber}-{openResult.number}
+                </Text>
               </View>
             )}
 
-            {/* Close Result */}
-            {closeResult && (
-              <View style={styles.badgesContainer}>
-                {renderBadge('Close Number', closeResult.number, '#00CED1')}
-                {renderBadge('Type', closeResult.type, '#FF69B4')}
+            {closeResult && !openResult && (
+              <View style={styles.resultRow}>
+                <Text style={styles.resultLabel}>CLOSE RESULT</Text>
+                <Text style={styles.resultValue}>
+                  {closeResult.number}-{closeResult.pannumber}
+                </Text>
               </View>
             )}
+
+            {openResult && closeResult && (
+              <View style={styles.resultRow}>
+                <Text style={styles.resultLabel}>RESULT</Text>
+                <Text style={styles.resultValue}>
+                  {openResult.pannumber}-{openResult.number}{closeResult.number}-{closeResult.pannumber}
+                </Text>
+              </View>
+            )}
+
 
             {/* Market */}
             <View style={styles.detailItem}>
@@ -256,6 +269,27 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 14,
   },
+  resultRow: {
+    // flexDirection: 'row',
+    // justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+  },
+  resultLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+  },
+  resultValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+
 });
 
 export default ResultScreen;

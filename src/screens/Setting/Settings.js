@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_BASE_URL } from '../../utils/Api';
 import Toast from 'react-native-toast-message';
+import { TouchableWithoutFeedback, Keyboard } from 'react-native';
 
 const SettingsScreen = ({ navigation }) => {
     const dispatch = useDispatch();
@@ -140,12 +141,12 @@ const SettingsScreen = ({ navigation }) => {
 
 
     const settingsOptions = [
-        // {
-        //     id: 1,
-        //     title: t('profile'),
-        //     icon: 'person-outline',
-        //     onPress: () => navigation.navigate('Profile'),
-        // },
+        {
+            id: 1,
+            title: t('account'),
+            icon: 'person-outline',
+            onPress: () => navigation.navigate('Account'),
+        },
         {
             id: 2,
             title: t('language'),
@@ -237,35 +238,39 @@ const SettingsScreen = ({ navigation }) => {
                 animationType="fade"
                 onRequestClose={() => setShowLanguageModal(false)}
             >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>{t('selectLanguage')}</Text>
-                            <TouchableOpacity onPress={() => setShowLanguageModal(false)}>
-                                <Icon name="close" size={24} color={globalColors.darkBlue} />
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.languageList}>
-                            {languages.map((lang) => (
-                                <TouchableOpacity
-                                    key={lang.code}
-                                    style={[
-                                        styles.languageItem,
-                                        i18n.language === lang.code && styles.activeLanguageItem
-                                    ]}
-                                    onPress={() => changeLanguage(lang.code)}
-                                >
-                                    <Text style={[
-                                        styles.languageText,
-                                        i18n.language === lang.code && styles.activeLanguageText
-                                    ]}>
-                                        {lang.name}
-                                    </Text>
+                <TouchableWithoutFeedback onPress={() => setShowLanguageModal(false)}>
+
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalContent}>
+                            <View style={styles.modalHeader}>
+                                <Text style={styles.modalTitle}>{t('selectLanguage')}</Text>
+                                <TouchableOpacity onPress={() => setShowLanguageModal(false)}>
+                                    <Icon name="close" size={24} color={globalColors.darkBlue} />
                                 </TouchableOpacity>
-                            ))}
+                            </View>
+                            <View style={styles.languageList}>
+                                {languages.map((lang) => (
+                                    <TouchableOpacity
+                                        key={lang.code}
+                                        style={[
+                                            styles.languageItem,
+                                            i18n.language === lang.code && styles.activeLanguageItem
+                                        ]}
+                                        onPress={() => changeLanguage(lang.code)}
+                                    >
+                                        <Text style={[
+                                            styles.languageText,
+                                            i18n.language === lang.code && styles.activeLanguageText
+                                        ]}>
+                                            {lang.name}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
                         </View>
                     </View>
-                </View>
+                </TouchableWithoutFeedback>
+
             </Modal>
 
             {/* Password Change Modal */}

@@ -72,7 +72,7 @@ const WithdrawBalanceScreen = () => {
             text: 'OK',
             onPress: () => {
               // Navigate to the Add Fund Account page if no fund account exists
-              navigation.navigate('AddFundAccount');
+              navigation.navigate('Account');
             }
           }
         ]
@@ -92,7 +92,7 @@ const WithdrawBalanceScreen = () => {
       return;
     }
 
-    if (amountToWithdraw < 200) {
+    if (amountToWithdraw < 9) {
       Alert.alert('Error', 'Minimum withdrawal amount is ₹200');
       return;
     }

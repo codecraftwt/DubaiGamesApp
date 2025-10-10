@@ -4,7 +4,8 @@ import {
     Image, Dimensions,
     ScrollView,
     KeyboardAvoidingView,
-    Modal
+    Modal,
+    TouchableWithoutFeedback
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -179,8 +180,14 @@ const LoginScreen = ({ navigation }) => {
         <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={styles.container}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         >
-            <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            <ScrollView
+                contentContainerStyle={styles.scrollContainer}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+                bounces={false}
+            >
                 <Image style={{
                     width: wp('90%'),
                     height: hp('24%'),
@@ -290,7 +297,7 @@ const LoginScreen = ({ navigation }) => {
                     navigation.navigate('LogoutAllDevices');
                 }}>
                     <Text style={[styles.subtitle, { fontSize: hp('2%'), color: globalColors.black }]}>
-                        {t('Logout all Devices')}</Text>
+                        {t('LogoutallDevicesText')}</Text>
                 </TouchableOpacity>
 
 
@@ -301,63 +308,64 @@ const LoginScreen = ({ navigation }) => {
                     animationType="fade"
                     onRequestClose={() => setShowForgotPasswordModal(false)}
                 >
-                    <View style={styles.modalContainer}>
-                        <View style={styles.modalContent}>
-                            <View style={styles.modalHeader}>
-                                <Text style={styles.modalTitle}>{t('forgotPassword')}</Text>
-                                <TouchableOpacity
-                                    style={styles.closeButton}
-                                    onPress={() => setShowForgotPasswordModal(false)}
-                                >
-                                    <Icon name="close" size={24} color={globalColors.darkGrey} />
-                                </TouchableOpacity>
-                            </View>
+                    <TouchableWithoutFeedback onPress={() => setShowForgotPasswordModal(false)}>
+                        <View style={styles.modalContainer}>
+                            <TouchableWithoutFeedback onPress={() => { }}>
+                                {/* Prevents closing when clicking inside modal */}
+                                <View style={styles.modalContent}>
+                                    <View style={styles.modalHeader}>
+                                        <Text style={styles.modalTitle}>{t('forgotPassword')}</Text>
+                                        <TouchableOpacity
+                                            style={styles.closeButton}
+                                            onPress={() => setShowForgotPasswordModal(false)}
+                                        >
+                                            <Icon name="close" size={24} color={globalColors.darkGrey} />
+                                        </TouchableOpacity>
+                                    </View>
 
-                            <View style={styles.modalBody}>
-                                {/* <Text style={styles.modalDescription}>
-                                    {t('forgotPassword')}
-                                </Text> */}
+                                    <View style={styles.modalBody}>
+                                        <View style={styles.modalInputContainer}>
+                                            <Icon
+                                                name="email-outline"
+                                                size={20}
+                                                color={globalColors.darkGrey}
+                                                style={styles.inputIcon}
+                                            />
+                                            <TextInput
+                                                style={styles.modalInput}
+                                                placeholder={t('email')}
+                                                placeholderTextColor={globalColors.black}
+                                                value={forgotPasswordEmail}
+                                                onChangeText={setForgotPasswordEmail}
+                                                keyboardType="email-address"
+                                                autoCapitalize="none"
+                                                autoFocus={true}
+                                            />
+                                        </View>
+                                    </View>
 
-                                <View style={styles.modalInputContainer}>
-                                    <Icon
-                                        name="email-outline"
-                                        size={20}
-                                        color={globalColors.darkGrey}
-                                        style={styles.inputIcon}
-                                    />
-                                    <TextInput
-                                        style={styles.modalInput}
-                                        placeholder={t('email')}
-                                        placeholderTextColor={globalColors.black}
-                                        value={forgotPasswordEmail}
-                                        onChangeText={setForgotPasswordEmail}
-                                        keyboardType="email-address"
-                                        autoCapitalize="none"
-                                        autoFocus={true}
-                                    />
+                                    <View style={styles.modalFooter}>
+                                        <TouchableOpacity
+                                            style={[
+                                                styles.submitButton,
+                                                isForgotLoading && styles.submitButtonDisabled
+                                            ]}
+                                            onPress={handleForgotPassword}
+                                            disabled={isForgotLoading}
+                                        >
+                                            {isForgotLoading ? (
+                                                <ActivityIndicator size="small" color={globalColors.white} />
+                                            ) : (
+                                                <Text style={styles.submitButtonText}>
+                                                    {t('sendResetLink')}
+                                                </Text>
+                                            )}
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
-                            </View>
-
-                            <View style={styles.modalFooter}>
-                                <TouchableOpacity
-                                    style={[
-                                        styles.submitButton,
-                                        isForgotLoading && styles.submitButtonDisabled
-                                    ]}
-                                    onPress={handleForgotPassword}
-                                    disabled={isForgotLoading}
-                                >
-                                    {isForgotLoading ? (
-                                        <ActivityIndicator size="small" color={globalColors.white} />
-                                    ) : (
-                                        <Text style={styles.submitButtonText}>
-                                            {t('sendResetLink')}
-                                        </Text>
-                                    )}
-                                </TouchableOpacity>
-                            </View>
+                            </TouchableWithoutFeedback>
                         </View>
-                    </View>
+                    </TouchableWithoutFeedback>
                 </Modal>
             </ScrollView>
 
@@ -383,6 +391,7 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        paddingBottom: 20,
     },
     inputContainer: {
         flexDirection: 'row',
