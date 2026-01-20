@@ -16,6 +16,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Keyboard,
+  AppState,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Header from '../../components/Header/Header';
@@ -116,6 +117,7 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
   const [editNumber, setEditNumber] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [refreshingMarketTimes, setRefreshingMarketTimes] = useState(false);
 
   console.log('market data 11 fetch------->', data);
 
@@ -358,11 +360,28 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
       }
     };
 
+    const refreshMarketTimes = async () => {
+      try {
+        await dispatch(fetchCountdowns());
+        console.log('Market times refreshed');
+      } catch (error) {
+        console.error('Error refreshing market times:', error);
+      }
+    };
+
     fetchCurrentTime();
+    refreshMarketTimes(); // Initial fetch
+
     // Update time every minute
-    const interval = setInterval(fetchCurrentTime, 60000);
-    return () => clearInterval(interval);
-  }, []);
+    const timeInterval = setInterval(fetchCurrentTime, 60000);
+    // Refresh market times every 2 minutes (balanced for performance and responsiveness)
+    const marketTimesInterval = setInterval(refreshMarketTimes, 120000);
+
+    return () => {
+      clearInterval(timeInterval);
+      clearInterval(marketTimesInterval);
+    };
+  }, [dispatch]);
 
   const loadInitialData = async () => {
     await dispatch(fetchCountdowns());
@@ -380,6 +399,8 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
     const loadData = async () => {
       await fetchDeclaredResults();
       await fetchData();
+      // Refresh market times when date or market changes
+      await refreshMarketTimesData();
     };
     loadData();
   }, [date, market]);
@@ -388,6 +409,22 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
     // Fetch countdowns immediately when component mounts
     dispatch(fetchCountdowns());
   }, [dispatch]);
+
+  // Listen for app state changes to refresh market times when app becomes active
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState) => {
+      if (nextAppState === 'active') {
+        // Refresh market times when app becomes active
+        refreshMarketTimesData();
+      }
+    };
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+
+    return () => {
+      subscription?.remove();
+    };
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -518,6 +555,19 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
       setSelectedCategory(filteredCategories[0]);
     }
   }, [filteredCategories]);
+
+  // Refresh market times when category changes (for validation)
+  useEffect(() => {
+    const refreshForCategoryChange = async () => {
+      // Only refresh if it's today's date (when validation matters)
+      const today = new Date();
+      const isToday = formatDate(date) === formatDate(today);
+      if (isToday) {
+        await refreshMarketTimesData();
+      }
+    };
+    refreshForCategoryChange();
+  }, [selectedCategory]);
 
   // Auto-focus first field when RunningPan category is selected
   useEffect(() => {
@@ -713,14 +763,127 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
     return compareDate < today;
   };
 
+  // Function to refresh market times manually (only when needed)
+  const refreshMarketTimesData = async () => {
+    try {
+      setRefreshingMarketTimes(true);
+      await dispatch(fetchCountdowns());
+      console.log('Market times refreshed successfully');
+    } catch (error) {
+      console.error('Error refreshing market times:', error);
+    } finally {
+      setRefreshingMarketTimes(false);
+    }
+  };
+
+  // Function to validate market time before submission
+  const validateMarketTime = async () => {
+    console.log('🔍 Starting market time validation...');
+
+    // Check if selected date is today
+    const today = new Date();
+    const isToday = formatDate(date) === formatDate(today);
+    console.log('📅 Is today:', isToday, 'Selected date:', formatDate(date), 'Today:', formatDate(today));
+
+    // If it's not today, allow submission (future dates are allowed)
+    if (!isToday) {
+      console.log('✅ Not today, allowing submission');
+      return { isValid: true };
+    }
+
+    console.log('🔄 Refreshing market times data...');
+    // Refresh market times and get fresh data
+    const response = await dispatch(fetchCountdowns());
+    const freshMarketTimes = response.payload?.data || response.payload;
+    console.log('📊 Fresh market times:', freshMarketTimes);
+
+    // Get market times for the selected market
+    const marketTimeData = freshMarketTimes?.filter(
+      time => time.market.toLowerCase() === market.toLowerCase(),
+    );
+    console.log('🎯 Market time data for', market, ':', marketTimeData);
+
+    if (!marketTimeData || marketTimeData.length === 0) {
+      console.log('⚠️ No market time data found, allowing submission');
+      return { isValid: true }; // If no market time data, allow submission
+    }
+
+    console.log('⏰ Current time:', currentTime);
+    console.log('📋 Selected category:', selectedCategory);
+
+    // Check if current time exceeds open/close times
+    const openTimeExceeded = marketTimeData.some(
+      time => {
+        const exceeded = time.type === 'open' && isTimeExceeded(time.end_time, currentTime);
+        console.log(`🟢 Open time check - ${time.end_time} vs ${currentTime}:`, exceeded);
+        return exceeded;
+      }
+    );
+
+    const closeTimeExceeded = marketTimeData.some(
+      time => {
+        const exceeded = time.type === 'close' && isTimeExceeded(time.end_time, currentTime);
+        console.log(`🔴 Close time check - ${time.end_time} vs ${currentTime}:`, exceeded);
+        return exceeded;
+      }
+    );
+
+    console.log('🟢 Open time exceeded:', openTimeExceeded);
+    console.log('🔴 Close time exceeded:', closeTimeExceeded);
+
+    // Determine which categories are affected by time restrictions
+    const openCategories = ['OPEN', 'JODI', 'CHOKADA', 'CYCLE', 'CUT', 'RUNNING_PAN', 'SARAL_PAN', 'ULTA PAN', 'BEERICH', 'FARAK', 'OPENPAN'];
+    const closeCategories = ['CLOSE', 'CLOSEPAN'];
+
+    console.log('📝 Open categories:', openCategories);
+    console.log('📝 Close categories:', closeCategories);
+
+    // Check if the selected category is restricted by time
+    if (openTimeExceeded && openCategories.includes(selectedCategory)) {
+      const message = `Market time for ${selectedCategory} has exceeded. You cannot submit ${selectedCategory} entries at this time.`;
+      console.log('❌ Validation failed - Open time exceeded:', message);
+      return {
+        isValid: false,
+        message: message
+      };
+    }
+
+    if (closeTimeExceeded && closeCategories.includes(selectedCategory)) {
+      const message = `Market time for ${selectedCategory} has exceeded. You cannot submit ${selectedCategory} entries at this time.`;
+      console.log('❌ Validation failed - Close time exceeded:', message);
+      return {
+        isValid: false,
+        message: message
+      };
+    }
+
+    console.log('✅ Market time validation passed');
+    return { isValid: true };
+  };
+
   const handleSubmit = async () => {
+    console.log('🚀 Starting handleSubmit...');
     setIsSubmitting(true);
 
     try {
       if (isPastDate(date)) {
+        console.log('❌ Past date detected, blocking submission');
         Alert.alert('Error', 'Cannot submit entries for past dates');
         return;
       }
+
+      console.log('⏰ Validating market time before submission...');
+      // Validate market time before submission
+      const timeValidation = await validateMarketTime();
+      console.log('📊 Time validation result:', timeValidation);
+
+      if (!timeValidation.isValid) {
+        console.log('❌ Market time validation failed:', timeValidation.message);
+        Alert.alert('Market Time Exceeded', timeValidation.message);
+        return;
+      }
+
+      console.log('✅ Market time validation passed, continuing with submission...');
 
       // Validation for OPEN category - both number and amount are required
       if (selectedCategory === 'OPEN' ||
@@ -1399,8 +1562,8 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
     }
   };
 
-  const handleRemoveNumber = num => {
-    const updatedNumbersList = numbersList.filter(item => item !== num);
+  const handleRemoveNumber = index => {
+    const updatedNumbersList = numbersList.filter((item, i) => i !== index);
     setNumbersList(updatedNumbersList);
 
     setPayloadString(updatedNumbersList.join(','));
@@ -1489,9 +1652,14 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
   }, [selectedCategory]);
 
 
-  const onRefresh = useCallback(() => {
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    fetchData().then(() => {
+    try {
+      // Refresh all data including market times
+      await dispatch(fetchCountdowns());
+      await fetchData();
+      await fetchDeclaredResults();
+
       // Reset selected category if needed
       const { categories: newFilteredCategories } = getFilteredCategories(
         data?.results,
@@ -1504,13 +1672,12 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
       if (!newFilteredCategories.includes(selectedCategory)) {
         setSelectedCategory(newFilteredCategories[0]);
       }
-      fetchDeclaredResults();
-      fetchData()
-      loadInitialData()
-      getFilteredCategories()
+    } catch (error) {
+      console.error('Error during refresh:', error);
+    } finally {
       setRefreshing(false);
-    });
-  }, [fetchData, getFilteredCategories, selectedCategory]);
+    }
+  }, [dispatch, fetchData, getFilteredCategories, selectedCategory, data?.results, data?.role, marketsTime, currentTime, market]);
 
 
 
@@ -1635,13 +1802,22 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
         {marketsTime && currentTime && (
           <View style={{ flexDirection: 'row', alignItems: 'stretch' }}>
             <View style={{ flex: 1 }}>
-              <MarketCountdown
-                marketData={marketsTime}
-                selectedMarket={market}
-                currentTime={currentTime}
-                selectedDate={date}
-                alternateOpenClose
-              />
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{ flex: 1 }}>
+                  <MarketCountdown
+                    marketData={marketsTime}
+                    selectedMarket={market}
+                    currentTime={currentTime}
+                    selectedDate={date}
+                    alternateOpenClose
+                  />
+                </View>
+                {refreshingMarketTimes && (
+                  <View style={{ marginLeft: 8 }}>
+                    <ActivityIndicator size="small" color={globalColors.blue} />
+                  </View>
+                )}
+              </View>
             </View>
             <View style={{
               flex: 1,
@@ -2259,10 +2435,10 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
                 data={numbersList}
                 keyExtractor={(item, index) => index.toString()}
                 horizontal
-                renderItem={({ item }) => (
+                renderItem={({ item, index }) => (
                   <View style={styles.numberContainer}>
                     <Text style={styles.numberText}>{item}</Text>
-                    <TouchableOpacity onPress={() => handleRemoveNumber(item)}>
+                    <TouchableOpacity onPress={() => handleRemoveNumber(index)}>
                       <Text style={styles.removeText}>X</Text>
                     </TouchableOpacity>
                   </View>
