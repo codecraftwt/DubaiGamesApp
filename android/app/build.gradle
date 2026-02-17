@@ -6,6 +6,24 @@ apply plugin: "com.facebook.react"
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
  */
+// Patch autolinking.cpp to remove component descriptors not present in current library codegen
+// (RNSBottomTabsComponentDescriptor in react-native-screens 4.18, RNSSafeAreaViewComponentDescriptor mismatch)
+tasks.configureEach { task ->
+    if (task.name == "generateAutolinkingNewArchitectureFiles") {
+        task.doLast {
+            def cppFile = file("${task.project.buildDir}/generated/autolinking/src/main/jni/autolinking.cpp")
+            if (cppFile.exists()) {
+                def lines = cppFile.readLines()
+                def patched = lines.findAll { line ->
+                    !line.contains("RNSBottomTabsComponentDescriptor") &&
+                    !line.contains("RNSSafeAreaViewComponentDescriptor")
+                }
+                cppFile.write(patched.join("\n"))
+            }
+        }
+    }
+}
+
 react {
     /* Folders */
     //   The root of your project, i.e. where "package.json" lives. Default is '../..'
