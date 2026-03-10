@@ -26,7 +26,8 @@ const RegistrationScreen = ({ navigation }) => {
         email: '',
         phone_number: '',
         pass: '',
-        confirm_pass: ''
+        confirm_pass: '',
+        applied_referral_code: ''
     });
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
@@ -53,7 +54,8 @@ const RegistrationScreen = ({ navigation }) => {
                 email: '',
                 phone_number: '',
                 pass: '',
-                confirm_pass: ''
+                confirm_pass: '',
+                applied_referral_code: ''
             });
         }
     }, [isRegistered, navigation]);
@@ -277,6 +279,20 @@ const RegistrationScreen = ({ navigation }) => {
                                 color="#888"
                             />
                         </TouchableOpacity>
+                    </View>
+                </View>
+
+                <View style={styles.inputWrapper}>
+                    <View style={styles.inputContainer}>
+                        <Icon name="gift-outline" size={hp('2.8%')} color="#888" style={styles.icon} />
+                        <TextInput
+                            style={styles.input}
+                            placeholder={t('referralCode')}
+                            placeholderTextColor={globalColors.inputLabel}
+                            value={formData.applied_referral_code}
+                            onChangeText={(text) => handleChange('applied_referral_code', text)}
+                            autoCapitalize="characters"
+                        />
                     </View>
                 </View>
 

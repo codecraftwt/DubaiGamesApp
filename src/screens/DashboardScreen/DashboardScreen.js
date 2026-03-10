@@ -53,6 +53,35 @@ import { useNavigation } from '@react-navigation/native';
 import { getWalletHistory, setWalletBalance, withdrawFromWallet } from '../../Redux/Slices/walletSlice';
 import { Marquee } from '@animatereactnative/marquee';
 import ModernMarquee from '../../utils/ModernMarquee';
+import LinearGradient from 'react-native-linear-gradient';
+
+const SARAL_ULTA_ALLOWED_NUMBERS = new Set([
+  '137', '129', '120', '130', '140', '123', '124', '125', '126', '127',
+  '128', '138', '139', '149', '159', '150', '160', '134', '135', '136',
+  '146', '147', '148', '158', '168', '169', '179', '170', '180', '145',
+  '236', '156', '157', '167', '230', '178', '250', '189', '234', '190',
+  '245', '237', '238', '239', '249', '240', '269', '260', '270', '235',
+  '290', '246', '247', '248', '258', '259', '278', '279', '289', '280',
+  '380', '345', '256', '257', '267', '268', '340', '350', '360', '370',
+  '470', '390', '346', '347', '348', '349', '359', '369', '379', '389',
+  '489', '480', '490', '356', '357', '358', '368', '378', '450', '460',
+  '560', '570', '580', '590', '456', '367', '458', '459', '469', '479',
+  '678', '589', '670', '680', '690', '457', '467', '468', '478', '569',
+  '579', '679', '689', '789', '780', '790', '890', '567', '568', '578',
+  '119', '110', '166', '112', '113', '114', '115', '116', '117', '118',
+  '155', '228', '229', '220', '122', '277', '133', '224', '144', '226',
+  '227', '255', '337', '266', '177', '330', '188', '233', '199', '244',
+  '335', '336', '355', '338', '339', '448', '223', '288', '225', '299',
+  '344', '499', '445', '446', '366', '466', '377', '440', '388', '334',
+  '399', '660', '599', '455', '447', '556', '449', '477', '559', '488',
+  '588', '688', '779', '699', '799', '880', '557', '558', '577', '668',
+  '669', '778', '788', '770', '889', '899', '566', '990', '667', '677',
+  '777', '200', '300', '400', '500', '600', '700', '800', '900', '000',
+  '100', '444', '111', '888', '555', '222', '999', '666', '333', '550',
+]);
+
+const isAllowedSaralUltaNumber = num =>
+  SARAL_ULTA_ALLOWED_NUMBERS.has(String(num || '').trim());
 
 
 const DashboardScreen = ({ navigation: propNavigation }) => {
@@ -253,6 +282,7 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
   console.log('agent=========>', agent);
   console.log("agent=========>", agent?.id)
   const { marketsTime } = useSelector(state => state.countdown);
+  const { balance: walletBalance } = useSelector(state => state.wallet);
 
   console.log('marketsTime', marketsTime);
 
@@ -291,7 +321,11 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
       });
 
       if (response.data.success) {
-        setDeclaredResults(response.data.result);
+        // Filter results to show only the selected market
+        const filteredResults = response.data.result.filter(
+          result => result.market.toLowerCase() === market.toLowerCase()
+        );
+        setDeclaredResults(filteredResults);
       }
     } catch (error) {
       if (error.response && (error.response.status === 401 || error.response.status === 403)) {
@@ -425,6 +459,10 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
       subscription?.remove();
     };
   }, []);
+
+  useEffect(() => {
+    dispatch(getWalletHistory());
+  }, [dispatch]);
 
   useEffect(() => {
     fetchData();
@@ -569,24 +607,24 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
     refreshForCategoryChange();
   }, [selectedCategory]);
 
-  // Auto-focus first field when RunningPan category is selected
-  useEffect(() => {
-    if (selectedCategory === 'RUNNING_PAN') {
-      // Small delay to ensure the component is rendered
-      setTimeout(() => {
-        numberInputRef.current?.focus();
-      }, 100);
-    } else if (selectedCategory === 'SARAL_PAN') {
-      // Auto-focus first field for SARAL_PAN
-      setTimeout(() => {
+  // Auto-focus helper function
+  const focusFirstField = () => {
+    // Small delay to ensure the component is rendered
+    setTimeout(() => {
+      if (selectedCategory === 'SARAL_PAN') {
         saralPanNumberInputRef.current?.focus();
-      }, 100);
-    } else if (selectedCategory === 'ULTA PAN') {
-      // Auto-focus first field for ULTA PAN
-      setTimeout(() => {
+      } else if (selectedCategory === 'ULTA PAN') {
         ultaPanGunuleInputRef.current?.focus();
-      }, 100);
-    }
+      } else {
+        // For all other categories, focus the main number input field
+        numberInputRef.current?.focus();
+      }
+    }, 100);
+  };
+
+  // Auto-focus first field when category is selected
+  useEffect(() => {
+    focusFirstField();
   }, [selectedCategory]);
 
   const validateNumber = (value, category, panType) => {
@@ -928,6 +966,10 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
               Alert.alert('Error', 'SARAL PAN numbers must be exactly 3 digits');
               return;
             }
+            if (!isAllowedSaralUltaNumber(entry.number)) {
+              Alert.alert('Error', `SARAL PAN number ${entry.number} is not allowed`);
+              return;
+            }
           }
         }
 
@@ -967,6 +1009,10 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
             }
             if (entry.number.length !== 3) {
               Alert.alert('Error', 'ULTA PAN numbers must be exactly 3 digits');
+              return;
+            }
+            if (!isAllowedSaralUltaNumber(entry.number)) {
+              Alert.alert('Error', `ULTA PAN number ${entry.number} is not allowed`);
               return;
             }
           }
@@ -1182,7 +1228,7 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
         console.error('Payload is empty, check your conditions and variables.');
       } else {
         try {
-          const response = await dispatch(submitEntry({ payload, token }));
+          const response = await dispatch(submitEntry({ payload, token, navigation }));
           if (submitEntry?.fulfilled?.match(response)) {
             if (response.payload.success) {
               // Update wallet balance from the response
@@ -1194,6 +1240,8 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
 
               resetFormStates();
               fetchData();
+              // Auto-focus on first field after successful submission
+              focusFirstField();
             }
           } else {
             console.error('submitEntry failed:', response);
@@ -1221,6 +1269,11 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
 
     if (saralPanNumber.length !== 3) {
       Alert.alert('Error', 'SARAL PAN must be exactly 3 digits');
+      return;
+    }
+
+    if (!isAllowedSaralUltaNumber(saralPanNumber)) {
+      Alert.alert('Error', 'This SARAL PAN number is not allowed');
       return;
     }
 
@@ -1472,6 +1525,11 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
           payload.number = editNumber;
       }
 
+      const editingType = editingEntry.type.toLowerCase();
+      if ((editingType === 'saral_pan' || editingType === 'ulta_pan') && !isAllowedSaralUltaNumber(editNumber)) {
+        throw new Error(`${editingEntry.type.toUpperCase()} number is not allowed`);
+      }
+
       // Ensure arrays don't contain empty strings
       if (payload.number && Array.isArray(payload.number)) {
         payload.number = payload.number.filter(num => num !== '');
@@ -1577,6 +1635,11 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
 
     if (ultaPanNumber.length !== 3) {
       Alert.alert('Error', 'ULTA PAN must be exactly 3 digits');
+      return;
+    }
+
+    if (!isAllowedSaralUltaNumber(ultaPanNumber)) {
+      Alert.alert('Error', 'This ULTA PAN number is not allowed');
       return;
     }
 
@@ -1819,17 +1882,39 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
                 )}
               </View>
             </View>
-            <View style={{
-              flex: 1,
-              // backgroundColor: '#f8fafc',
-              borderRadius: 6,
-              alignItems: 'center',
-              justifyContent: 'center',
-              // height: 60,
-              marginRight: 6
-            }}>
+            <LinearGradient
+              colors={['#1e3c72', '#2a5298']}
+              style={{
+                flex: 1,
+                borderRadius: 8,
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginRight: 6,
+                paddingVertical: 5,
+                paddingHorizontal: 10,
+                elevation: 4,
+                shadowColor: '#000',
+                shadowOpacity: 0.2,
+                shadowRadius: 4,
+                shadowOffset: { width: 0, height: 2 },
+                minHeight: 50,
+              }}>
+              <Text style={{
+                fontFamily: 'Poppins-Bold',
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontSize: 10,
+                textTransform: 'uppercase',
+                letterSpacing: 0.5,
+              }}>
+                {'SURE'}
+              </Text>
               {Array.isArray(sureRecords) && sureRecords?.length > 0 ? (
-                <Text style={{ fontFamily: 'Poppins-Bold', color: '#1e293b' }}>
+                <Text style={{
+                  fontFamily: 'Poppins-Bold',
+                  color: '#fff',
+                  fontSize: 16,
+                  textAlign: 'center',
+                }}>
                   {(() => {
                     // Find open-pan and close-pan records
                     const openPanRecord = sureRecords.find(record => record?.type === 'open-pan');
@@ -1848,11 +1933,11 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
                   })()}
                 </Text>
               ) : (
-                <Text style={{ fontFamily: 'Poppins-Bold', color: '#1e293b' }}>
+                <Text style={{ fontFamily: 'Poppins-Bold', color: '#fff', fontSize: 14 }}>
                   No Data
                 </Text>
               )}
-            </View>
+            </LinearGradient>
 
           </View>
         )}
@@ -2055,6 +2140,7 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
                     <View style={styles.inputGroup}>
                       <Text style={styles.label}>{t('enterNumber')}</Text>
                       <TextInput
+                        ref={numberInputRef}
                         style={[
                           styles.input,
                           !validateNumber(number, selectedCategory) &&
@@ -2112,6 +2198,7 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
                       <View style={styles.inputGroup}>
                         <Text style={styles.label}>{t('enterNumber')}</Text>
                         <TextInput
+                          ref={numberInputRef}
                           style={[
                             styles.input,
                             !validateNumber(number, selectedCategory) &&
@@ -2152,6 +2239,7 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
                       <View style={styles.inputGroup}>
                         <Text style={styles.label}>{t('enterNumber')}</Text>
                         <TextInput
+                          ref={numberInputRef}
                           style={[
                             styles.input,
                             !validateNumber(
@@ -2466,24 +2554,34 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
               </View>
               {!bothResultsOut && (
                 <View style={styles.totalContainer}>
+                  <View style={styles.totalRow}>
+                    <View style={styles.totalColumn}>
+                      <Text style={styles.totalLabel}>{t('openAmount')}</Text>
+                      <Text style={styles.totalValue}>
+                        {data?.totalOpenAmount || 0}
+                      </Text>
+                    </View>
+                    <View style={styles.totalColumn}>
+                      <Text style={styles.totalLabel}>{t('closeAmount')}</Text>
 
-                  <View style={styles.totalItem}>
-                    <Text style={styles.totalLabel}>{t('openAmount')}</Text>
-                    <Text style={styles.totalValue}>
-                      {data?.totalOpenAmount || 0}
-                    </Text>
-                  </View>
-                  <View style={styles.totalItem}>
-                    <Text style={styles.totalLabel}>{t('closeAmount')}</Text>
-                    <Text style={styles.totalValue}>
-                      {data?.totalCloseAmount || 0}
-                    </Text>
-                  </View>
-                  <View style={styles.totalItem}>
-                    <Text style={styles.totalLabel}>{t('totalAmount')}</Text>
-                    <Text style={styles.totalValue}>
-                      {data?.totalAmount || 0}
-                    </Text>
+                      <Text style={styles.totalValue}>
+                        {data?.totalCloseAmount || 0}
+                      </Text>
+                    </View>
+                    <View style={styles.totalColumn}>
+                      <Text style={styles.totalLabel}>{t('totalAmount')}</Text>
+
+                      <Text style={styles.totalValue}>
+                        {data?.totalAmount || 0}
+                      </Text>
+                    </View>
+                    <View style={styles.totalColumn}>
+                      <Text style={styles.totalLabel}>{t('walletBalance')}</Text>
+
+                      <Text style={styles.totalValue}>
+                        {walletBalance || 0}
+                      </Text>
+                    </View>
                   </View>
                 </View>
               )}
@@ -2497,6 +2595,9 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
           handleEdit={handleEdit}
           userRole={data?.role}
           marketResults={data?.results}
+          marketTimes={marketsTime}
+          currentTime={currentTime}
+          declaredResults={declaredResults}
           onSelectionChange={handleEntrySelection}
           isLoading={isEntriesLoadings}
         />
@@ -2734,25 +2835,39 @@ const styles = StyleSheet.create({
   //   color: globalColors.darkBlue,
   // },
   totalContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap', // Allow wrapping
-    justifyContent: 'space-between',
-    padding: 10,
+    padding: 15,
     backgroundColor: globalColors.white,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#ddd',
   },
-  totalItem: {
-    // width: isSmallScreen ? '100%' : '30%', // Full width on small, 1/3 on larger
+  totalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
     alignItems: 'center',
-    // marginBottom: 5,
+  },
+  totalColumn: {
+    flex: 1,
+    alignItems: 'center',
+    paddingHorizontal: 5,
+    minWidth: 70,
+  },
+  totalItem: {
+    flex: 1,
+    alignItems: 'center',
+    paddingHorizontal: 10,
   },
   totalLabel: {
     fontSize: 12,
     fontFamily: 'Poppins-Bold',
-    color: '#555',
-    // marginBottom: 5,
+    color: '#333',
+    textAlign: 'center',
+  },
+  totalSubLabel: {
+    fontSize: 12,
+    fontFamily: 'Poppins-Medium',
+    color: '#666',
+    marginBottom: 5,
     textAlign: 'center',
   },
   totalValue: {

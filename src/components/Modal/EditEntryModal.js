@@ -105,7 +105,6 @@ const EditEntryModal = ({ visible, entry, onClose, onSave, editNumber, setEditNu
 
     return (
         <Modal
-            animationType="slide"
             transparent={true}
             visible={visible}
             onRequestClose={onClose}

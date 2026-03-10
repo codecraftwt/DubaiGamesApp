@@ -7,7 +7,7 @@ import { Alert } from 'react-native';
 
 export const submitEntry = createAsyncThunk(
     'entry/submitEntry',
-    async ({ payload, token }, { dispatch, rejectWithValue }) => {
+    async ({ payload, token, navigation }, { dispatch, rejectWithValue }) => {
         try {
             const response = await axios.post(`${API_BASE_URL}/entery/store`, payload, {
                 headers: {
@@ -28,10 +28,17 @@ export const submitEntry = createAsyncThunk(
                         'Insufficient Balance',
                         'Your wallet balance is too low to place this entry. Please add funds to your wallet.',
                         [
-
                             {
                                 text: 'Cancel',
                                 style: 'cancel',
+                            },
+                            {
+                                text: 'Add Funds',
+                                onPress: () => {
+                                    if (navigation) {
+                                        navigation.navigate('AddBalance');
+                                    }
+                                },
                             },
                         ]
                     );

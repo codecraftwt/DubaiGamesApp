@@ -13,6 +13,7 @@ import { fetchAgentByCode, fetchAgentByName } from "../../Redux/Slices/autoCompl
 import DynamicDropdown from "../DynamicDropdown";
 import PanNumberScreen from "./PanNumberScreen";
 import { addResult } from "../../Redux/Slices/panNumberSlice";
+import { fetchWinningRatesData } from "../../Redux/Slices/winningRatesSlice";
 
 export default function ResultPage() {
     const dispatch = useDispatch();
@@ -33,9 +34,15 @@ export default function ResultPage() {
     const [showPicker, setShowPicker] = useState(false);
     const [dataType, setDataType] = useState("beforeOpen");
 
+    const token = useSelector((state) => state.auth.token);
     const { beforeOpenData, status, error } = useSelector((state) => state.beforeOpen);
     const { afterOpenData, status: afterOpenStatus } = useSelector((state) => state.afterOpen);
     const { agentInfo } = useSelector((state) => state.autoComplete)
+    const {
+        winningRatesData,
+        status: winningRatesStatus,
+        error: winningRatesError
+    } = useSelector((state) => state.winningRates);
 
 
     console.log("beforeOpenData=======>", beforeOpenData)
@@ -85,6 +92,12 @@ export default function ResultPage() {
         }
     }, [agentInfo]);
 
+    useEffect(() => {
+        if (token) {
+            dispatch(fetchWinningRatesData());
+        }
+    }, [dispatch, token]);
+
     const addEntry = () => {
         const formattedDate = format(date, 'yyyy-MM-dd');
         dispatch(addResult({
@@ -99,6 +112,87 @@ export default function ResultPage() {
             setMarket2(null);
             setType("open-pan");
         });
+    };
+
+    const handleCheckResult = () => {
+        dispatch(fetchWinningRatesData());
+    };
+
+    const winningRateFields = [
+        { key: "open", label: "Open" },
+        { key: "close", label: "Close" },
+        { key: "jodi", label: "Jodi" },
+        { key: "open_closepan", label: "Open Close Pan" },
+        { key: "sp", label: "SP" },
+        { key: "dp", label: "DP" },
+        { key: "tp", label: "TP" },
+        { key: "chokada", label: "Chokada" },
+        { key: "cycle", label: "Cycle" },
+        { key: "cut", label: "Cut" },
+        { key: "running_pan", label: "Running Pan" },
+        { key: "saral_pan", label: "Saral Pan" },
+        { key: "ulta_pan", label: "Ulta Pan" },
+        { key: "farak", label: "Farak" },
+        { key: "beerich", label: "Beerich" },
+    ];
+
+    const renderWinningBreakdown = () => {
+        const agent = winningRatesData?.agent;
+        const rates = winningRateFields.map((item) => ({
+            ...item,
+            value: Number(agent?.[item.key]) || 0,
+        }));
+        const maxValue = Math.max(...rates.map((item) => item.value), 1);
+
+        return (
+            <View style={styles.winningCard}>
+                <View style={styles.winningHeaderRow}>
+                    <View>
+                        <Text style={styles.winningTitle}>Winning Breakdown</Text>
+                        <Text style={styles.winningSubtitle}>
+                            1 Rs Win Return (Agent: {agent?.name || "-"})
+                        </Text>
+                    </View>
+                    <TouchableOpacity
+                        style={styles.checkResultButton}
+                        onPress={handleCheckResult}
+                    >
+                        <Text style={styles.checkResultButtonText}>Check Result</Text>
+                    </TouchableOpacity>
+                </View>
+
+                {winningRatesStatus === "loading" && (
+                    <Text style={styles.winningStatusText}>Loading winning rates...</Text>
+                )}
+
+                {winningRatesStatus === "failed" && (
+                    <Text style={styles.winningErrorText}>
+                        {winningRatesError || "Failed to load winning rates"}
+                    </Text>
+                )}
+
+                {winningRatesStatus === "succeeded" && (
+                    <View style={styles.breakdownList}>
+                        {rates.map((item) => (
+                            <View key={item.key} style={styles.breakdownRow}>
+                                <View style={styles.breakdownTopRow}>
+                                    <Text style={styles.breakdownName}>{item.label}</Text>
+                                    <Text style={styles.breakdownValue}>1Rs = ₹{item.value}</Text>
+                                </View>
+                                <View style={styles.barTrack}>
+                                    <View
+                                        style={[
+                                            styles.barFill,
+                                            { width: `${(item.value / maxValue) * 100}%` },
+                                        ]}
+                                    />
+                                </View>
+                            </View>
+                        ))}
+                    </View>
+                )}
+            </View>
+        );
     };
 
     // Render the numbers table (0-9 with values)
@@ -421,6 +515,8 @@ export default function ResultPage() {
                             {renderPannaTable(afterOpenData)}
                         </View>
                     )}
+
+                    {renderWinningBreakdown()}
                 </ScrollView>
             </KeyboardAvoidingView>
         </SafeAreaView>
@@ -679,5 +775,89 @@ const styles = StyleSheet.create({
     pannaAmount: {
         fontSize: 10,
         color: '#666',
+    },
+    winningCard: {
+        backgroundColor: '#ffffff',
+        marginHorizontal: 10,
+        marginTop: 8,
+        marginBottom: 20,
+        borderRadius: 12,
+        padding: 14,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    winningHeaderRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    winningTitle: {
+        fontSize: 17,
+        fontWeight: '700',
+        color: '#0F172A',
+    },
+    winningSubtitle: {
+        marginTop: 2,
+        fontSize: 12,
+        color: '#64748B',
+    },
+    checkResultButton: {
+        backgroundColor: '#0EA5E9',
+        borderRadius: 8,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+    },
+    checkResultButtonText: {
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: '700',
+    },
+    winningStatusText: {
+        fontSize: 13,
+        color: '#475569',
+    },
+    winningErrorText: {
+        fontSize: 13,
+        color: '#DC2626',
+    },
+    breakdownList: {
+        paddingBottom: 2,
+    },
+    breakdownRow: {
+        backgroundColor: '#F8FAFC',
+        borderRadius: 8,
+        padding: 10,
+        marginBottom: 10,
+    },
+    breakdownTopRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 6,
+    },
+    breakdownName: {
+        fontSize: 13,
+        color: '#0F172A',
+        fontWeight: '600',
+    },
+    breakdownValue: {
+        fontSize: 12,
+        color: '#1D4ED8',
+        fontWeight: '700',
+    },
+    barTrack: {
+        height: 7,
+        borderRadius: 999,
+        backgroundColor: '#E2E8F0',
+        overflow: 'hidden',
+    },
+    barFill: {
+        height: '100%',
+        borderRadius: 999,
+        backgroundColor: '#38BDF8',
     },
 });

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, ScrollView, Modal, TextInput } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, ScrollView, Modal, TextInput, Clipboard } from 'react-native';
 import { globalColors } from '../../Theme/globalColors';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { logoutUser } from '../../Redux/Slices/authSlice';
@@ -192,6 +192,15 @@ const SettingsScreen = ({ navigation }) => {
         { code: 'kn', name: 'ಕನ್ನಡ' },
     ];
 
+    const copyToClipboard = () => {
+        Clipboard.setString(user?.referral_code);
+        Toast.show({
+            type: 'success',
+            text1: t('copied'),
+            text2: t('referralCodeCopied'),
+        });
+    };
+
     return (
         <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
             {/* Profile Section */}
@@ -207,6 +216,13 @@ const SettingsScreen = ({ navigation }) => {
                 </View>
                 <Text style={styles.userName}>{user?.name}</Text>
                 <Text style={styles.userEmail}>{user?.email}</Text>
+                {console.log("userDataall", user)}
+                <View style={styles.referralContainer}>
+                    <Text style={styles.referralText}>{t('referralCode')}: {user?.referral_code}</Text>
+                    <TouchableOpacity onPress={copyToClipboard} style={styles.copyButton}>
+                        <Icon name="copy-outline" size={20} color={globalColors.blue} />
+                    </TouchableOpacity>
+                </View>
             </View>
 
             {/* Settings Options */}
@@ -588,6 +604,26 @@ const styles = StyleSheet.create({
         color: globalColors.darkBlue,
         marginBottom: 15,
         textAlign: 'center',
+    },
+    referralContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 10,
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        backgroundColor: globalColors.LightWhite,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: globalColors.borderColor,
+    },
+    referralText: {
+        fontSize: 14,
+        fontFamily: 'Poppins-Medium',
+        color: globalColors.darkBlue,
+        marginRight: 10,
+    },
+    copyButton: {
+        padding: 5,
     },
 });
 

@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchDailyResult } from '../Redux/Slices/dailyResultSlice';
+import { fetchWinningRatesData } from '../Redux/Slices/winningRatesSlice';
 import { globalColors } from '../Theme/globalColors';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTranslation } from 'react-i18next';
@@ -24,6 +25,12 @@ const DailyResultFormScreen = ({ navigation }) => {
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const { status, error } = useSelector((state) => state.dailyResult);
+    const token = useSelector((state) => state.auth.token);
+    const {
+        winningRatesData,
+        status: winningRatesStatus,
+        error: winningRatesError,
+    } = useSelector((state) => state.winningRates);
     const [market, setMarket] = useState('kalyan');
     const [date, setDate] = useState(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -53,6 +60,12 @@ const DailyResultFormScreen = ({ navigation }) => {
             ]).start();
         }
     }, [error]);
+
+    useEffect(() => {
+        if (token) {
+            dispatch(fetchWinningRatesData());
+        }
+    }, [dispatch, token]);
 
     const handleSubmit = async () => {
         if (!market) {
@@ -102,6 +115,36 @@ const DailyResultFormScreen = ({ navigation }) => {
         inputRange: [0, 1],
         outputRange: [-100, 0],
     });
+
+    const winningRateFields = [
+        { key: 'open', label: 'Open' },
+        { key: 'close', label: 'Close' },
+        { key: 'jodi', label: 'Jodi' },
+        { key: 'open_closepan', label: 'Open Close Pan' },
+        { key: 'sp', label: 'SP' },
+        { key: 'dp', label: 'DP' },
+        { key: 'tp', label: 'TP' },
+        { key: 'chokada', label: 'Chokada' },
+        { key: 'cycle', label: 'Cycle' },
+        { key: 'cut', label: 'Cut' },
+        { key: 'running_pan', label: 'Running Pan' },
+        { key: 'saral_pan', label: 'Saral Pan' },
+        { key: 'ulta_pan', label: 'Ulta Pan' },
+        { key: 'farak', label: 'Farak' },
+        { key: 'beerich', label: 'Beerich' },
+    ];
+
+    const rates = winningRateFields.map((item) => ({
+        ...item,
+        value: Number(winningRatesData?.agent?.[item.key]) || 0,
+    }));
+    const maxRateValue = Math.max(...rates.map((item) => item.value), 1);
+    const totalReturn = rates.reduce((sum, item) => sum + item.value, 0);
+    const highestRate = rates.reduce(
+        (max, item) => (item.value > max.value ? item : max),
+        rates[0] || { label: '-', value: 0 }
+    );
+    const rateColors = ['#0284C7', '#0EA5E9', '#2563EB', '#0891B2', '#1D4ED8'];
 
     return (
         <View style={styles.container}>
@@ -185,6 +228,69 @@ const DailyResultFormScreen = ({ navigation }) => {
                             </>
                         )}
                     </TouchableOpacity>
+
+                    <View style={styles.winningCard}>
+                        <View style={styles.winningHeaderRow}>
+                            <Text style={styles.winningTitle}>Winning Breakdown</Text>
+                            <TouchableOpacity
+                                style={styles.refreshButton}
+                                onPress={() => dispatch(fetchWinningRatesData())}
+                            >
+                                <Text style={styles.refreshButtonText}>Refresh</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <Text style={styles.winningSubtitle}>
+                            1 Rs Return ({winningRatesData?.agent?.name || 'Agent'})
+                        </Text>
+
+                        {winningRatesStatus === 'loading' && (
+                            <Text style={styles.winningStatusText}>Loading rates...</Text>
+                        )}
+                        {winningRatesStatus === 'failed' && (
+                            <Text style={styles.winningErrorText}>
+                                {winningRatesError || 'Failed to load winning rates'}
+                            </Text>
+                        )}
+                        {winningRatesStatus === 'succeeded' && (
+                            <View>
+                                <View style={styles.summaryRow}>
+                                    <View style={styles.summaryChip}>
+                                        <Text style={styles.summaryLabel}>Total Return</Text>
+                                        <Text style={styles.summaryValue}>₹{totalReturn}</Text>
+                                    </View>
+                                    <View style={styles.summaryChip}>
+                                        <Text style={styles.summaryLabel}>Top Category</Text>
+                                        <Text style={styles.summaryValue}>
+                                            {highestRate?.label} ({highestRate?.value})
+                                        </Text>
+                                    </View>
+                                </View>
+
+                                <View style={styles.rateGrid}>
+                                    {rates.map((item, index) => (
+                                        <View key={item.key} style={styles.rateTile}>
+                                            <View style={styles.breakdownTopRow}>
+                                                <Text style={styles.breakdownName}>{item.label}</Text>
+                                                <Text style={styles.breakdownValue}>₹{item.value}</Text>
+                                            </View>
+                                            <View style={styles.barTrack}>
+                                                <View
+                                                    style={[
+                                                        styles.barFill,
+                                                        {
+                                                            width: `${(item.value / maxRateValue) * 100}%`,
+                                                            backgroundColor: rateColors[index % rateColors.length],
+                                                        },
+                                                    ]}
+                                                />
+                                            </View>
+                                            <Text style={styles.perRsText}>1Rs payout</Text>
+                                        </View>
+                                    ))}
+                                </View>
+                            </View>
+                        )}
+                    </View>
                 </View>
             </ScrollView>
         </View>
@@ -291,6 +397,124 @@ const styles = StyleSheet.create({
         color: globalColors.black,
         fontSize: 18,
         fontFamily: 'Poppins-Bold',
+    },
+    winningCard: {
+        backgroundColor: '#0F172A',
+        borderRadius: 18,
+        padding: 16,
+        marginTop: 18,
+        marginBottom: 30,
+    },
+    winningHeaderRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    winningTitle: {
+        fontSize: 18,
+        fontFamily: 'Poppins-Bold',
+        color: '#F8FAFC',
+    },
+    winningSubtitle: {
+        fontSize: 12,
+        fontFamily: 'Poppins-Regular',
+        color: '#CBD5E1',
+        marginTop: 4,
+        marginBottom: 10,
+    },
+    refreshButton: {
+        backgroundColor: '#1E293B',
+        paddingVertical: 7,
+        paddingHorizontal: 12,
+        borderRadius: 999,
+        borderWidth: 1,
+        borderColor: '#334155',
+    },
+    refreshButtonText: {
+        color: '#E2E8F0',
+        fontSize: 12,
+        fontFamily: 'Poppins-Bold',
+    },
+    winningStatusText: {
+        fontSize: 13,
+        fontFamily: 'Poppins-Medium',
+        color: '#E2E8F0',
+    },
+    winningErrorText: {
+        fontSize: 13,
+        fontFamily: 'Poppins-Medium',
+        color: '#FCA5A5',
+    },
+    summaryRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 12,
+    },
+    summaryChip: {
+        width: '48.5%',
+        backgroundColor: '#111827',
+        borderRadius: 12,
+        padding: 10,
+        borderWidth: 1,
+        borderColor: '#1F2937',
+    },
+    summaryLabel: {
+        fontSize: 11,
+        color: '#94A3B8',
+        fontFamily: 'Poppins-Medium',
+    },
+    summaryValue: {
+        marginTop: 4,
+        fontSize: 14,
+        color: '#F8FAFC',
+        fontFamily: 'Poppins-Bold',
+    },
+    rateGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+    },
+    rateTile: {
+        width: '48.5%',
+        backgroundColor: '#111827',
+        borderRadius: 12,
+        padding: 10,
+        marginBottom: 10,
+        borderWidth: 1,
+        borderColor: '#1F2937',
+    },
+    breakdownTopRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 6,
+    },
+    breakdownName: {
+        fontSize: 12,
+        fontFamily: 'Poppins-SemiBold',
+        color: '#E2E8F0',
+    },
+    breakdownValue: {
+        fontSize: 13,
+        fontFamily: 'Poppins-Bold',
+        color: '#F8FAFC',
+    },
+    barTrack: {
+        height: 7,
+        borderRadius: 999,
+        backgroundColor: '#1E293B',
+        overflow: 'hidden',
+    },
+    barFill: {
+        height: '100%',
+        borderRadius: 999,
+        backgroundColor: '#38BDF8',
+    },
+    perRsText: {
+        marginTop: 6,
+        fontSize: 10,
+        color: '#94A3B8',
+        fontFamily: 'Poppins-Regular',
     },
     errorContainer: {
         position: 'absolute',

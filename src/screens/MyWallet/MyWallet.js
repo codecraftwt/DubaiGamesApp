@@ -88,6 +88,7 @@ const MyWallet = ({ navigation }) => {
 
       <ScrollView
         style={styles.transactionsScroll}
+        contentContainerStyle={styles.transactionsScrollContent}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }>
@@ -163,6 +164,9 @@ const styles = StyleSheet.create({
   transactionsScroll: {
     flex: 1,
     marginTop: 250,
+  },
+  transactionsScrollContent: {
+    // paddingBottom: 60,
   },
   card: {
     backgroundColor: '#0F0F2D',

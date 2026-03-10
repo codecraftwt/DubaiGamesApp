@@ -14,6 +14,7 @@ import onlineCustomersReducer from "../Slices/onlineCustomersSlice";
 import countdownSlice from "../Slices/countdownSlice"
 import walletReducer from '../Slices/walletSlice';
 import fundAccount from '../Slices/fundAccountSlice'
+import winningRatesReducer from '../Slices/winningRatesSlice';
 // import galleryReducer from '../Slices/gallerySlice';
 // import webSocketReducer from '../Slices/webSocketSlice';
 // import websiteReducer from '../Slices/websiteSlice';
@@ -34,6 +35,7 @@ const rootReducer = combineReducers({
     countdown: countdownSlice,
     wallet: walletReducer,
     fundAccount: fundAccount,
+    winningRates: winningRatesReducer,
 
     // gallery: galleryReducer,
     // webSocket: webSocketReducer,

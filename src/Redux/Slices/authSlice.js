@@ -158,6 +158,7 @@ export const registerUser = userData => async dispatch => {
         phone: userData?.phone_number,
         password: userData?.pass,
         password_confirmation: userData?.confirm_pass,
+        applied_referral_code: userData?.applied_referral_code,
       },
       {
         headers: {

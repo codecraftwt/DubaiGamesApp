@@ -34,6 +34,10 @@ export const resources = {
             "submit": "Submit",
             "payment": "Payment",
 
+            "walletBalance": "Wallet balance",
+
+
+
             // Explore Screen
             "filter": "Filter By",
             "sort": "Sort By",
@@ -134,6 +138,13 @@ export const resources = {
             "clientList": "Client List",
             "customerlist": "Customer List",
             "wallet": "Wallet",
+            "charts": "Charts",
+            "chartsSubtitle": "Track the pulse of wins and wallet health in one glance.",
+            "chartsWeeklyTitle": "Weekly Performance",
+            "chartsMonthlyTitle": "Monthly Comparison",
+            "chartsLegendTitle": "Legend",
+            "chartsLegendWins": "Winning streak",
+            "chartsLegendLosses": "Losses & payouts",
 
             // Dashboard Screen Additional Translations
             "enterGunule": "Enter Gunule",
@@ -202,6 +213,7 @@ export const resources = {
 
             "LogoutallDevicesText": "Log out all Devices",
 
+
         }
     },
     hi: {
@@ -238,6 +250,8 @@ export const resources = {
             "amountSecond": "दूसरी राशि",
             "submit": "सबमिट",
             "payment": "भुगतान",
+            "walletBalance": "वॉलेट बैलेंस",
+
 
             // Explore Screen
             "filter": "फ़िल्टर करें",
@@ -338,6 +352,13 @@ export const resources = {
             "clientList": "क्लाइंट सूची",
             "customerlist": "ग्राहक सूची",
             "wallet": "मेरा वॉलेट",
+            "charts": "चार्ट",
+            "chartsSubtitle": "जीत और वॉलेट की स्थिति को एक नजर में देखें।",
+            "chartsWeeklyTitle": "साप्ताहिक प्रदर्शन",
+            "chartsMonthlyTitle": "मासिक तुलना",
+            "chartsLegendTitle": "व्याख्या",
+            "chartsLegendWins": "जीत की लहर",
+            "chartsLegendLosses": "नुकसान और भुगतान",
 
             // Dashboard Screen Additional Translations
             "enterGunule": "गुनुले दर्ज करें",
@@ -441,6 +462,8 @@ export const resources = {
             "amountSecond": "दुसरी रक्कम",
             "submit": "सबमिट करा",
             "payment": "पेमेंट",
+            "walletBalance": "वॉलेट शिल्लक",
+
 
             // Explore Screen
             "filter": "फिल्टर करा",
@@ -541,6 +564,13 @@ export const resources = {
             "clientList": "क्लायंट यादी",
             "customerlist": "ग्राहक यादी",
             "wallet": "वॉलेट",
+            "charts": "चार्ट",
+            "chartsSubtitle": "जिंकण्याचे प्रमाण आणि वॉलेटचे आरोग्य एका नजरेत पहा.",
+            "chartsWeeklyTitle": "साप्ताहिक कामगिरी",
+            "chartsMonthlyTitle": "मासिक तुलना",
+            "chartsLegendTitle": "दुवा",
+            "chartsLegendWins": "जिंकण्याची साखळी",
+            "chartsLegendLosses": "तोटा व पावती",
 
             // Dashboard Screen Additional Translations
             "enterGunule": "गुनुले प्रविष्ट करा",
@@ -646,6 +676,7 @@ export const resources = {
             "amountSecond": "ಎರಡನೇ ಮೊತ್ತ",
             "submit": "ಸಲ್ಲಿಸು",
             "payment": "ಪಾವತಿ",
+            "walletBalance": "ವಾಲೆಟ್ ಬ್ಯಾಲೆನ್ಸ್",
 
             // Explore Screen
             "filter": "ಫಿಲ್ಟರ್ ಮಾಡಿ",
@@ -746,6 +777,13 @@ export const resources = {
             "clientList": "ಕ್ಲೈಂಟ್ ಪಟ್ಟಿ",
             "customerlist": "ಗ್ರಾಹಕ ಪಟ್ಟಿ",
             "wallet": "ವಾಲೆಟ್",
+            "charts": "ಚಾರ್ಟ್‌ಗಳು",
+            "chartsSubtitle": "ಗೆದ್ದಿಕೆ ಮತ್ತು ವಾಲೆಟ್ ಆರೋಗ್ಯವನ್ನು ಒಂದೇ ದೃಷ್ಟಿಯಲ್ಲಿ ಪರಿಶೀಲಿಸಿ.",
+            "chartsWeeklyTitle": "ವಾರದ ಪ್ರದರ್ಶನ",
+            "chartsMonthlyTitle": "ತಿಂಗಳ ಹೋಲಿಕೆ",
+            "chartsLegendTitle": "ವಿವರಣೆ",
+            "chartsLegendWins": "ಗೆಲುವಿನ ಸರಣಿ",
+            "chartsLegendLosses": "ನಷ್ಟಗಳು ಮತ್ತು ಪಾವತ್ತೆಗಳು",
 
             // Dashboard Screen Additional Translations
             "enterGunule": "ಗುನುಲೆ ನಮೂದಿಸಿ",
