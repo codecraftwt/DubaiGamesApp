@@ -141,78 +141,101 @@ const EntriesList = ({
     onSelectionChange(newSelectedEntries);
   };
 
-  // Helper function to check if a number is a winning number
-  const isWinningNumber = (number, entryType, entryMarket) => {
-    // Combine both data sources
-    const allResults = [...(declaredResults || []), ...(marketResults || [])];
-
-    if (!allResults || allResults.length === 0) return false;
-
-    // console.log('🔍 Checking winning number:', { number, entryType, entryMarket });
-    // console.log('📊 All results:', allResults);
-
-    const entryTypeLower = entryType.toLowerCase();
-    const marketResultsFiltered = allResults.filter(result =>
-      result.market && result.market.toLowerCase() === entryMarket.toLowerCase()
+  const getMarketResultData = (marketName) => {
+    const relevantResults = [...(declaredResults || []), ...(marketResults || [])].filter(
+      r => r.market?.toLowerCase() === marketName?.toLowerCase()
     );
 
-    for (const result of marketResultsFiltered) {
-      const resultType = result.type.toLowerCase().replace('-', '');
+    let resultnum = null;
+    let resultpan = null;
+    let result_cl_num = null;
+    let result_cl_pan = null;
+    let openDeclared = false;
+    let closeDeclared = false;
 
-      // Define categories that use "contains" logic (open/open-pan related)
-      const openRelatedCategories = ['open', 'jodi', 'chokada', 'cycle', 'cut', 'cut_open', 'cut_close', 'beerich', 'farak', 'openpan'];
+    relevantResults.forEach(item => {
+      const type = (item.type || '').toLowerCase().replace('-', '');
+      if (type === 'openpan' || type === 'open') {
+        resultnum = item.number;
+        resultpan = item.pannumber;
+        openDeclared = true;
+      }
+      if (type === 'closepan' || type === 'close') {
+        result_cl_num = item.number;
+        result_cl_pan = item.pannumber;
+        closeDeclared = true;
+      }
+    });
 
-      // Define categories that use "contains" logic (close/close-pan related)
-      const closeRelatedCategories = ['closepan', 'close'];
+    return { resultnum, resultpan, result_cl_num, result_cl_pan, openDeclared, closeDeclared };
+  };
 
-      // Define categories that use exact match
-      const exactMatchCategories = ['running_pan', 'saral_pan', 'ulta_pan'];
+  // Helper function to check if a number is a winning number (Legacy Logic)
+  const isWinningNumberLegacy = (number, index, entryType, numbersArray, marketData) => {
+    const { resultnum, resultpan, result_cl_num, result_cl_pan, openDeclared, closeDeclared } = marketData;
+    const type = entryType.toLowerCase();
 
-      // Check if entry type is in open-related categories
-      if (openRelatedCategories.includes(entryTypeLower) && (resultType === 'open' || resultType === 'openpan')) {
-        // For open-related categories, check if result number appears anywhere in the entry number
-        const resultStr = result.number.toString();
-        const numberStr = number.toString();
-        return numberStr.includes(resultStr);
+    if (type === 'running_pan') {
+      if (closeDeclared) {
+        // If Close declared: BOTH must match to highlight
+        const num0 = numbersArray[0];
+        const num1 = numbersArray[1];
+        return (num0 == resultpan && num1 == result_cl_pan);
+      } else if (openDeclared) {
+        // If only Open declared: Highlight first part if matches
+        if (index === 0) return number == resultpan;
       }
-      // Check if entry type is in close-related categories
-      else if (closeRelatedCategories.includes(entryTypeLower) && (resultType === 'close' || resultType === 'closepan')) {
-        // For close-related categories, check if result number appears anywhere in the entry number
-        const resultStr = result.number.toString();
-        const numberStr = number.toString();
-        return numberStr.includes(resultStr);
-      }
-      // Check exact match categories
-      else if (exactMatchCategories.includes(entryTypeLower)) {
-        // For exact match categories, require exact number match
-        if (entryTypeLower === 'running_pan' && resultType === 'runningpan') {
-          return number == result.number;
-        } else if (entryTypeLower === 'saral_pan' && resultType === 'saralpan') {
-          return number == result.number;
-        } else if (entryTypeLower === 'ulta_pan' && resultType === 'ultapan') {
-          return number == result.number;
-        }
-      }
-      // Check openpan categories (use contains logic)
-      else if (entryTypeLower.startsWith('openpan') && (resultType === 'openpan' || resultType === 'open')) {
-        // For openpan categories, use contains logic
-        const resultStr = result.number.toString();
-        const numberStr = number.toString();
-        return numberStr.includes(resultStr) || number == result.pannumber;
-      }
-      // Check closepan categories (use contains logic)
-      else if (entryTypeLower.startsWith('closepan') && (resultType === 'closepan' || resultType === 'close')) {
-        // For closepan categories, use contains logic
-        const resultStr = result.number.toString();
-        const numberStr = number.toString();
-        return numberStr.includes(resultStr) || number == result.pannumber;
-      }
+      return false;
     }
+
+    if (type === 'cycle') {
+      if (closeDeclared) {
+        // If Close declared: BOTH must match
+        const num0 = numbersArray[0]?.toString();
+        const num1 = numbersArray[1]?.toString();
+        return (num0?.includes(resultnum) && num1?.includes(result_cl_num));
+      } else if (openDeclared) {
+        if (index === 0) return number.toString().includes(resultnum);
+      }
+      return false;
+    }
+
+    if (type === 'jodi' || type === 'chokada') {
+      if (closeDeclared) {
+        // Match full result (Open+Close)
+        const res = String(resultnum) + String(result_cl_num);
+        return number == res;
+      } else if (openDeclared) {
+        // Match first digit with Open Result
+        const firstChar = number.toString().charAt(0);
+        return firstChar == resultnum;
+      }
+      return false;
+    }
+
+    // Default logic for other types
+    if (type.includes('close') || type === 'cut_close') {
+      if (!closeDeclared) return false;
+      if (type.includes('pan')) return number == result_cl_pan;
+      return number.toString().includes(result_cl_num);
+    }
+
+    if (type.includes('open') || type === 'cut_open' || type === 'cut' || type === 'beerich' || type === 'farak') {
+      if (!openDeclared) return false;
+      if (type.includes('pan')) return number == resultpan;
+      return number.toString().includes(resultnum);
+    }
+
+    // Fallback for simple matches
+    if (openDeclared && number == resultnum) return true;
+    if (closeDeclared && number == result_cl_num) return true;
+
     return false;
   };
 
   const renderNumbers = (entry, type) => {
     if (!entry) return <Text style={styles.numbers}>N/A</Text>;
+    const marketData = getMarketResultData(entry.market);
 
     try {
       let numbersArray = [];
@@ -248,7 +271,7 @@ const EntriesList = ({
       return (
         <View style={styles.numbersContainer}>
           {numbersArray.map((num, index) => {
-            const isWinning = isWinningNumber(num, type, entry.market);
+            const isWinning = isWinningNumberLegacy(num, index, type, numbersArray, marketData);
             return (
               <Text
                 key={index}
@@ -366,14 +389,8 @@ const EntriesList = ({
           const type = childrenGrouped[parentKey].type;
           const market = childrenGrouped[parentKey].market;
           const children = childrenGrouped[parentKey].children;
-
-          // Determine if results are out based on market
-          const isResultOut =
-            market === 'Kalyan'
-              ? isKalyanResultOut
-              : market === 'Mumbai'
-                ? isMumbaiResultOut
-                : false;
+          const marketData = getMarketResultData(market);
+          const { resultnum, resultpan, result_cl_num, result_cl_pan } = marketData;
 
           const openDeclared = isOpenResultDeclaredForMarket(market);
           // saral_pan and ulta_pan are restricted on open result
@@ -381,11 +398,20 @@ const EntriesList = ({
 
           let parentContent = [];
           let childContent = [];
+          let flag = 0;
 
           parentIds.forEach(parentId => {
             if (parents[parentId]) {
               const parent = parents[parentId];
-              const isWinning = isWinningNumber(parent.number, type, market);
+              // Exact match logic for parents
+              let isWinning = false;
+              if (type === 'ulta_pan' && resultnum == parent.number) {
+                isWinning = true;
+                flag = 1;
+              } else if (type === 'saral_pan' && resultpan == parent.number) {
+                isWinning = true;
+                flag = 1;
+              }
 
               parentContent.push(
                 <View key={`parent-${parentId}`} style={styles.panEntry}>
@@ -402,7 +428,16 @@ const EntriesList = ({
           });
 
           children.forEach(child => {
-            const isWinning = isWinningNumber(child.number, type, market);
+            let isWinning = false;
+            // Child match depends on parent match (flag)
+            if (flag === 1) {
+              if (type === 'ulta_pan' && result_cl_pan == child.number) {
+                isWinning = true;
+              } else if (type === 'saral_pan' && result_cl_num == child.number) {
+                isWinning = true;
+              }
+            }
+
             childContent.push(
               <View key={`child-${child.id}`} style={styles.panEntry}>
                 <Text style={[

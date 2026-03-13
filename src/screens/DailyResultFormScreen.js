@@ -13,6 +13,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchDailyResult } from '../Redux/Slices/dailyResultSlice';
 import { fetchWinningRatesData } from '../Redux/Slices/winningRatesSlice';
+import { fetchCountdowns } from '../Redux/Slices/countdownSlice';
 import { globalColors } from '../Theme/globalColors';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTranslation } from 'react-i18next';
@@ -31,15 +32,15 @@ const DailyResultFormScreen = ({ navigation }) => {
         status: winningRatesStatus,
         error: winningRatesError,
     } = useSelector((state) => state.winningRates);
-    const [market, setMarket] = useState('kalyan');
+    const { marketsTime } = useSelector((state) => state.countdown);
+    const [market, setMarket] = useState(null);
     const [date, setDate] = useState(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [errorAnimation] = useState(new Animated.Value(0));
     const [open, setOpen] = useState(false);
     const [items, setItems] = useState([
-        { label: 'Kalyan', value: 'kalyan' },
-        { label: 'Mumbai', value: 'mumbai' },
-
+        { label: 'Kalyan', value: 'Kalyan' },
+        { label: 'Mumbai', value: 'Mumbai' },
     ]);
 
     useEffect(() => {
@@ -64,8 +65,22 @@ const DailyResultFormScreen = ({ navigation }) => {
     useEffect(() => {
         if (token) {
             dispatch(fetchWinningRatesData());
+            dispatch(fetchCountdowns());
         }
     }, [dispatch, token]);
+
+    useEffect(() => {
+        if (marketsTime && Array.isArray(marketsTime) && marketsTime.length > 0) {
+            const uniqueMarkets = [...new Set(marketsTime.map((item) => item.market))];
+            const formattedItems = uniqueMarkets.map((m) => ({ label: m, value: m }));
+            setItems(formattedItems);
+
+            // Set default market if none selected or if current selection is not in list
+            if (!market && formattedItems.length > 0) {
+                setMarket(formattedItems[0].value);
+            }
+        }
+    }, [marketsTime]);
 
     const handleSubmit = async () => {
         if (!market) {

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -208,7 +208,7 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
         },
         params: {
           market: market,
-          date: date,
+          date: formattedDate,
         },
       });
       console.log("wwwwww", response)
@@ -287,6 +287,15 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
   console.log('marketsTime', marketsTime);
 
   console.log('currentTime ----------------------->', currentTime);
+
+  const marketList = useMemo(() => {
+    if (marketsTime && Array.isArray(marketsTime) && marketsTime.length > 0) {
+      const uniqueMarkets = [...new Set(marketsTime.map(item => item.market))];
+      return uniqueMarkets.map(m => ({ label: m, value: m }));
+    }
+    return [{ label: 'Kalyan', value: 'Kalyan' }, { label: 'Mumbai', value: 'Mumbai' }];
+  }, [marketsTime]);
+
   useEffect(() => {
     dispatch(fetchCountdowns());
   }, [dispatch]);
@@ -1722,6 +1731,7 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
       await dispatch(fetchCountdowns());
       await fetchData();
       await fetchDeclaredResults();
+      await fetchSureRecords();
 
       // Reset selected category if needed
       const { categories: newFilteredCategories } = getFilteredCategories(
@@ -1740,7 +1750,7 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
     } finally {
       setRefreshing(false);
     }
-  }, [dispatch, fetchData, getFilteredCategories, selectedCategory, data?.results, data?.role, marketsTime, currentTime, market]);
+  }, [dispatch, fetchData, fetchSureRecords, getFilteredCategories, selectedCategory, data?.results, data?.role, marketsTime, currentTime, market]);
 
 
 
@@ -1991,10 +2001,7 @@ const DashboardScreen = ({ navigation: propNavigation }) => {
             <View style={styles.halfWidthInput}>
               <Text style={styles.label}>{t('market')}</Text>
               <Dropdown
-                data={[
-                  { label: 'Kalyan', value: 'Kalyan' },
-                  { label: 'Mumbai', value: 'Mumbai' },
-                ]}
+                data={marketList}
                 value={market}
                 labelField="label"
                 valueField="value"
